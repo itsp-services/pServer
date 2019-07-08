@@ -1,0 +1,10 @@
+﻿
+@{
+    ViewData["Title"] = "Welcome";
+}
+
+<h1>Welcome</h1>
+@for (int i = 0; i < (int)ViewData["NumTimes"]; i++)
+{
+    <p>Hello @ViewData["UserName"]</p>
+}
