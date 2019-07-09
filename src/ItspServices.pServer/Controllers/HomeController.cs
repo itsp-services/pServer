@@ -5,17 +5,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ItspServices.pServer.Models;
-using ItspServices.pServer.Services;
+using System.Security.Cryptography;
 
 namespace ItspServices.pServer.Controllers
 {
     public class HomeController : Controller
     {
-        readonly ITestService _testService;
 
-        public HomeController(Services.ITestService testService)
+        public HomeController()
         {
-            _testService = testService;
         }
 
         public IActionResult Index()
