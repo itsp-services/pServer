@@ -31,8 +31,6 @@ namespace ItspServices.pServer
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddTransient(typeof(Services.ITestService), typeof(Services.TestService));
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 

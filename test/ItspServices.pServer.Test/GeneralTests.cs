@@ -32,24 +32,11 @@ namespace ItspServices.pServer.Test
                 base.ConfigureWebHost(builder);
                 builder.ConfigureTestServices(services =>
                 {
-                    foreach (ServiceDescriptor serviceDescriptor in services.Where(x => x.ServiceType == typeof(ILoggerProvider)).ToList())
-                        services.Remove(serviceDescriptor);
+                    //foreach (ServiceDescriptor serviceDescriptor in services.Where(x => x.ServiceType == typeof(ILoggerProvider)).ToList())
+                    //  services.Remove(serviceDescriptor);
 
                 });
             }
-        }
-
-        [TestMethod]
-        public async Task FirstTest()
-        {
-            HttpResponseMessage response = await new WebApplicationFactory().CreateClient().GetAsync("/HelloWorld/Values");
-
-            string responseString = await response.Content.ReadAsStringAsync();
-
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            JToken responseObject = JToken.Parse(await response.Content.ReadAsStringAsync());
-            JToken expectedObject = JToken.Parse(Mock.ServerResponse.ServerResponse.JsonResponseTest.ToString());
-            Assert.IsTrue(true);
         }
     }
 }
