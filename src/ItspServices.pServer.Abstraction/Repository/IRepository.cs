@@ -7,6 +7,6 @@ namespace ItspServices.pServer.Abstraction.Repository
 {
     public interface IRepository
     {
-        IRepositoryPart<User> UserPart { get; }
+        IUserRepository UserPart { get; }
     }
 }
