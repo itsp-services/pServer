@@ -7,14 +7,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2947A69F-178
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8F4A9774-BDFD-4039-960D-D750115E290C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItspServices.pServer", "src\ItspServices.pServer\ItspServices.pServer.csproj", "{FF712B27-B695-4A9C-BCE6-6677D6391C6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer", "src\ItspServices.pServer\ItspServices.pServer.csproj", "{FF712B27-B695-4A9C-BCE6-6677D6391C6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItspServices.pServer.Test", "test\ItspServices.pServer.Test\ItspServices.pServer.Test.csproj", "{05CFF29B-7642-4E25-A02A-05769BED0EB9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer.Test", "test\ItspServices.pServer.Test\ItspServices.pServer.Test.csproj", "{05CFF29B-7642-4E25-A02A-05769BED0EB9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{FF712B27-B695-4A9C-BCE6-6677D6391C6C} = {FF712B27-B695-4A9C-BCE6-6677D6391C6C}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItspServices.pServer.Abstraction", "src\ItspServices.pServer.Abstraction\ItspServices.pServer.Abstraction.csproj", "{DC421953-B5A8-4754-85CD-687796DE435B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer.Abstraction", "src\ItspServices.pServer.Abstraction\ItspServices.pServer.Abstraction.csproj", "{DC421953-B5A8-4754-85CD-687796DE435B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItspServices.pServer.Persistence", "ItspServices.pServer.Persistence\ItspServices.pServer.Persistence.csproj", "{4CAF9CA9-1EC5-4532-BA96-42502E47EFFF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItspServices.pServer.Repository", "ItspServices.pServer.Repository\ItspServices.pServer.Repository.csproj", "{E456E0C7-DA50-408D-A95D-6F222A021ABA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +38,14 @@ Global
 		{DC421953-B5A8-4754-85CD-687796DE435B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC421953-B5A8-4754-85CD-687796DE435B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC421953-B5A8-4754-85CD-687796DE435B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CAF9CA9-1EC5-4532-BA96-42502E47EFFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CAF9CA9-1EC5-4532-BA96-42502E47EFFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CAF9CA9-1EC5-4532-BA96-42502E47EFFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CAF9CA9-1EC5-4532-BA96-42502E47EFFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E456E0C7-DA50-408D-A95D-6F222A021ABA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E456E0C7-DA50-408D-A95D-6F222A021ABA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E456E0C7-DA50-408D-A95D-6F222A021ABA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E456E0C7-DA50-408D-A95D-6F222A021ABA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -42,6 +54,8 @@ Global
 		{FF712B27-B695-4A9C-BCE6-6677D6391C6C} = {2947A69F-1788-4262-9056-DAA917479403}
 		{05CFF29B-7642-4E25-A02A-05769BED0EB9} = {8F4A9774-BDFD-4039-960D-D750115E290C}
 		{DC421953-B5A8-4754-85CD-687796DE435B} = {2947A69F-1788-4262-9056-DAA917479403}
+		{4CAF9CA9-1EC5-4532-BA96-42502E47EFFF} = {2947A69F-1788-4262-9056-DAA917479403}
+		{E456E0C7-DA50-408D-A95D-6F222A021ABA} = {2947A69F-1788-4262-9056-DAA917479403}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2B6BB9AC-5759-42D9-90F7-D507EE0F516A}
