@@ -1,0 +1,21 @@
+﻿{
+  "user": [
+    {
+      "id": 0,
+      "name": "Max",
+      "sname":  "Muster",
+      "pkeys": [
+        "CCsGAQUFBwICMIIBFB6CARAAQQB1AHQAbwByAGkAZABhAGQAIABkAGUAIABDAGUA"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "Sebastian",
+      "sname": "Muster",
+      "pkeys": [
+        "UNnSEQU5CmH7UwoZtCPNdpNYbdKl02125DgBS4OxnnQ8pdp",
+        "lHPrzg5XPAOBOp0KoVdDaaxXbXmQeOW1tDvYvEyNKKGno6e6Ak4l0Squ7a4DIrhr"
+      ]
+    }
+  ]
+}
