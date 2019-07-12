@@ -7,10 +7,10 @@
 <form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]">
 
     <label asp-for="Username"><b>Username</b></label>
-    <input asp-for="Username" type="text" placeholder="Enter Username" required>
+    <input asp-for="Username" type="text" placeholder="Enter Username" name="Username" required>
 
     <label asp-for="Password"><b>Password</b></label>
-    <input asp-for="Password" type="password" placeholder="Enter Password" name="psw" required>
+    <input asp-for="Password" type="password" placeholder="Enter Password" name="Password" required>
 
     <button type="submit">Login</button>
 </form>

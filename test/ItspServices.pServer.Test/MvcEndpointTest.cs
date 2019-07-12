@@ -1,20 +1,10 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Principal;
-using System.Text;
-using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ItspServices.pServer.Test
@@ -42,8 +32,21 @@ namespace ItspServices.pServer.Test
         [TestMethod]
         public async Task GetControllerTest()
         {
-            HttpResponseMessage response = await new WebApplicationFactory().CreateClient().GetAsync("/Account/Login");
+            HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
+            HttpResponseMessage response = await client.GetAsync("/Account/Login");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            response = await client.GetAsync("/Account/Login?returnurl=%2F");
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            string expectedToken = "action=\"/Account/Login?returnurl=%2F\"";
+            string content = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(content.Contains(expectedToken), "Return Url Action not found: " + expectedToken);
+
+            response = await client.PostAsync("/Account/Login?returnurl=%2F", new FormUrlEncodedContent(new[] {
+                new KeyValuePair<string, string>("Username", "John"),
+                new KeyValuePair<string, string>("Password", "Example")
+            }));
         }
     }
 }

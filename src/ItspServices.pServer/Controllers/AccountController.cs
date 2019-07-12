@@ -11,13 +11,6 @@ namespace ItspServices.pServer.Controllers
 {
     public class AccountController : Controller
     {
-        private SignInManager<User> _signInManager;
-
-        AccountController(SignInManager<User> signInManager)
-        {
-            _signInManager = signInManager;
-        }
-
         public IActionResult Index()
         {
             return View();
@@ -31,17 +24,13 @@ namespace ItspServices.pServer.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody]LoginModel loginModel, string returnUrl = null)
+        public IActionResult Login([FromBody]LoginModel loginModel, string returnUrl = null)
         {
             //Signin
 
             loginModel.Password = null;
             ViewData["ReturnUrl"] = returnUrl;
 
-            Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(loginModel.Username, loginModel.Password, false, false);
-            if(result.Succeeded)
-                return Redirect(returnUrl);
-            ModelState.AddModelError(string.Empty, "Invalid login attempt");
             return View(loginModel);
         }
 
