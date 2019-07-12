@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Mock\DB\UserDataTestInput.json" />
+    <Compile Remove="Mock\Implementation\**" />
+    <EmbeddedResource Remove="Mock\Implementation\**" />
+    <None Remove="Mock\Implementation\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,15 +26,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ItspServices.pServer.Abstraction\ItspServices.pServer.Abstraction.csproj" />
     <ProjectReference Include="..\..\src\ItspServices.pServer\ItspServices.pServer.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Mock\DB\UserDataTestInput.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Mock\Implementation\" />
-    <Folder Include="Mock\Output\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>

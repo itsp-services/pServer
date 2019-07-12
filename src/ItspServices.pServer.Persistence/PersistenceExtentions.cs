@@ -7,7 +7,7 @@ namespace ItspServices.pServer.Persistence
     {
         public static void AddPersistence(this IServiceCollection services)
         {
-            services.AddTransient(typeof(IRepository), typeof(Repository.Repository));
+            //services.AddTransient(typeof(IRepository), typeof(Repository.Repository));
         }
     }
 }

@@ -47,6 +47,9 @@ namespace ItspServices.pServer.Test
                 new KeyValuePair<string, string>("Username", "John"),
                 new KeyValuePair<string, string>("Password", "Example")
             }));
+
+            content = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(content.Contains("<title>Home Page"), "Redirect failed.");
         }
     }
 }
