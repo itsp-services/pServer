@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ItspServices.pServer.Test
 {
-    [TestClass]
+    //[TestClass]
     public class UserRepositoryTest
     {
         private UserRepository _userRepository;
@@ -14,7 +14,7 @@ namespace ItspServices.pServer.Test
         [TestInitialize]
         public void Setup()
         {
-            _userRepository = new UserRepository(new Data.UserDataContext());
+
         }
 
         [TestMethod]

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ItspServices.pServer.Models;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ItspServices.pServer.Controllers
 {
@@ -16,16 +17,12 @@ namespace ItspServices.pServer.Controllers
         {
         }
 
-        public IActionResult Login()
-        {
-            return View();
-        }
-
         public IActionResult Index()
         {
             return View();
         }
 
+        [Authorize]
         public IActionResult Privacy()
         {
             return View();

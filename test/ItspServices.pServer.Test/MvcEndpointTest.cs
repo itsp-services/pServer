@@ -20,7 +20,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ItspServices.pServer.Test
 {
     [TestClass]
-    public class GeneralTests
+    public class MvcEndpointTest
     {
         class WebApplicationFactory : WebApplicationFactory<Startup>
         {
@@ -37,6 +37,13 @@ namespace ItspServices.pServer.Test
 
                 });
             }
+        }
+
+        [TestMethod]
+        public async Task GetControllerTest()
+        {
+            HttpResponseMessage response = await new WebApplicationFactory().CreateClient().GetAsync("/Account/Login");
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
     }
 }
