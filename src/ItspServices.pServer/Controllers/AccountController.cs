@@ -28,7 +28,7 @@ namespace ItspServices.pServer.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> LoginAsync([FromBody]LoginModel loginModel, string returnUrl = null)
+        public async Task<IActionResult> Login([FromBody]LoginModel loginModel, string returnUrl = null)
         {
             //Signin
             Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(loginModel.Username, loginModel.Password, false, false);

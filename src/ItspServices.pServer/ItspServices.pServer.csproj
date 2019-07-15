@@ -18,9 +18,4 @@
     <ProjectReference Include="..\ItspServices.pServer.Persistence\ItspServices.pServer.Persistence.csproj" />
   </ItemGroup>
 
-
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-
 </Project>

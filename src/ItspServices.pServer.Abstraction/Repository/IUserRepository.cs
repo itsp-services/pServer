@@ -1,11 +1,9 @@
-﻿
-using ItspServices.pServer.Abstraction.Models;
-using System.Threading.Tasks;
+﻿using ItspServices.pServer.Abstraction.Models;
 
 namespace ItspServices.pServer.Abstraction.Repository
 {
     public interface IUserRepository : IRepositoryPart<User>
     {
-        Task<User> GetUserByNameAsync(string name);
+        User GetUserByName(string name);
     }
 }

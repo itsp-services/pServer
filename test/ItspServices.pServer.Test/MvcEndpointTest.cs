@@ -1,10 +1,17 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using ItspServices.pServer.Abstraction.Models;
+using ItspServices.pServer.Abstraction.Repository;
+using ItspServices.pServer.Stores;
+using ItspServices.pServer.Test.Mock.Repository;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ItspServices.pServer.Test
@@ -22,9 +29,14 @@ namespace ItspServices.pServer.Test
                 base.ConfigureWebHost(builder);
                 builder.ConfigureTestServices(services =>
                 {
-                    //foreach (ServiceDescriptor serviceDescriptor in services.Where(x => x.ServiceType == typeof(ILoggerProvider)).ToList())
-                    //  services.Remove(serviceDescriptor);
+                    foreach (ServiceDescriptor serviceDescriptor in services.Where(x =>
+                    { return x.ServiceType == typeof(IUserRepository) || x.ServiceType == typeof(IRoleRepository); }).ToList())
+                        services.Remove(serviceDescriptor);
 
+                    services.AddSingleton<IUserRepository, MockUserRepository>();
+                    services.AddSingleton<IRoleRepository, MockRoleRepository>();
+
+                    
                 });
             }
         }
