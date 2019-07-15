@@ -4,13 +4,13 @@
 }
 
 <h1>Login</h1>
-<form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]">
+<form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
 
-    <label asp-for="Username"><b>Username</b></label>
-    <input asp-for="Username" type="text" placeholder="Enter Username" name="Username" required>
+    <label><b>Username</b></label>
+    <input asp-for="Username" placeholder="Enter Username">
 
-    <label asp-for="Password"><b>Password</b></label>
-    <input asp-for="Password" type="password" placeholder="Enter Password" name="Password" required>
+    <label><b>Password</b></label>
+    <input asp-for="Password" placeholder="Enter Password">
 
     <button type="submit">Login</button>
 </form>

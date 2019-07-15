@@ -42,25 +42,35 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task GetControllerTest()
+        public async Task GetAccountControllerTest()
         {
             HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
             HttpResponseMessage response = await client.GetAsync("/Account/Login");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
 
-            response = await client.GetAsync("/Account/Login?returnurl=%2F");
+        [TestMethod]
+        public async Task ReturnUrlFormTest()
+        {
+            HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
+            HttpResponseMessage response = await client.GetAsync("/Account/Login?returnurl=%2F");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-
             string expectedToken = "action=\"/Account/Login?returnurl=%2F\"";
             string content = await response.Content.ReadAsStringAsync();
             Assert.IsTrue(content.Contains(expectedToken), "Return Url Action not found: " + expectedToken);
+        }
 
-            response = await client.PostAsync("/Account/Login?returnurl=%2F", new FormUrlEncodedContent(new[] {
+        [TestMethod]
+        public async Task PostCredentialsTest()
+        {
+            HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
+
+            HttpResponseMessage response = await client.PostAsync("/Account/Login?returnurl=%2F", new FormUrlEncodedContent(new[] {
                 new KeyValuePair<string, string>("Username", "John"),
-                new KeyValuePair<string, string>("Password", "Example")
+                new KeyValuePair<string, string>("Password", "Test")
             }));
 
-            content = await response.Content.ReadAsStringAsync();
+            string content = await response.Content.ReadAsStringAsync();
             Assert.IsTrue(content.Contains("<title>Home Page"), "Redirect failed.");
         }
     }

@@ -8,7 +8,7 @@ using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Stores
 {
-    public class UserStore : IUserStore<User>
+    public class UserStore : IUserStore<User>, IUserPasswordStore<User>
     {
         public IUserRepository UserRepository { get; }
 
@@ -54,7 +54,7 @@ namespace ItspServices.pServer.Stores
 
         public Task<string> GetUserIdAsync(User user, CancellationToken cancellationToken)
         {
-            return Task.FromResult(user.Id);
+            return Task.FromResult(user.Id.ToString());
         }
 
         public Task<string> GetUserNameAsync(User user, CancellationToken cancellationToken)
@@ -70,6 +70,20 @@ namespace ItspServices.pServer.Stores
 
         public void Dispose()
         {
+        }
+
+        public async Task SetPasswordHashAsync(User user, string passwordHash, CancellationToken cancellationToken) =>
+            await Task.Run(() => { user.PasswordHash = passwordHash; });
+        
+
+        public Task<string> GetPasswordHashAsync(User user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.PasswordHash);
+        }
+
+        public Task<bool> HasPasswordAsync(User user, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }
