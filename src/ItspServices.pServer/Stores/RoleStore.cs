@@ -13,9 +13,9 @@ namespace ItspServices.pServer.Stores
     {
         public IRoleRepository RoleRepository { get; }
 
-        public RoleStore(IRoleRepository roleRepository)
+        public RoleStore(IRepository repository)
         {
-            RoleRepository = roleRepository;
+            RoleRepository = repository.RoleRepository;
         }
 
         public Task<IdentityResult> CreateAsync(Role role, CancellationToken cancellationToken)

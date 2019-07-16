@@ -12,9 +12,9 @@ namespace ItspServices.pServer.Stores
     {
         public IUserRepository UserRepository { get; }
 
-        public UserStore(IUserRepository userRepository)
+        public UserStore(IRepository repository)
         {
-            UserRepository = userRepository;
+            UserRepository = repository.UserRepository;
         }
 
         public Task<IdentityResult> CreateAsync(User user, CancellationToken cancellationToken)

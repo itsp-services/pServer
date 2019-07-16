@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ItspServices.pServer.Persistence.Repository
 {
-    public class UserRepository : IUserRepository
+    class UserRepository : IUserRepository
     {
         public IUnitOfWork Add()
         {

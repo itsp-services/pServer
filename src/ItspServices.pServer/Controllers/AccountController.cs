@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
-using ItspServices.pServer.Abstraction.Models;
-using ItspServices.pServer.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using ItspServices.pServer.Models;
+using ItspServices.pServer.Abstraction.Models;
 
 namespace ItspServices.pServer.Controllers
 {
@@ -41,5 +40,11 @@ namespace ItspServices.pServer.Controllers
             return View(loginModel);
         }
 
+        [HttpGet]
+        public IActionResult Register(string returnurl = null)
+        {
+            ViewData["ReturnUrl"] = returnurl;
+            return View(new RegisterViewModel());
+        }
     }
 }

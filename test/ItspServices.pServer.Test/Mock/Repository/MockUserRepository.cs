@@ -19,12 +19,12 @@ namespace ItspServices.pServer.Test.Mock.Repository
             User testUser = new User()
             {
                 Id = 0,
-                UserName = "John",
-                NormalizedUserName = "JOHN"
+                UserName = "Foo",
+                NormalizedUserName = "FOO"
             };
 
             PasswordHasher<User> passwordHasher = new PasswordHasher<User>();
-            testUser.PasswordHash = passwordHasher.HashPassword(testUser, "Test");
+            testUser.PasswordHash = passwordHasher.HashPassword(testUser, "Bar");
 
             testUser.PublicKeys.Add(Encoding.ASCII.GetBytes("AAAABBBB"));
 

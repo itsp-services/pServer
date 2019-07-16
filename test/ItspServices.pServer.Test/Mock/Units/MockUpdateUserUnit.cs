@@ -1,7 +1,6 @@
-﻿using ItspServices.pServer.Abstraction.Models;
+﻿using System.Collections.Generic;
+using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Units;
-using System;
-using System.Collections.Generic;
 
 namespace ItspServices.pServer.Test.Mock.Units
 {
@@ -13,7 +12,7 @@ namespace ItspServices.pServer.Test.Mock.Units
 
         public MockUpdateUserUnit(List<User> users)
         {
-            
+            _users = users;
         }
 
         public void Complete()
@@ -23,7 +22,7 @@ namespace ItspServices.pServer.Test.Mock.Units
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+
         }
     }
 }

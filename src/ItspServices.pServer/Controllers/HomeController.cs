@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using ItspServices.pServer.Models;
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
+using ItspServices.pServer.Models;
 
 namespace ItspServices.pServer.Controllers
 {

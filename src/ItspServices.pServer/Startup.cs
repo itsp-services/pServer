@@ -35,8 +35,7 @@ namespace ItspServices.pServer
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
 
-            services.AddSingleton(typeof(IUserRepository), typeof(UserRepository));
-            services.AddSingleton(typeof(IRoleRepository), typeof(RoleRepository));
+            services.AddSingleton(typeof(IRepository), typeof(Repository));
 
             services.AddTransient(typeof(IUserStore<User>), typeof(UserStore));
             services.AddTransient(typeof(IRoleStore<Role>), typeof(RoleStore));

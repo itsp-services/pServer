@@ -1,18 +1,15 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using ItspServices.pServer.Abstraction.Models;
-using ItspServices.pServer.Abstraction.Repository;
-using ItspServices.pServer.Stores;
-using ItspServices.pServer.Test.Mock.Repository;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ItspServices.pServer.Abstraction.Repository;
+using ItspServices.pServer.Test.Mock.Repository;
 
 namespace ItspServices.pServer.Test
 {
@@ -29,24 +26,19 @@ namespace ItspServices.pServer.Test
                 base.ConfigureWebHost(builder);
                 builder.ConfigureTestServices(services =>
                 {
-                    foreach (ServiceDescriptor serviceDescriptor in services.Where(x =>
-                    { return x.ServiceType == typeof(IUserRepository) || x.ServiceType == typeof(IRoleRepository); }).ToList())
+                    foreach (ServiceDescriptor serviceDescriptor in services.Where(x => x.ServiceType == typeof(IRepository)).ToList())
                         services.Remove(serviceDescriptor);
 
-                    services.AddSingleton<IUserRepository, MockUserRepository>();
-                    services.AddSingleton<IRoleRepository, MockRoleRepository>();
-
-                    
+                    services.AddSingleton(typeof(IRepository), typeof(MockRepository));
                 });
             }
         }
 
         [TestMethod]
-        public async Task GetAccountControllerTest()
+        public async Task GetAccountControllerLoginTest()
         {
             HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
-            HttpResponseMessage response = await client.GetAsync("/Account/Login");
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual(HttpStatusCode.OK, (await client.GetAsync("/Account/Login")).StatusCode);
         }
 
         [TestMethod]
@@ -61,17 +53,35 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task PostCredentialsTest()
+        public async Task PostCredentialsLoginTest()
+        {
+            HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
+
+            HttpResponseMessage response = await client.PostAsync("/Account/Login?returnurl=%2F", new FormUrlEncodedContent(new[] {
+                new KeyValuePair<string, string>("Username", "Foo"),
+                new KeyValuePair<string, string>("Password", "Bar")
+            }));
+
+            string content = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(content.Contains("<title>Home Page"), "Redirect failed.");
+        }
+
+        [TestMethod]
+        public async Task GetAccountControllerRegisterTest()
+        {
+            HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
+            Assert.AreEqual(HttpStatusCode.OK, (await client.GetAsync("/Account/Register")).StatusCode);
+        }
+
+        [TestMethod]
+        public async Task PostCredentialsRegisterTest()
         {
             HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
 
             HttpResponseMessage response = await client.PostAsync("/Account/Login?returnurl=%2F", new FormUrlEncodedContent(new[] {
                 new KeyValuePair<string, string>("Username", "John"),
-                new KeyValuePair<string, string>("Password", "Test")
+                new KeyValuePair<string, string>("Password", "Doe")
             }));
-
-            string content = await response.Content.ReadAsStringAsync();
-            Assert.IsTrue(content.Contains("<title>Home Page"), "Redirect failed.");
         }
     }
 }
