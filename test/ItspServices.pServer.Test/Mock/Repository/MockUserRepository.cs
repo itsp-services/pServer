@@ -1,10 +1,11 @@
-﻿using ItspServices.pServer.Abstraction.Models;
-using ItspServices.pServer.Abstraction.Repository;
-using ItspServices.pServer.Abstraction.Units;
-using Microsoft.AspNetCore.Identity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
+using ItspServices.pServer.Abstraction.Models;
+using ItspServices.pServer.Abstraction.Repository;
+using ItspServices.pServer.Abstraction.Units;
+using ItspServices.pServer.Test.Mock.Units;
 
 namespace ItspServices.pServer.Test.Mock.Repository
 {
@@ -22,28 +23,32 @@ namespace ItspServices.pServer.Test.Mock.Repository
                 UserName = "Foo",
                 NormalizedUserName = "FOO"
             };
-
-            PasswordHasher<User> passwordHasher = new PasswordHasher<User>();
-            testUser.PasswordHash = passwordHasher.HashPassword(testUser, "Bar");
-
-            testUser.PublicKeys.Add(Encoding.ASCII.GetBytes("AAAABBBB"));
-
+            testUser.PasswordHash = new PasswordHasher<User>().HashPassword(testUser, "Bar123456789");
             _users.Add(testUser);
         }
 
         public IUnitOfWork Add()
         {
-            throw new NotImplementedException();
+            int availableId = 0;
+            foreach(User user in _users)
+            {
+                if (user.Id != availableId)
+                    break;
+                availableId++;
+            }
+            MockAddUserUnit unit = new MockAddUserUnit(_users);
+            unit.User.Id = availableId;
+            return unit;
         }
 
         public IEnumerable<User> GetAll()
         {
-            throw new NotImplementedException();
+            return _users;
         }
 
-        public User GetById(string id)
+        public User GetById(int id)
         {
-            throw new NotImplementedException();
+            return _users.Find(x => x.Id == id);
         }
 
         public User GetUserByName(string name)
@@ -53,12 +58,15 @@ namespace ItspServices.pServer.Test.Mock.Repository
 
         public IUnitOfWork Remove()
         {
-            throw new NotImplementedException();
+            return new MockRemoveUserUnit(_users);
         }
 
-        public IUnitOfWork Update()
+        public IUnitOfWork Update(int id)
         {
-            throw new NotImplementedException();
+            User userToUpdate = _users.Find(x => x.Id == id);
+            MockUpdateUserUnit unit = new MockUpdateUserUnit(userToUpdate);
+            unit.User.Id = userToUpdate.Id;
+            return unit;
         }
     }
 }

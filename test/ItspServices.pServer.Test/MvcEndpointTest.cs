@@ -8,14 +8,16 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Test.Mock.Repository;
+using ItspServices.pServer.Abstraction.Repository;
 
 namespace ItspServices.pServer.Test
 {
     [TestClass]
     public class MvcEndpointTest
     {
+        public HttpClient Client { get; set; }
+
         class WebApplicationFactory : WebApplicationFactory<Startup>
         {
             protected override IWebHostBuilder CreateWebHostBuilder() =>
@@ -34,18 +36,22 @@ namespace ItspServices.pServer.Test
             }
         }
 
+        [TestInitialize]
+        public void Init()
+        {
+            Client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
+        }
+
         [TestMethod]
         public async Task GetAccountControllerLoginTest()
         {
-            HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
-            Assert.AreEqual(HttpStatusCode.OK, (await client.GetAsync("/Account/Login")).StatusCode);
+            Assert.AreEqual(HttpStatusCode.OK, (await Client.GetAsync("/Account/Login")).StatusCode);
         }
 
         [TestMethod]
         public async Task ReturnUrlFormTest()
         {
-            HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
-            HttpResponseMessage response = await client.GetAsync("/Account/Login?returnurl=%2F");
+            HttpResponseMessage response = await Client.GetAsync("/Account/Login?returnurl=%2F");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             string expectedToken = "action=\"/Account/Login?returnurl=%2F\"";
             string content = await response.Content.ReadAsStringAsync();
@@ -55,11 +61,9 @@ namespace ItspServices.pServer.Test
         [TestMethod]
         public async Task PostCredentialsLoginTest()
         {
-            HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
-
-            HttpResponseMessage response = await client.PostAsync("/Account/Login?returnurl=%2F", new FormUrlEncodedContent(new[] {
+            HttpResponseMessage response = await Client.PostAsync("/Account/Login?returnurl=%2F", new FormUrlEncodedContent(new[] {
                 new KeyValuePair<string, string>("Username", "Foo"),
-                new KeyValuePair<string, string>("Password", "Bar")
+                new KeyValuePair<string, string>("Password", "Bar123456789")
             }));
 
             string content = await response.Content.ReadAsStringAsync();
@@ -69,19 +73,20 @@ namespace ItspServices.pServer.Test
         [TestMethod]
         public async Task GetAccountControllerRegisterTest()
         {
-            HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
-            Assert.AreEqual(HttpStatusCode.OK, (await client.GetAsync("/Account/Register")).StatusCode);
+            Assert.AreEqual(HttpStatusCode.OK, (await Client.GetAsync("/Account/Register")).StatusCode);
         }
 
         [TestMethod]
         public async Task PostCredentialsRegisterTest()
         {
-            HttpClient client = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
-
-            HttpResponseMessage response = await client.PostAsync("/Account/Login?returnurl=%2F", new FormUrlEncodedContent(new[] {
+            HttpResponseMessage response = await Client.PostAsync("/Account/Register?returnurl=%2F", new FormUrlEncodedContent(new[] {
                 new KeyValuePair<string, string>("Username", "John"),
-                new KeyValuePair<string, string>("Password", "Doe")
+                new KeyValuePair<string, string>("Password", "Doe12345!"),
+                new KeyValuePair<string, string>("ConfirmPassword", "Doe12345!")
             }));
+
+            string content = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(content.Contains("<title>Home Page"), "Redirect failed.");
         }
     }
 }

@@ -6,6 +6,6 @@ namespace ItspServices.pServer.Abstraction.Units
 {
     public interface IUnitOfWork : IDisposable
     {
-        void Complete();
+        bool Complete();
     }
 }

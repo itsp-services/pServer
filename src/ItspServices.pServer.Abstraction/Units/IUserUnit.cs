@@ -5,6 +5,6 @@ namespace ItspServices.pServer.Abstraction.Units
 {
     public interface IUserUnit : IUnitOfWork
     {
-        User User { get; }
+        User User { get; set; }
     }
 }

@@ -8,16 +8,17 @@ namespace ItspServices.pServer.Test.Mock.Units
     {
         private List<User> _users;
 
-        public User User { get; }
+        public User User { get; set; }
 
         public MockRemoveUserUnit(List<User> users)
         {
             _users = users;
         }
 
-        public void Complete()
+        public bool Complete()
         {
             _users.Remove(User);
+            return true;
         }
 
         public void Dispose()

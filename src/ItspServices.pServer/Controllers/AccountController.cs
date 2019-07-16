@@ -44,7 +44,45 @@ namespace ItspServices.pServer.Controllers
         public IActionResult Register(string returnurl = null)
         {
             ViewData["ReturnUrl"] = returnurl;
-            return View(new RegisterViewModel());
+            return View(new RegisterModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register([FromForm]RegisterModel registerModel, [FromQuery]string returnUrl = null)
+        {
+            User user = new User()
+            {
+                UserName = registerModel.Username,
+                NormalizedUserName = registerModel.Username.ToUpper(),
+            };
+
+            IdentityResult result = await _signInManager.UserManager.CreateAsync(user);
+            if(!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, "Could not create new user");
+                return View(registerModel);
+            }
+
+            user = await _signInManager.UserManager.FindByNameAsync(user.NormalizedUserName);
+
+            result = await _signInManager.UserManager.AddPasswordAsync(user, registerModel.Password);
+            if (!result.Succeeded)
+            {
+                await _signInManager.UserManager.DeleteAsync(user);
+                ModelState.AddModelError(string.Empty, "Could not add password to user");
+                return View(registerModel);
+            }
+
+            Microsoft.AspNetCore.Identity.SignInResult signInResult 
+                = await _signInManager.PasswordSignInAsync(registerModel.Username, registerModel.Password, false, false);
+
+            if (signInResult.Succeeded)
+            {
+                return Redirect(returnUrl ?? "/");
+            }
+
+            ModelState.AddModelError(string.Empty, "Invalid register attempt.");
+            return View(registerModel);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace ItspServices.pServer.Persistence.Repository
             throw new NotImplementedException();
         }
 
-        public User GetById(string id)
+        public User GetById(int id)
         {
             throw new NotImplementedException();
         }
@@ -34,7 +34,7 @@ namespace ItspServices.pServer.Persistence.Repository
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork Update()
+        public IUnitOfWork Update(int id)
         {
             throw new NotImplementedException();
         }

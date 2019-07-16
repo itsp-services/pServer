@@ -2,7 +2,7 @@
 
 namespace ItspServices.pServer.Models
 {
-    public class RegisterViewModel
+    public class RegisterModel
     {
         [Required, Display(Name = "Username")]
         public string Username { get; set; }

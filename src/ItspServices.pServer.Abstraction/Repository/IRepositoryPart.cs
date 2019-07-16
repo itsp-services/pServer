@@ -8,10 +8,10 @@ namespace ItspServices.pServer.Abstraction.Repository
 {
     public interface IRepositoryPart<T> where T : class
     {
-        T GetById(string id);
+        T GetById(int id);
         IEnumerable<T> GetAll();
         IUnitOfWork Add();
         IUnitOfWork Remove();
-        IUnitOfWork Update();
+        IUnitOfWork Update(int id);
     }
 }

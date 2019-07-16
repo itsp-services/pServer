@@ -21,27 +21,51 @@ namespace ItspServices.pServer.Stores
         {
             using (IUserUnit unit = (IUserUnit) UserRepository.Add())
             {
-                unit.User.Id = user.Id;
                 unit.User.UserName = user.UserName;
                 unit.User.NormalizedUserName = user.NormalizedUserName;
+                unit.User.PublicKeys = user.PublicKeys;
 
-                unit.Complete();
-                return Task.FromResult(IdentityResult.Success);
+                if (unit.Complete())
+                    return Task.FromResult(IdentityResult.Success);
+                else
+                    return Task.FromResult(IdentityResult.Failed());
             }
         }
 
         public Task<IdentityResult> DeleteAsync(User user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            using (IUserUnit unit = (IUserUnit) UserRepository.Remove())
+            {
+                if (user.Id == User.Invalid_Id)
+                {
+                    return Task.FromResult(IdentityResult.Failed());
+                }
+                unit.User.Id = user.Id;
+
+                if (unit.Complete())
+                    return Task.FromResult(IdentityResult.Success);
+                else
+                    return Task.FromResult(IdentityResult.Failed());
+            }
         }
 
         public Task<IdentityResult> UpdateAsync(User user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            using(IUserUnit unit = (IUserUnit) UserRepository.Update(user.Id))
+            {
+                if (user.Id == User.Invalid_Id || unit.User.Id == User.Invalid_Id)
+                    return Task.FromResult(IdentityResult.Failed());
+                unit.User = user;
+
+                if (unit.Complete())
+                    return Task.FromResult(IdentityResult.Success);
+                else
+                    return Task.FromResult(IdentityResult.Failed());
+            }
         }
 
         public async Task<User> FindByIdAsync(string userId, CancellationToken cancellationToken) => 
-            await Task.Run(() => UserRepository.GetById(userId));
+            await Task.Run(() => UserRepository.GetById(int.Parse(userId)));
 
 
         public async Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) => 
@@ -83,7 +107,7 @@ namespace ItspServices.pServer.Stores
 
         public Task<bool> HasPasswordAsync(User user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(user.PasswordHash != null && user.PasswordHash != string.Empty);
         }
     }
 }

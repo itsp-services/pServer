@@ -6,18 +6,22 @@ namespace ItspServices.pServer.Test.Mock.Units
 {
     class MockUpdateUserUnit : IUserUnit
     {
-        private List<User> _users;
+        private User _userToUpdate;
 
-        public User User { get; }
+        public User User { get; set; }
 
-        public MockUpdateUserUnit(List<User> users)
+        public MockUpdateUserUnit(User userToUpdate)
         {
-            _users = users;
+            _userToUpdate = userToUpdate;
+            User = new User();
         }
 
-        public void Complete()
+        public bool Complete()
         {
-            User userToUpdate = _users.Find(u => u.Id == User.Id);
+            if (_userToUpdate.Id != User.Id)
+                return false;
+            _userToUpdate = User;
+            return true;
         }
 
         public void Dispose()
