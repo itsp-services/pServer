@@ -8,7 +8,7 @@ namespace ItspServices.pServer.Persistence.Repository
 {
     class RoleRepository : IRoleRepository
     {
-        public IUnitOfWork Add()
+        public IUnitOfWork<Role> Add()
         {
             throw new NotImplementedException();
         }
@@ -28,12 +28,12 @@ namespace ItspServices.pServer.Persistence.Repository
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork Remove()
+        public IUnitOfWork<Role> Remove()
         {
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork Update(int id)
+        public IUnitOfWork<Role> Update()
         {
             throw new NotImplementedException();
         }

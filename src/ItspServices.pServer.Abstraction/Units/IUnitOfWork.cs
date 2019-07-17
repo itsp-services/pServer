@@ -6,6 +6,6 @@ namespace ItspServices.pServer.Abstraction.Units
     {
         T Entity { get; }
 
-        bool Complete();
+        void Complete();
     }
 }

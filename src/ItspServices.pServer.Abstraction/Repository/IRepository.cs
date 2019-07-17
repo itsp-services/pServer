@@ -9,6 +9,6 @@ namespace ItspServices.pServer.Abstraction.Repository
         IEnumerable<T> GetAll();
         IUnitOfWork<T> Add();
         IUnitOfWork<T> Remove();
-        IUnitOfWork<T> Update(int id);
+        IUnitOfWork<T> Update();
     }
 }

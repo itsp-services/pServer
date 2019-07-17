@@ -61,12 +61,9 @@ namespace ItspServices.pServer.Test.Mock.Repository
             return new MockRemoveUserUnit(_users);
         }
 
-        public IUnitOfWork<User> Update(int id)
+        public IUnitOfWork<User> Update()
         {
-            User userToUpdate = _users.Find(x => x.Id == id);
-            MockUpdateUserUnit unit = new MockUpdateUserUnit(userToUpdate);
-            unit.Entity.Id = userToUpdate.Id;
-            return unit;
+            return new MockUpdateUserUnit(_users);
         }
     }
 }

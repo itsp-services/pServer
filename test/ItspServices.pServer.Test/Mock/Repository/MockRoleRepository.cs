@@ -34,7 +34,7 @@ namespace ItspServices.pServer.Test.Mock.Repository
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork<Role> Update(int id)
+        public IUnitOfWork<Role> Update()
         {
             throw new NotImplementedException();
         }

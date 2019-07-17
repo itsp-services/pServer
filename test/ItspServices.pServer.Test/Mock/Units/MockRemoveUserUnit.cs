@@ -13,12 +13,12 @@ namespace ItspServices.pServer.Test.Mock.Units
         public MockRemoveUserUnit(List<User> users)
         {
             _users = users;
+            Entity = new User();
         }
 
-        public bool Complete()
+        public void Complete()
         {
-            _users.Remove(Entity);
-            return true;
+            _users.Remove(_users.Find(user => user.Id == Entity.Id));
         }
 
         public void Dispose()

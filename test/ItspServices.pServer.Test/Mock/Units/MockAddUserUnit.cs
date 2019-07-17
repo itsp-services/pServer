@@ -16,11 +16,9 @@ namespace ItspServices.pServer.Test.Mock.Units
             Entity = new User();
         }
 
-
-        public bool Complete()
+        public void Complete()
         {
             _users.Add(Entity);
-            return true;
         }
 
         public void Dispose()

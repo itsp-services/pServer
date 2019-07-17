@@ -1,9 +1,11 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
+using System.IO;
 
 namespace ItspServices.pServer.Stores
 {
@@ -20,47 +22,51 @@ namespace ItspServices.pServer.Stores
         {
             using (IUnitOfWork<User> unit = UserRepository.Add())
             {
-                unit.Entity.UserName = user.UserName;
-                unit.Entity.NormalizedUserName = user.NormalizedUserName;
-                unit.Entity.PublicKeys = user.PublicKeys;
-
-                if (unit.Complete())
-                    return Task.FromResult(IdentityResult.Success);
-                else
-                    return Task.FromResult(IdentityResult.Failed());
+                CloneUserWithoutId(user, unit.Entity);
+                try
+                {
+                    unit.Complete();
+                }
+                catch (IOException exception)
+                {
+                    return GetResultFromUnitCompleteException(exception);
+                }
             }
+            return Task.FromResult(IdentityResult.Success);
         }
 
         public Task<IdentityResult> DeleteAsync(User user, CancellationToken cancellationToken)
         {
             using (IUnitOfWork<User> unit = UserRepository.Remove())
             {
-                if (user.Id == User.Invalid_Id)
+                CloneUser(user, unit.Entity);
+                try
                 {
-                    return Task.FromResult(IdentityResult.Failed());
+                    unit.Complete();
                 }
-                unit.Entity.Id = user.Id;
-
-                if (unit.Complete())
-                    return Task.FromResult(IdentityResult.Success);
-                else
-                    return Task.FromResult(IdentityResult.Failed());
+                catch (IOException exception)
+                {
+                    return GetResultFromUnitCompleteException(exception);
+                }
             }
+            return Task.FromResult(IdentityResult.Success);
         }
 
         public Task<IdentityResult> UpdateAsync(User user, CancellationToken cancellationToken)
         {
-            using(IUnitOfWork<User> unit = UserRepository.Update(user.Id))
+            using(IUnitOfWork<User> unit = UserRepository.Update())
             {
-                if (user.Id == User.Invalid_Id || unit.Entity.Id == User.Invalid_Id)
-                    return Task.FromResult(IdentityResult.Failed());
-                // TODO: Update user
-
-                if (unit.Complete())
-                    return Task.FromResult(IdentityResult.Success);
-                else
-                    return Task.FromResult(IdentityResult.Failed());
+                CloneUser(user, unit.Entity);
+                try
+                {
+                    unit.Complete();
+                }
+                catch (IOException exception)
+                {
+                    return GetResultFromUnitCompleteException(exception);
+                }
             }
+            return Task.FromResult(IdentityResult.Success);
         }
 
         public async Task<User> FindByIdAsync(string userId, CancellationToken cancellationToken) => 
@@ -91,9 +97,6 @@ namespace ItspServices.pServer.Stores
         public async Task SetUserNameAsync(User user, string userName, CancellationToken cancellationToken) =>
             await Task.Run(() => { user.UserName = userName; });
 
-        public void Dispose()
-        {
-        }
 
         public async Task SetPasswordHashAsync(User user, string passwordHash, CancellationToken cancellationToken) =>
             await Task.Run(() => { user.PasswordHash = passwordHash; });
@@ -107,6 +110,34 @@ namespace ItspServices.pServer.Stores
         public Task<bool> HasPasswordAsync(User user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.PasswordHash != null && user.PasswordHash != string.Empty);
+        }
+
+        public void Dispose()
+        {
+        }
+
+        private static void CloneUserWithoutId(User source, User destination)
+        {
+            var saved_id = destination.Id;
+            CloneUser(source, destination);
+            destination.Id = saved_id;
+        }
+
+        private static void CloneUser(User source, User destination)
+        {
+            destination.Id = source.Id;
+            destination.UserName = source.UserName;
+            destination.NormalizedUserName = source.NormalizedUserName;
+            destination.PublicKeys = source.PublicKeys;
+            destination.PasswordHash = source.PasswordHash;
+        }
+
+        private static Task<IdentityResult> GetResultFromUnitCompleteException(IOException exception)
+        {
+            IdentityError error = new IdentityError();
+            error.Code = exception.Source;
+            error.Description = exception.Message;
+            return Task.FromResult(IdentityResult.Failed(error));
         }
     }
 }
