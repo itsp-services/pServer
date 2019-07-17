@@ -4,11 +4,11 @@ using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Test.Mock.Units
 {
-    class MockRemoveUserUnit : IUserUnit
+    class MockRemoveUserUnit : IUnitOfWork<User>
     {
         private List<User> _users;
 
-        public User User { get; set; }
+        public User Entity { get; }
 
         public MockRemoveUserUnit(List<User> users)
         {
@@ -17,7 +17,7 @@ namespace ItspServices.pServer.Test.Mock.Units
 
         public bool Complete()
         {
-            _users.Remove(User);
+            _users.Remove(Entity);
             return true;
         }
 

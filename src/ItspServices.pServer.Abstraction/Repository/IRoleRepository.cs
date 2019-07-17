@@ -1,11 +1,8 @@
 ﻿using ItspServices.pServer.Abstraction.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ItspServices.pServer.Abstraction.Repository
 {
-    public interface IRoleRepository : IRepositoryPart<Role>
+    public interface IRoleRepository : IRepository<Role>
     {
         Role GetRoleByName(string name);
     }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using ItspServices.pServer.Abstraction.Models;
@@ -12,18 +11,18 @@ namespace ItspServices.pServer.Stores
     {
         public IUserRepository UserRepository { get; }
 
-        public UserStore(IRepository repository)
+        public UserStore(IRepositoryManager repository)
         {
             UserRepository = repository.UserRepository;
         }
 
         public Task<IdentityResult> CreateAsync(User user, CancellationToken cancellationToken)
         {
-            using (IUserUnit unit = (IUserUnit) UserRepository.Add())
+            using (IUnitOfWork<User> unit = UserRepository.Add())
             {
-                unit.User.UserName = user.UserName;
-                unit.User.NormalizedUserName = user.NormalizedUserName;
-                unit.User.PublicKeys = user.PublicKeys;
+                unit.Entity.UserName = user.UserName;
+                unit.Entity.NormalizedUserName = user.NormalizedUserName;
+                unit.Entity.PublicKeys = user.PublicKeys;
 
                 if (unit.Complete())
                     return Task.FromResult(IdentityResult.Success);
@@ -34,13 +33,13 @@ namespace ItspServices.pServer.Stores
 
         public Task<IdentityResult> DeleteAsync(User user, CancellationToken cancellationToken)
         {
-            using (IUserUnit unit = (IUserUnit) UserRepository.Remove())
+            using (IUnitOfWork<User> unit = UserRepository.Remove())
             {
                 if (user.Id == User.Invalid_Id)
                 {
                     return Task.FromResult(IdentityResult.Failed());
                 }
-                unit.User.Id = user.Id;
+                unit.Entity.Id = user.Id;
 
                 if (unit.Complete())
                     return Task.FromResult(IdentityResult.Success);
@@ -51,11 +50,11 @@ namespace ItspServices.pServer.Stores
 
         public Task<IdentityResult> UpdateAsync(User user, CancellationToken cancellationToken)
         {
-            using(IUserUnit unit = (IUserUnit) UserRepository.Update(user.Id))
+            using(IUnitOfWork<User> unit = UserRepository.Update(user.Id))
             {
-                if (user.Id == User.Invalid_Id || unit.User.Id == User.Invalid_Id)
+                if (user.Id == User.Invalid_Id || unit.Entity.Id == User.Invalid_Id)
                     return Task.FromResult(IdentityResult.Failed());
-                unit.User = user;
+                // TODO: Update user
 
                 if (unit.Complete())
                     return Task.FromResult(IdentityResult.Success);

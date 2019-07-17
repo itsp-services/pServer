@@ -4,21 +4,22 @@ using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Test.Mock.Units
 {
-    class MockAddUserUnit : IUserUnit
+    class MockAddUserUnit : IUnitOfWork<User>
     {
         private List<User> _users;
 
-        public User User { get; set; }
+        public User Entity { get; }
 
         public MockAddUserUnit(List<User> users)
         {
             _users = users;
-            User = new User();
+            Entity = new User();
         }
+
 
         public bool Complete()
         {
-            _users.Add(User);
+            _users.Add(Entity);
             return true;
         }
 

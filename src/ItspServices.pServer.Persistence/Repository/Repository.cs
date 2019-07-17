@@ -1,15 +1,14 @@
-﻿using System;
-using ItspServices.pServer.Abstraction.Repository;
+﻿using ItspServices.pServer.Abstraction.Repository;
 
 namespace ItspServices.pServer.Persistence.Repository
 {
-    public class Repository : IRepository
+    public class RepositoryManager : IRepositoryManager
     {
         public IUserRepository UserRepository { get; }
 
         public IRoleRepository RoleRepository { get; }
 
-        public Repository()
+        public RepositoryManager()
         {
             UserRepository = new UserRepository();
             RoleRepository = new RoleRepository();

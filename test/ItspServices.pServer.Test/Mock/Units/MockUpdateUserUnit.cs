@@ -4,23 +4,23 @@ using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Test.Mock.Units
 {
-    class MockUpdateUserUnit : IUserUnit
+    class MockUpdateUserUnit : IUnitOfWork<User>
     {
         private User _userToUpdate;
 
-        public User User { get; set; }
+        public User Entity { get; }
 
         public MockUpdateUserUnit(User userToUpdate)
         {
             _userToUpdate = userToUpdate;
-            User = new User();
+            Entity = new User();
         }
 
         public bool Complete()
         {
-            if (_userToUpdate.Id != User.Id)
+            if (_userToUpdate.Id != Entity.Id)
                 return false;
-            _userToUpdate = User;
+            _userToUpdate = Entity;
             return true;
         }
 

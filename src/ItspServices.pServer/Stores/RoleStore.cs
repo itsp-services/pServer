@@ -1,11 +1,9 @@
-﻿using ItspServices.pServer.Abstraction.Models;
-using ItspServices.pServer.Abstraction.Repository;
-using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using ItspServices.pServer.Abstraction.Models;
+using ItspServices.pServer.Abstraction.Repository;
 
 namespace ItspServices.pServer.Stores
 {
@@ -13,7 +11,7 @@ namespace ItspServices.pServer.Stores
     {
         public IRoleRepository RoleRepository { get; }
 
-        public RoleStore(IRepository repository)
+        public RoleStore(IRepositoryManager repository)
         {
             RoleRepository = repository.RoleRepository;
         }

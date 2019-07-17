@@ -27,7 +27,7 @@ namespace ItspServices.pServer.Test.Mock.Repository
             _users.Add(testUser);
         }
 
-        public IUnitOfWork Add()
+        public IUnitOfWork<User> Add()
         {
             int availableId = 0;
             foreach(User user in _users)
@@ -37,7 +37,7 @@ namespace ItspServices.pServer.Test.Mock.Repository
                 availableId++;
             }
             MockAddUserUnit unit = new MockAddUserUnit(_users);
-            unit.User.Id = availableId;
+            unit.Entity.Id = availableId;
             return unit;
         }
 
@@ -56,16 +56,16 @@ namespace ItspServices.pServer.Test.Mock.Repository
             return _users.Find(u => u.NormalizedUserName == name);
         }
 
-        public IUnitOfWork Remove()
+        public IUnitOfWork<User> Remove()
         {
             return new MockRemoveUserUnit(_users);
         }
 
-        public IUnitOfWork Update(int id)
+        public IUnitOfWork<User> Update(int id)
         {
             User userToUpdate = _users.Find(x => x.Id == id);
             MockUpdateUserUnit unit = new MockUpdateUserUnit(userToUpdate);
-            unit.User.Id = userToUpdate.Id;
+            unit.Entity.Id = userToUpdate.Id;
             return unit;
         }
     }

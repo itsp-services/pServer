@@ -1,14 +1,14 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using ItspServices.pServer.Models;
 using ItspServices.pServer.Abstraction.Models;
+using ItspServices.pServer.Models;
 
 namespace ItspServices.pServer.Controllers
 {
     public class AccountController : Controller
     {
-        private SignInManager<User> _signInManager;
+        private readonly SignInManager<User> _signInManager;
 
         public AccountController(SignInManager<User> signInManager)
         {

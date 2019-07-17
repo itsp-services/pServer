@@ -2,7 +2,7 @@
 
 namespace ItspServices.pServer.Abstraction.Repository
 {
-    public interface IUserRepository : IRepositoryPart<User>
+    public interface IUserRepository : IRepository<User>
     {
         User GetUserByName(string name);
     }

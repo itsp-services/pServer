@@ -5,13 +5,13 @@ using System.Text;
 
 namespace ItspServices.pServer.Test.Mock.Repository
 {
-    class MockRepository : IRepository
+    class MockRepositoryManager : IRepositoryManager
     {
         public IUserRepository UserRepository { get; }
 
         public IRoleRepository RoleRepository { get; }
 
-        public MockRepository()
+        public MockRepositoryManager()
         {
             UserRepository = new MockUserRepository();
             RoleRepository = new MockRoleRepository();

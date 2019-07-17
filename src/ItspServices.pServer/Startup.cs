@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using ItspServices.pServer.Stores;
-using Microsoft.AspNetCore.Identity;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Persistence.Repository;
+using ItspServices.pServer.Stores;
 
 namespace ItspServices.pServer
 {
@@ -35,7 +35,7 @@ namespace ItspServices.pServer
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
 
-            services.AddSingleton(typeof(IRepository), typeof(Repository));
+            services.AddSingleton(typeof(IRepositoryManager), typeof(RepositoryManager));
 
             services.AddTransient(typeof(IUserStore<User>), typeof(UserStore));
             services.AddTransient(typeof(IRoleStore<Role>), typeof(RoleStore));
