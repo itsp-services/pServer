@@ -1,11 +1,10 @@
-﻿using System;
+﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
-using System.IO;
 
 namespace ItspServices.pServer.Stores
 {
@@ -20,51 +19,42 @@ namespace ItspServices.pServer.Stores
 
         public Task<IdentityResult> CreateAsync(User user, CancellationToken cancellationToken)
         {
-            using (IUnitOfWork<User> unit = UserRepository.Add())
+            try
             {
-                CloneUserWithoutId(user, unit.Entity);
-                try
-                {
-                    unit.Complete();
-                }
-                catch (IOException exception)
-                {
-                    return GetResultFromUnitCompleteException(exception);
-                }
+                IUnitOfWork<User> uow = UserRepository.Add(user);
+                uow.Complete();
+            }
+            catch (IOException exception)
+            {
+                return GetResultFromUnitCompleteException(exception);
             }
             return Task.FromResult(IdentityResult.Success);
         }
 
         public Task<IdentityResult> DeleteAsync(User user, CancellationToken cancellationToken)
         {
-            using (IUnitOfWork<User> unit = UserRepository.Remove())
+            try
             {
-                CloneUser(user, unit.Entity);
-                try
-                {
-                    unit.Complete();
-                }
-                catch (IOException exception)
-                {
-                    return GetResultFromUnitCompleteException(exception);
-                }
+                IUnitOfWork<User> uow = UserRepository.Remove(user);
+                uow.Complete();
+            }
+            catch (IOException exception)
+            {
+                return GetResultFromUnitCompleteException(exception);
             }
             return Task.FromResult(IdentityResult.Success);
         }
 
         public Task<IdentityResult> UpdateAsync(User user, CancellationToken cancellationToken)
         {
-            using(IUnitOfWork<User> unit = UserRepository.Update())
+            try
             {
-                CloneUser(user, unit.Entity);
-                try
-                {
-                    unit.Complete();
-                }
-                catch (IOException exception)
-                {
-                    return GetResultFromUnitCompleteException(exception);
-                }
+                IUnitOfWork<User> uow = UserRepository.Update(user);
+                uow.Complete();
+            }
+            catch (IOException exception)
+            {
+                return GetResultFromUnitCompleteException(exception);
             }
             return Task.FromResult(IdentityResult.Success);
         }
@@ -114,22 +104,6 @@ namespace ItspServices.pServer.Stores
 
         public void Dispose()
         {
-        }
-
-        private static void CloneUserWithoutId(User source, User destination)
-        {
-            var saved_id = destination.Id;
-            CloneUser(source, destination);
-            destination.Id = saved_id;
-        }
-
-        private static void CloneUser(User source, User destination)
-        {
-            destination.Id = source.Id;
-            destination.UserName = source.UserName;
-            destination.NormalizedUserName = source.NormalizedUserName;
-            destination.PublicKeys = source.PublicKeys;
-            destination.PasswordHash = source.PasswordHash;
         }
 
         private static Task<IdentityResult> GetResultFromUnitCompleteException(IOException exception)

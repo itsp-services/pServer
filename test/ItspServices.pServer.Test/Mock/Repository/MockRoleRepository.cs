@@ -9,7 +9,7 @@ namespace ItspServices.pServer.Test.Mock.Repository
 {
     class MockRoleRepository : IRoleRepository
     {
-        public IUnitOfWork<Role> Add()
+        public IUnitOfWork<Role> Add(Role entity)
         {
             throw new NotImplementedException();
         }
@@ -29,12 +29,12 @@ namespace ItspServices.pServer.Test.Mock.Repository
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork<Role> Remove()
+        public IUnitOfWork<Role> Remove(Role entity)
         {
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork<Role> Update()
+        public IUnitOfWork<Role> Update(Role entity)
         {
             throw new NotImplementedException();
         }

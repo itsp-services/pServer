@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace ItspServices.pServer.Abstraction.Models
+﻿namespace ItspServices.pServer.Abstraction.Models
 {
-    public class Role : IdentityRole<int>
+    public class Role
     {
     }
 }

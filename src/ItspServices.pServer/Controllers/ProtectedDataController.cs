@@ -5,34 +5,21 @@ using ItspServices.pServer.Abstraction.Repository;
 
 namespace ItspServices.pServer.Controllers
 {
+    [Route("/api/[controller]")]
+    [ApiController]
     public class ProtectedDataController : Controller
     {
-        readonly IRepositoryManager _repository;
+        private readonly IRepositoryManager _repository;
 
         public ProtectedDataController(IRepositoryManager repository)
         {
             _repository = repository;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public Task<User> GetFolder(int? id)
-        {
-            return null;
-        }
-
+        [Route("{id:int}"), HttpGet]
         public Task<ProtectedData> GetProtectedData(int id)
         {
-            return null;
+            return Task.FromResult(_repository.ProtectedDataRepository.GetById(id));
         }
-
-        public Task<ProtectedData> GetProtectedData(string fullQualifiedName)
-        {
-            return null;
-        }
-
     }
 }

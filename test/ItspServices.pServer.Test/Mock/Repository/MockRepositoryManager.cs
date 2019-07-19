@@ -1,7 +1,6 @@
-﻿using ItspServices.pServer.Abstraction.Repository;
+﻿using ItspServices.pServer.Abstraction.Models;
+using ItspServices.pServer.Abstraction.Repository;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ItspServices.pServer.Test.Mock.Repository
 {
@@ -10,6 +9,8 @@ namespace ItspServices.pServer.Test.Mock.Repository
         public IUserRepository UserRepository { get; }
 
         public IRoleRepository RoleRepository { get; }
+
+        public IRepository<ProtectedData> ProtectedDataRepository { get => throw new NotImplementedException(); }
 
         public MockRepositoryManager()
         {

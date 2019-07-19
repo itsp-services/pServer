@@ -8,7 +8,7 @@ namespace ItspServices.pServer.Persistence.Repository
 {
     class UserRepository : IUserRepository
     {
-        public IUnitOfWork<User> Add()
+        public IUnitOfWork<User> Add(User entity)
         {
             throw new NotImplementedException();
         }
@@ -28,12 +28,12 @@ namespace ItspServices.pServer.Persistence.Repository
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork<User> Remove()
+        public IUnitOfWork<User> Remove(User entity)
         {
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork<User> Update()
+        public IUnitOfWork<User> Update(User entity)
         {
             throw new NotImplementedException();
         }

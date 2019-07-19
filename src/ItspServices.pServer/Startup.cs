@@ -10,6 +10,7 @@ using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Persistence.Repository;
 using ItspServices.pServer.Stores;
+using ItspServices.pServer.Persistence;
 
 namespace ItspServices.pServer
 {
@@ -35,7 +36,11 @@ namespace ItspServices.pServer
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
 
-            services.AddSingleton(typeof(IRepositoryManager), typeof(RepositoryManager));
+            services.Configure<PersistenceOption>(o =>
+            {
+                o.Path = "Sepp";
+            });
+            services.AddPersistence();
 
             services.AddTransient(typeof(IUserStore<User>), typeof(UserStore));
             services.AddTransient(typeof(IRoleStore<Role>), typeof(RoleStore));

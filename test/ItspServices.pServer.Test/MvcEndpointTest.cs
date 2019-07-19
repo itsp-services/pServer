@@ -1,16 +1,10 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
-using ItspServices.pServer.Abstraction.Repository;
-using ItspServices.pServer.Test.Mock.Repository;
 
 namespace ItspServices.pServer.Test
 {
@@ -18,24 +12,6 @@ namespace ItspServices.pServer.Test
     public class MvcEndpointTest
     {
         public HttpClient Client { get; set; }
-
-        class WebApplicationFactory : WebApplicationFactory<Startup>
-        {
-            protected override IWebHostBuilder CreateWebHostBuilder() =>
-                Program.CreateWebHostBuilder(new string[0]);
-
-            protected override void ConfigureWebHost(IWebHostBuilder builder)
-            {
-                base.ConfigureWebHost(builder);
-                builder.ConfigureTestServices(services =>
-                {
-                    foreach (ServiceDescriptor serviceDescriptor in services.Where(x => x.ServiceType == typeof(IRepositoryManager)).ToList())
-                        services.Remove(serviceDescriptor);
-
-                    services.AddSingleton(typeof(IRepositoryManager), typeof(MockRepositoryManager));
-                });
-            }
-        }
 
         [TestInitialize]
         public void Init()
@@ -89,22 +65,5 @@ namespace ItspServices.pServer.Test
             string content = await response.Content.ReadAsStringAsync();
             Assert.IsTrue(content.Contains("<title>Home Page"), "Redirect failed.");
         }
-
-        [TestMethod]
-        public async Task GetProtectedDataControllerTest()
-        {
-            Assert.AreEqual(HttpStatusCode.OK, (await Client.GetAsync("/ProtectedData")).StatusCode);
-        }
-
-        [TestMethod]
-        public async Task GetRootFolderTest()
-        {
-            HttpResponseMessage response = await Client.GetAsync("/ProtectedData/GetFolder");
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            string content = await response.Content.ReadAsStringAsync();
-            JToken token = JToken.Parse(content);
-            Assert.AreEqual(token["name"].Value<string>(), "root");
-        }
-
     }
 }

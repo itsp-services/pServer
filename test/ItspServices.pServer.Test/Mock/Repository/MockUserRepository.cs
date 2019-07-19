@@ -1,69 +1,76 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Identity;
+﻿using System.Collections.Generic;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
-using ItspServices.pServer.Test.Mock.Units;
+using Microsoft.AspNetCore.Identity;
+using UnitRepositoryTest.Unit;
 
 namespace ItspServices.pServer.Test.Mock.Repository
 {
     class MockUserRepository : IUserRepository
     {
-        private List<User> _users;
+        private List<User> _context = new List<User>();
+        private MockUserUnit _unitOfWork;
 
         public MockUserRepository()
         {
-            _users = new List<User>();
-
-            User testUser = new User()
+            User sampleUser = new User()
             {
                 Id = 0,
                 UserName = "Foo",
-                NormalizedUserName = "FOO"
+                NormalizedUserName = "FOO",
             };
-            testUser.PasswordHash = new PasswordHasher<User>().HashPassword(testUser, "Bar123456789");
-            _users.Add(testUser);
+            sampleUser.PasswordHash = new PasswordHasher<User>().HashPassword(sampleUser, "Bar123456789");
+            _context.Add(sampleUser);
+
+            _unitOfWork = new MockUserUnit(_context);
+
         }
 
-        public IUnitOfWork<User> Add()
+        public IUnitOfWork<User> Add(User entity)
+        {
+            entity.Id = GetFreeId();
+            _unitOfWork.Record.Add(entity, UnitRepositoryTest.TransactionActions.ADD);
+            return _unitOfWork;
+        }
+
+        public IEnumerable<User> GetAll()
+        {
+            return _context;
+        }
+
+        public User GetById(int id)
+        {
+            return _context.Find(user => user.Id == id);
+        }
+
+        public User GetUserByName(string name)
+        {
+            return _context.Find(user => user.NormalizedUserName == name);
+        }
+
+        public IUnitOfWork<User> Remove(User entity)
+        {
+            _unitOfWork.Record.Add(entity, UnitRepositoryTest.TransactionActions.REMOVE);
+            return _unitOfWork;
+        }
+
+        public IUnitOfWork<User> Update(User entity)
+        {
+            _unitOfWork.Record.Add(entity, UnitRepositoryTest.TransactionActions.UPDATE);
+            return _unitOfWork;
+        }
+
+        private int GetFreeId()
         {
             int availableId = 0;
-            foreach(User user in _users)
+            foreach (User user in _context)
             {
                 if (user.Id != availableId)
                     break;
                 availableId++;
             }
-            MockAddUserUnit unit = new MockAddUserUnit(_users);
-            unit.Entity.Id = availableId;
-            return unit;
-        }
-
-        public IEnumerable<User> GetAll()
-        {
-            return _users;
-        }
-
-        public User GetById(int id)
-        {
-            return _users.Find(x => x.Id == id);
-        }
-
-        public User GetUserByName(string name)
-        {
-            return _users.Find(u => u.NormalizedUserName == name);
-        }
-
-        public IUnitOfWork<User> Remove()
-        {
-            return new MockRemoveUserUnit(_users);
-        }
-
-        public IUnitOfWork<User> Update()
-        {
-            return new MockUpdateUserUnit(_users);
+            return availableId;
         }
     }
 }
