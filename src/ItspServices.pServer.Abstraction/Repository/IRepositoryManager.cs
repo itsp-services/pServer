@@ -6,6 +6,6 @@ namespace ItspServices.pServer.Abstraction.Repository
     {
         IUserRepository UserRepository { get; }
         IRoleRepository RoleRepository { get; }
-        IRepository<ProtectedData> ProtectedDataRepository { get; }
+        IProtectedDataRepository ProtectedDataRepository { get; }
     }
 }

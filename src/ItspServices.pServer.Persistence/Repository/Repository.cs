@@ -15,7 +15,7 @@ namespace ItspServices.pServer.Persistence.Repository
 
         public IRoleRepository RoleRepository { get; }
 
-        public IRepository<ProtectedData> ProtectedDataRepository => throw new System.NotImplementedException();
+        public IProtectedDataRepository ProtectedDataRepository => throw new System.NotImplementedException();
 
         public RepositoryManager()
         {

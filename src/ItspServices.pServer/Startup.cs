@@ -7,8 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ItspServices.pServer.Abstraction.Models;
-using ItspServices.pServer.Abstraction.Repository;
-using ItspServices.pServer.Persistence.Repository;
 using ItspServices.pServer.Stores;
 using ItspServices.pServer.Persistence;
 

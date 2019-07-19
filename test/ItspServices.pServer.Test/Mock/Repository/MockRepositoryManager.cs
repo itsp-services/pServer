@@ -10,12 +10,13 @@ namespace ItspServices.pServer.Test.Mock.Repository
 
         public IRoleRepository RoleRepository { get; }
 
-        public IRepository<ProtectedData> ProtectedDataRepository { get => throw new NotImplementedException(); }
+        public IProtectedDataRepository ProtectedDataRepository { get; }
 
         public MockRepositoryManager()
         {
             UserRepository = new MockUserRepository();
             RoleRepository = new MockRoleRepository();
+            ProtectedDataRepository = new MockProtectedDataRepository();
         }
     }
 }
