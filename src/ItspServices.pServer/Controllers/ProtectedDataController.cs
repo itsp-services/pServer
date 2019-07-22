@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ItspServices.pServer.Controllers
 {
     [Route("/api/[controller]")]
+    [Authorize]
     [ApiController]
     public class ProtectedDataController : Controller
     {
@@ -16,10 +18,16 @@ namespace ItspServices.pServer.Controllers
             _repository = repository;
         }
 
-        [Route("{id:int}"), HttpGet]
-        public Task<ProtectedData> GetProtectedData(int id)
+        [HttpGet("folder/{id:int?}")]
+        public Task<Folder> GetFolderById(int? id)
         {
-            return Task.FromResult(_repository.ProtectedDataRepository.GetById(id));
+            return Task.FromResult(_repository.ProtectedDataRepository.GetFolderById(id));
+        }
+
+        [Route("user")]
+        public Task<string> GetUsername()
+        {
+            return Task.FromResult(User.Identity.Name);
         }
     }
 }

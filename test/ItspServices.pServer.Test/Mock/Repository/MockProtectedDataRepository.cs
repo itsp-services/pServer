@@ -22,6 +22,15 @@ namespace ItspServices.pServer.Test.Mock.Repository
         public MockProtectedDataRepository()
         {
             _folders.Add(rootFolder);
+
+            Folder sampleSubfolder = new Folder()
+            {
+                Id = 1,
+                Name = "foo"
+            };
+            rootFolder.Subfolder.Add(sampleSubfolder);
+
+            _folders.Add(sampleSubfolder);
         }
 
         public IEnumerable<ProtectedData> GetAll()

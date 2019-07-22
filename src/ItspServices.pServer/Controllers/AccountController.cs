@@ -56,20 +56,10 @@ namespace ItspServices.pServer.Controllers
                 NormalizedUserName = registerModel.Username.ToUpper(),
             };
 
-            IdentityResult result = await _signInManager.UserManager.CreateAsync(user);
+            IdentityResult result = await _signInManager.UserManager.CreateAsync(user, registerModel.Password);
             if(!result.Succeeded)
             {
                 ModelState.AddModelError(string.Empty, "Could not create new user");
-                return View(registerModel);
-            }
-
-            user = await _signInManager.UserManager.FindByNameAsync(user.NormalizedUserName);
-
-            result = await _signInManager.UserManager.AddPasswordAsync(user, registerModel.Password);
-            if (!result.Succeeded)
-            {
-                await _signInManager.UserManager.DeleteAsync(user);
-                ModelState.AddModelError(string.Empty, "Could not add password to user");
                 return View(registerModel);
             }
 

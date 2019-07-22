@@ -8,6 +8,7 @@ using ItspServices.pServer.Test.Mock.Repository;
 
 namespace ItspServices.pServer.Test
 {
+
     class WebApplicationFactory : WebApplicationFactory<Startup>
     {
         protected override IWebHostBuilder CreateWebHostBuilder() =>
