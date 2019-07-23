@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Users>
+  <User Id="0">
+    <UserName>Bar</UserName>
+    <NormalizedUserName>BAR</NormalizedUserName>
+    <PasswordHash>AQAAAAEAACcQAAAAEC3r0bi/e3BKWEn5eKjMy7Y2AYH6dEmgHPCOIJiKIlnx1Xz2I/ADv4HtTQilFe5xmg==</PasswordHash>
+    <PublicKeys>
+      <PublicKey>cgDzAG4AaQBjAGEALAAgAEMASQBGACAAUQA0ADYAMAAxADEANQA2AEUAKQAuACAA</PublicKey>
+      <PublicKey>lHPrzg5XPAOBOp0KoVdDaaxXbXmQeOW1tDvYvEyNKKGno6e6Ak4l0Squ7a4DIrhr</PublicKey>
+      <PublicKey>pPVWQxaZLPSkVrQ0uGE3ycJYgBugl6H8WY3pEfbRD0tVNEYqi4Y7MCEwFAYIKwYB</PublicKey>
+    </PublicKeys>
+  </User>
+  <User Id="1">
+    <UserName>Bar</UserName>
+    <NormalizedUserName>BAR</NormalizedUserName>
+    <PasswordHash>AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV+7LeE9B4hYWnoG2LHBnd9KwS12nY0HztB3Oq5d1rdsnnw==</PasswordHash>
+    <PublicKeys>
+      <PublicKey>cgDzAG4AaQBjAGEALAAgAEMASQBG</PublicKey>
+      <PublicKey>lHPrzg5XPAOBOp0KoVdDaaxXbXmQ</PublicKey>
+      <PublicKey>pPVWQxaZLPSkVrQ0uGE3ycJYgBug</PublicKey>
+    </PublicKeys>
+  </User>
+</Users>

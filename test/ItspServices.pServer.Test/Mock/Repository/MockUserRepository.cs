@@ -2,6 +2,7 @@
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
+using ItspServices.pServer.Persistence;
 using Microsoft.AspNetCore.Identity;
 using UnitRepositoryTest.Unit;
 
@@ -30,7 +31,7 @@ namespace ItspServices.pServer.Test.Mock.Repository
         public IUnitOfWork<User> Add(User entity)
         {
             entity.Id = GetFreeId();
-            _unitOfWork.Record.Add(entity, UnitRepositoryTest.TransactionActions.ADD);
+            _unitOfWork.Record.Add(entity, TransactionActions.ADD);
             return _unitOfWork;
         }
 
@@ -44,20 +45,20 @@ namespace ItspServices.pServer.Test.Mock.Repository
             return _context.Find(user => user.Id == id);
         }
 
-        public User GetUserByName(string name)
+        public User GetUserByNormalizedName(string name)
         {
             return _context.Find(user => user.NormalizedUserName == name);
         }
 
         public IUnitOfWork<User> Remove(User entity)
         {
-            _unitOfWork.Record.Add(entity, UnitRepositoryTest.TransactionActions.REMOVE);
+            _unitOfWork.Record.Add(entity, TransactionActions.REMOVE);
             return _unitOfWork;
         }
 
         public IUnitOfWork<User> Update(User entity)
         {
-            _unitOfWork.Record.Add(entity, UnitRepositoryTest.TransactionActions.UPDATE);
+            _unitOfWork.Record.Add(entity, TransactionActions.UPDATE);
             return _unitOfWork;
         }
 

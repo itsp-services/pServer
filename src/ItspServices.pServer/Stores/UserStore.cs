@@ -64,7 +64,7 @@ namespace ItspServices.pServer.Stores
 
 
         public async Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) => 
-            await Task.Run(() => UserRepository.GetUserByName(normalizedUserName));
+            await Task.Run(() => UserRepository.GetUserByNormalizedName(normalizedUserName));
 
         public Task<string> GetNormalizedUserNameAsync(User user, CancellationToken cancellationToken)
         {

@@ -4,6 +4,6 @@ namespace ItspServices.pServer.Abstraction.Repository
 {
     public interface IUserRepository : IRepository<User>
     {
-        User GetUserByName(string name);
+        User GetUserByNormalizedName(string name);
     }
 }

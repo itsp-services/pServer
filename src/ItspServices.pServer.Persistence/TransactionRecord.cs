@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace UnitRepositoryTest
+namespace ItspServices.pServer.Persistence
 {
     public enum TransactionActions
     {
@@ -31,7 +31,10 @@ namespace UnitRepositoryTest
 
         public IEnumerable<T> StagedEntitiesAsEnumerable(TransactionActions action)
         {
-            return _record.GetValueOrDefault(action);
+            List<T> stagedEntitiesList;
+            return _record.TryGetValue(action, out stagedEntitiesList) ?
+                stagedEntitiesList :
+                null;
         }
 
         public void Clear()
