@@ -79,6 +79,7 @@ namespace ItspServices.pServer.Controllers
         {
             await _signInManager.SignOutAsync();
             return Redirect(returnUrl ?? "/");
+
         }
     }
 }
