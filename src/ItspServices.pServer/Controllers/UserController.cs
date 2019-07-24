@@ -20,5 +20,13 @@ namespace ItspServices.pServer.Controllers
             User user = _userRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
             return View(user);
         }
+
+        [HttpPost]
+        public void Index([FromForm]string newKey)
+        {
+            User user = _userRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
+            user.PublicKeys.Add(new Key(newKey));
+            _userRepository.Update(user).Complete();
+        }
     }
 }

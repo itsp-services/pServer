@@ -73,5 +73,12 @@ namespace ItspServices.pServer.Controllers
             ModelState.AddModelError(string.Empty, "Invalid register attempt.");
             return View(registerModel);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout([FromQuery]string returnUrl = null)
+        {
+            await _signInManager.SignOutAsync();
+            return Redirect(returnUrl ?? "/");
+        }
     }
 }

@@ -8,6 +8,17 @@
       <PublicKey>cgDzAG4AaQBjAGEALAAgAEMASQBG</PublicKey>
       <PublicKey>lHPrzg5XPAOBOp0KoVdDaaxXbXmQ</PublicKey>
       <PublicKey>pPVWQxaZLPSkVrQ0uGE3ycJYgBug</PublicKey>
+      <PublicKey>HelloWorld</PublicKey>
+      <PublicKey>adfasdf</PublicKey>
+    </PublicKeys>
+  </User>
+  <User Id="1">
+    <UserName>Sebastian</UserName>
+    <NormalizedUserName>SEBASTIAN</NormalizedUserName>
+    <PasswordHash>AQAAAAEAACcQAAAAEFAk4e39Rvfk2DDEb/p66QXOBx3gah43eCFusg3Ii0XB5neip/qNOjFbEOS92hToJQ==</PasswordHash>
+    <PublicKeys>
+      <PublicKey>HelloSir</PublicKey>
+      <PublicKey>HelloWorld</PublicKey>
     </PublicKeys>
   </User>
 </Users>

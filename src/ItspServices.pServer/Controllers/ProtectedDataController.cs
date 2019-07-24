@@ -23,11 +23,5 @@ namespace ItspServices.pServer.Controllers
         {
             return Task.FromResult(_repository.ProtectedDataRepository.GetFolderById(id));
         }
-
-        [Route("user")]
-        public Task<string> GetUsername()
-        {
-            return Task.FromResult(User.Identity.Name);
-        }
     }
 }
