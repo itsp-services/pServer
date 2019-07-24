@@ -4,7 +4,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace ItspServices.pServer.RepositoryTest
 {
@@ -27,9 +26,9 @@ namespace ItspServices.pServer.RepositoryTest
                 NormalizedUserName = "BAR",
             };
             sampleUser1.PasswordHash = "AQAAAAEAA";
-            sampleUser1.PublicKeys.Add(Encoding.UTF8.GetBytes("cgD"));
-            sampleUser1.PublicKeys.Add(Encoding.UTF8.GetBytes("lHP"));
-            sampleUser1.PublicKeys.Add(Encoding.UTF8.GetBytes("pPV"));
+            sampleUser1.PublicKeys.Add(new Key("cgD"));
+            sampleUser1.PublicKeys.Add(new Key("lHP"));
+            sampleUser1.PublicKeys.Add(new Key("pPV"));
 
             User sampleUser2 = new User()
             {
@@ -38,9 +37,9 @@ namespace ItspServices.pServer.RepositoryTest
                 NormalizedUserName = "FOO",
             };
             sampleUser2.PasswordHash = "AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV";
-            sampleUser2.PublicKeys.Add(Encoding.UTF8.GetBytes("cgDzAG4AaQBjAGEALAAgAEMASQBG"));
-            sampleUser2.PublicKeys.Add(Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"));
-            sampleUser2.PublicKeys.Add(Encoding.UTF8.GetBytes("pPVWQxaZLPSkVrQ0uGE3ycJYgBug"));
+            sampleUser2.PublicKeys.Add(new Key("cgDzAG4AaQBjAGEALAAgAEMASQBG"));
+            sampleUser2.PublicKeys.Add(new Key("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"));
+            sampleUser2.PublicKeys.Add(new Key("pPVWQxaZLPSkVrQ0uGE3ycJYgBug"));
 
             _readonlyUserData.Add(sampleUser1);
             _readonlyUserData.Add(sampleUser2);
@@ -106,9 +105,9 @@ namespace ItspServices.pServer.RepositoryTest
                 NormalizedUserName = "FOOBAR",
                 PasswordHash = "AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV"
             };
-            newUser.PublicKeys.Add(Encoding.UTF8.GetBytes("cgDzAG4AaQBjAGEALAAgAEMASQBG"));
-            newUser.PublicKeys.Add(Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"));
-            newUser.PublicKeys.Add(Encoding.UTF8.GetBytes("pPVWQxaZLPSkVrQ0uGE3ycJYgBug"));
+            newUser.PublicKeys.Add(new Key("cgDzAG4AaQBjAGEALAAgAEMASQBG"));
+            newUser.PublicKeys.Add(new Key("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"));
+            newUser.PublicKeys.Add(new Key("pPVWQxaZLPSkVrQ0uGE3ycJYgBug"));
 
             WriteUserRepository.Add(newUser).Complete();
             User userFromFile = WriteUserRepository.GetUserByNormalizedName("FOOBAR");
@@ -139,7 +138,7 @@ namespace ItspServices.pServer.RepositoryTest
 
             userToUpdate.UserName = "BarFoo";
             userToUpdate.NormalizedUserName = userToUpdate.UserName.ToUpper();
-            userToUpdate.PublicKeys.Add(Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"));
+            userToUpdate.PublicKeys.Add(new Key("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"));
 
             WriteUserRepository.Update(userToUpdate).Complete();
 
@@ -159,7 +158,7 @@ namespace ItspServices.pServer.RepositoryTest
             // of Equals compares references
             for (int index = 0; index < expected.PublicKeys.Count; index++)
             {
-                CollectionAssert.AreEqual(expected.PublicKeys[index], actual.PublicKeys[index]);
+                CollectionAssert.AreEqual(expected.PublicKeys[index].GetKeyAsBytes(), actual.PublicKeys[index].GetKeyAsBytes());
             }
         }
 

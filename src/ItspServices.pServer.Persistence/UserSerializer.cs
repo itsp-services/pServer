@@ -15,7 +15,7 @@ namespace ItspServices.pServer.Persistence
                         new XElement("PasswordHash", user.PasswordHash),
                         new XElement("PublicKeys", 
                             from key in user.PublicKeys
-                            select new XElement("PublicKey", Encoding.UTF8.GetString(key))
+                            select new XElement("PublicKey", key.GetKeyAsString())
                                     )
                                 );
         }
@@ -28,7 +28,7 @@ namespace ItspServices.pServer.Persistence
             user.NormalizedUserName = element.Element("NormalizedUserName").Value;
             user.PasswordHash = element.Element("PasswordHash").Value;
             user.PublicKeys = (from key in element.Element("PublicKeys").Descendants("PublicKey")
-                               select Encoding.UTF8.GetBytes(key.Value)).ToList();
+                               select new Key(key.Value)).ToList();
             return user;
         }
     }

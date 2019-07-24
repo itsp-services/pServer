@@ -4,6 +4,10 @@
     <UserName>Andreas</UserName>
     <NormalizedUserName>ANDREAS</NormalizedUserName>
     <PasswordHash>AQAAAAEAACcQAAAAELOfhng5QUYRL2CvUqAG1On6WlXaSGBmmxj6nuXX0IXQJqOC3o+EnE2i75fgDblVjw==</PasswordHash>
-    <PublicKeys />
+    <PublicKeys>
+      <PublicKey>cgDzAG4AaQBjAGEALAAgAEMASQBG</PublicKey>
+      <PublicKey>lHPrzg5XPAOBOp0KoVdDaaxXbXmQ</PublicKey>
+      <PublicKey>pPVWQxaZLPSkVrQ0uGE3ycJYgBug</PublicKey>
+    </PublicKeys>
   </User>
 </Users>

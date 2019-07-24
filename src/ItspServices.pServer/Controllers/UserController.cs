@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +17,8 @@ namespace ItspServices.pServer.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            User user = _userRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
+            return View(user);
         }
     }
 }
