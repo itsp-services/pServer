@@ -1,8 +1,6 @@
 ﻿using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Persistence.Repository;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,7 +11,6 @@ namespace ItspServices.pServer.RepositoryTest
     [TestClass]
     public class UserRepositoryTests
     {
-
         static UserRepository ReadUserRepository { get; set; }
         static UserRepository WriteUserRepository { get; set; }
 
@@ -100,7 +97,58 @@ namespace ItspServices.pServer.RepositoryTest
             }
         }
 
-        public static void AreEquivalentUser(User expected, User actual)
+        [TestMethod]
+        public void AddUser()
+        {
+            User newUser = new User()
+            {
+                UserName = "FooBar",
+                NormalizedUserName = "FOOBAR",
+                PasswordHash = "AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV"
+            };
+            newUser.PublicKeys.Add(Encoding.UTF8.GetBytes("cgDzAG4AaQBjAGEALAAgAEMASQBG"));
+            newUser.PublicKeys.Add(Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"));
+            newUser.PublicKeys.Add(Encoding.UTF8.GetBytes("pPVWQxaZLPSkVrQ0uGE3ycJYgBug"));
+
+            WriteUserRepository.Add(newUser).Complete();
+            User userFromFile = WriteUserRepository.GetUserByNormalizedName("FOOBAR");
+
+            Assert.AreNotEqual(null, userFromFile);
+            AreEquivalentUser(newUser, userFromFile);
+        }
+
+        [TestMethod]
+        public void RemoveUser()
+        {
+            User user = WriteUserRepository.GetById(_readonlyUserData[0].Id);
+            Assert.AreNotEqual(null, user);
+            AreEquivalentUser(_readonlyUserData[0], user);
+
+            WriteUserRepository.Remove(_readonlyUserData[0]).Complete();
+
+            user = WriteUserRepository.GetById(_readonlyUserData[0].Id);
+            Assert.AreEqual(null, user);
+        }
+
+        [TestMethod]
+        public void UpdateUser()
+        {
+            User userToUpdate = WriteUserRepository.GetById(_readonlyUserData[1].Id);
+            Assert.AreNotEqual(null, userToUpdate);
+            AreEquivalentUser(_readonlyUserData[1], userToUpdate);
+
+            userToUpdate.UserName = "BarFoo";
+            userToUpdate.NormalizedUserName = userToUpdate.UserName.ToUpper();
+            userToUpdate.PublicKeys.Add(Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"));
+
+            WriteUserRepository.Update(userToUpdate).Complete();
+
+            User userFromFile = WriteUserRepository.GetById(_readonlyUserData[1].Id);
+            Assert.AreNotEqual(null, userFromFile);
+            AreEquivalentUser(userToUpdate, userFromFile);
+        }
+
+        private static void AreEquivalentUser(User expected, User actual)
         {
             Assert.AreEqual(expected.Id, actual.Id);
             Assert.AreEqual(expected.UserName, actual.UserName);

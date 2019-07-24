@@ -1,5 +1,4 @@
-﻿using ItspServices.pServer.Abstraction.Models;
-using ItspServices.pServer.Abstraction.Repository;
+﻿using ItspServices.pServer.Abstraction.Repository;
 using Microsoft.Extensions.Options;
 
 namespace ItspServices.pServer.Persistence.Repository
@@ -8,7 +7,8 @@ namespace ItspServices.pServer.Persistence.Repository
     {
         public RepositoryManager(IOptions<PersistenceOption> option)
         {
-
+            UserRepository = new UserRepository(option.Value.Path);
+            RoleRepository = new RoleRepository();
         }
 
         public IUserRepository UserRepository { get; }
@@ -16,12 +16,5 @@ namespace ItspServices.pServer.Persistence.Repository
         public IRoleRepository RoleRepository { get; }
 
         public IProtectedDataRepository ProtectedDataRepository { get; }
-
-        public RepositoryManager()
-        {
-            UserRepository = new UserRepository("");
-            RoleRepository = new RoleRepository();
-            
-        }
     }
 }

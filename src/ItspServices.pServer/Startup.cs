@@ -35,7 +35,7 @@ namespace ItspServices.pServer
 
             services.Configure<PersistenceOption>(o =>
             {
-                o.Path = "Sepp";
+                o.Path = @"..\..\data\UserData.xml";
             });
             services.AddPersistence();
 
