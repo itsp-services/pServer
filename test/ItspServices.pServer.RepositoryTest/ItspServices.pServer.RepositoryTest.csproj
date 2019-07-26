@@ -17,10 +17,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Data\ReadonlyUserData.xml">
+    <None Update="Data\UserRepository\UpdateUserData.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\WriteUserData.xml">
+    <None Update="Data\UserRepository\ReadUserData.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\UserRepository\AddUserData.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\UserRepository\RemoveUserData.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace ItspServices.pServer.RepositoryTest
 {
@@ -11,7 +12,7 @@ namespace ItspServices.pServer.RepositoryTest
     public class UserRepositoryTests
     {
         static UserRepository ReadUserRepository { get; set; }
-        static UserRepository WriteUserRepository { get; set; }
+        UserRepository WriteUserRepository { get; set; }
 
         private readonly List<User> _readonlyUserData;
 
@@ -26,9 +27,9 @@ namespace ItspServices.pServer.RepositoryTest
                 NormalizedUserName = "BAR",
             };
             sampleUser1.PasswordHash = "AQAAAAEAA";
-            sampleUser1.PublicKeys.Add(new Key("cgD"));
-            sampleUser1.PublicKeys.Add(new Key("lHP"));
-            sampleUser1.PublicKeys.Add(new Key("pPV"));
+            sampleUser1.PublicKeys.Add(new Key() { Id = 0, KeyData = Encoding.UTF8.GetBytes("cgD") });
+            sampleUser1.PublicKeys.Add(new Key() { Id = 1, KeyData = Encoding.UTF8.GetBytes("lHP") });
+            sampleUser1.PublicKeys.Add(new Key() { Id = 2, KeyData = Encoding.UTF8.GetBytes("pPV") });
 
             User sampleUser2 = new User()
             {
@@ -37,9 +38,9 @@ namespace ItspServices.pServer.RepositoryTest
                 NormalizedUserName = "FOO",
             };
             sampleUser2.PasswordHash = "AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV";
-            sampleUser2.PublicKeys.Add(new Key("cgDzAG4AaQBjAGEALAAgAEMASQBG"));
-            sampleUser2.PublicKeys.Add(new Key("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"));
-            sampleUser2.PublicKeys.Add(new Key("pPVWQxaZLPSkVrQ0uGE3ycJYgBug"));
+            sampleUser2.PublicKeys.Add(new Key() { Id = 0, KeyData = Encoding.UTF8.GetBytes("cgDzAG4AaQBjAGEALAAgAEMASQBG") });
+            sampleUser2.PublicKeys.Add(new Key() { Id = 1, KeyData = Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"), Flag = Key.KeyFlag.OBSOLET });
+            sampleUser2.PublicKeys.Add(new Key() { Id = 2, KeyData = Encoding.UTF8.GetBytes("pPVWQxaZLPSkVrQ0uGE3ycJYgBug"), Flag = Key.KeyFlag.OBSOLET });
 
             _readonlyUserData.Add(sampleUser1);
             _readonlyUserData.Add(sampleUser2);
@@ -48,8 +49,7 @@ namespace ItspServices.pServer.RepositoryTest
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
-            ReadUserRepository = new UserRepository(Path.GetFullPath("Data\\ReadonlyUserData.xml"));
-            WriteUserRepository = new UserRepository(Path.GetFullPath("Data\\WriteUserData.xml"));
+            ReadUserRepository = new UserRepository(Path.GetFullPath("Data\\UserRepository\\ReadUserData.xml"));
         }
 
         [TestMethod]
@@ -99,15 +99,17 @@ namespace ItspServices.pServer.RepositoryTest
         [TestMethod]
         public void AddUser()
         {
+            WriteUserRepository = new UserRepository("Data\\UserRepository\\AddUserData.xml");
+
             User newUser = new User()
             {
                 UserName = "FooBar",
                 NormalizedUserName = "FOOBAR",
                 PasswordHash = "AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV"
             };
-            newUser.PublicKeys.Add(new Key("cgDzAG4AaQBjAGEALAAgAEMASQBG"));
-            newUser.PublicKeys.Add(new Key("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"));
-            newUser.PublicKeys.Add(new Key("pPVWQxaZLPSkVrQ0uGE3ycJYgBug"));
+            newUser.PublicKeys.Add(new Key() { Id = 0, KeyData = Encoding.UTF8.GetBytes("cgDzAG4AaQBjAGEALAAgAEMASQBG") });
+            newUser.PublicKeys.Add(new Key() { Id = 1, KeyData = Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ") });
+            newUser.PublicKeys.Add(new Key() { Id = 2, KeyData = Encoding.UTF8.GetBytes("pPVWQxaZLPSkVrQ0uGE3ycJYgBug") });
 
             WriteUserRepository.Add(newUser).Complete();
             User userFromFile = WriteUserRepository.GetUserByNormalizedName("FOOBAR");
@@ -119,6 +121,8 @@ namespace ItspServices.pServer.RepositoryTest
         [TestMethod]
         public void RemoveUser()
         {
+            WriteUserRepository = new UserRepository("Data\\UserRepository\\RemoveUserData.xml");
+
             User user = WriteUserRepository.GetById(_readonlyUserData[0].Id);
             Assert.AreNotEqual(null, user);
             AreEquivalentUser(_readonlyUserData[0], user);
@@ -132,13 +136,15 @@ namespace ItspServices.pServer.RepositoryTest
         [TestMethod]
         public void UpdateUser()
         {
+            WriteUserRepository = new UserRepository("Data\\UserRepository\\UpdateUserData.xml");
+
             User userToUpdate = WriteUserRepository.GetById(_readonlyUserData[1].Id);
             Assert.AreNotEqual(null, userToUpdate);
             AreEquivalentUser(_readonlyUserData[1], userToUpdate);
 
             userToUpdate.UserName = "BarFoo";
             userToUpdate.NormalizedUserName = userToUpdate.UserName.ToUpper();
-            userToUpdate.PublicKeys.Add(new Key("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ"));
+            userToUpdate.PublicKeys.Add(new Key() { Id = 3, KeyData = Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ") });
 
             WriteUserRepository.Update(userToUpdate).Complete();
 
@@ -158,7 +164,9 @@ namespace ItspServices.pServer.RepositoryTest
             // of Equals compares references
             for (int index = 0; index < expected.PublicKeys.Count; index++)
             {
-                CollectionAssert.AreEqual(expected.PublicKeys[index].GetKeyAsBytes(), actual.PublicKeys[index].GetKeyAsBytes());
+                CollectionAssert.AreEqual(expected.PublicKeys[index].KeyData, actual.PublicKeys[index].KeyData);
+                Assert.AreEqual(expected.PublicKeys[index].Id, actual.PublicKeys[index].Id);
+                Assert.AreEqual(expected.PublicKeys[index].Flag, actual.PublicKeys[index].Flag);
             }
         }
 

@@ -2,6 +2,7 @@
 using ItspServices.pServer.Abstraction.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 namespace ItspServices.pServer.Controllers
 {
@@ -24,8 +25,10 @@ namespace ItspServices.pServer.Controllers
         [HttpPost]
         public void Index([FromForm]string newKey)
         {
+            if (newKey == null)
+                return;
             User user = _userRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
-            user.PublicKeys.Add(new Key(newKey));
+            user.PublicKeys.Add(new Key() { KeyData = Encoding.UTF8.GetBytes(newKey) });
             _userRepository.Update(user).Complete();
         }
     }

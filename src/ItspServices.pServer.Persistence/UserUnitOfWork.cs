@@ -60,7 +60,12 @@ namespace ItspServices.pServer.Persistence
                     elementToUpdate.SetElementValue("PasswordHash", user.PasswordHash);
                     elementToUpdate.Element("PublicKeys").Descendants().Remove();
                     elementToUpdate.Element("PublicKeys").Add(from key in user.PublicKeys
-                                                              select new XElement("PublicKey", key.GetKeyAsString()));
+                                                              select new XElement(
+                                                                  "PublicKey",
+                                                                  Encoding.UTF8.GetString(key.KeyData),
+                                                                  new XAttribute("Id", key.Id),
+                                                                  new XAttribute("Flag", (int)key.Flag)
+                                                                  ));
 
                 }
             }

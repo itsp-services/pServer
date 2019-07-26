@@ -1,4 +1,5 @@
-﻿@model ItspServices.pServer.Abstraction.Models.User
+﻿@using System.Text
+@model ItspServices.pServer.Abstraction.Models.User
 
 <h2>
     #@Model.Id: @Model.UserName
@@ -8,6 +9,7 @@
         <tr>
             <th scope="col">#</th>
             <th scope="col">Key</th>
+            <th scope="col">Status</th>
         </tr>
     </thead>
     <tbody>
@@ -15,7 +17,13 @@
         {
             <tr>
                 <td>@i</td>
-                <td>@Model.PublicKeys[i].GetKeyAsString()</td>
+                <td>@Encoding.UTF8.GetString(Model.PublicKeys[i].KeyData)</td>
+                <td>@Model.PublicKeys[i].Flag</td>
+                <td>
+                    <asp:button class="btn btn-outline-warning">
+                        Make obsolet
+                    </asp:button>
+                </td>
             </tr>
         }
     </tbody>

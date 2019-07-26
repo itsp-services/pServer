@@ -5,11 +5,14 @@
     <NormalizedUserName>ANDREAS</NormalizedUserName>
     <PasswordHash>AQAAAAEAACcQAAAAELOfhng5QUYRL2CvUqAG1On6WlXaSGBmmxj6nuXX0IXQJqOC3o+EnE2i75fgDblVjw==</PasswordHash>
     <PublicKeys>
-      <PublicKey>cgDzAG4AaQBjAGEALAAgAEMASQBG</PublicKey>
-      <PublicKey>lHPrzg5XPAOBOp0KoVdDaaxXbXmQ</PublicKey>
-      <PublicKey>pPVWQxaZLPSkVrQ0uGE3ycJYgBug</PublicKey>
-      <PublicKey>HelloWorld</PublicKey>
-      <PublicKey>adfasdf</PublicKey>
+      <PublicKey Id="0" Flag="0">cgDzAG4AaQBjAGEALAAgAEMASQBG</PublicKey>
+      <PublicKey Id="1" Flag="1">lHPrzg5XPAOBOp0KoVdDaaxXbXmQ</PublicKey>
+      <PublicKey Id="2" Flag="0">pPVWQxaZLPSkVrQ0uGE3ycJYgBug</PublicKey>
+      <PublicKey Id="3" Flag="0">HelloWorld</PublicKey>
+      <PublicKey Id="4" Flag="0">adfasdf</PublicKey>
+      <PublicKey Id="5" Flag="1">&lt;script&gt;alert('whoops!'); &lt;/script&gt;</PublicKey>
+      <PublicKey Id="6" Flag="1">HelloWörldchen</PublicKey>
+      <PublicKey Id="7" Flag="0">dasdf</PublicKey>
     </PublicKeys>
   </User>
   <User Id="1">
@@ -17,8 +20,8 @@
     <NormalizedUserName>SEBASTIAN</NormalizedUserName>
     <PasswordHash>AQAAAAEAACcQAAAAEFAk4e39Rvfk2DDEb/p66QXOBx3gah43eCFusg3Ii0XB5neip/qNOjFbEOS92hToJQ==</PasswordHash>
     <PublicKeys>
-      <PublicKey>HelloSir</PublicKey>
-      <PublicKey>HelloWorld</PublicKey>
+      <PublicKey Id="0" Flag="0">HelloSir</PublicKey>
+      <PublicKey Id="1" Flag="0">HelloWorld</PublicKey>
     </PublicKeys>
   </User>
 </Users>

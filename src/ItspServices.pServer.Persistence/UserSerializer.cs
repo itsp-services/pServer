@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using static ItspServices.pServer.Abstraction.Models.Key;
 
 namespace ItspServices.pServer.Persistence
 {
@@ -15,7 +16,12 @@ namespace ItspServices.pServer.Persistence
                         new XElement("PasswordHash", user.PasswordHash),
                         new XElement("PublicKeys", 
                             from key in user.PublicKeys
-                            select new XElement("PublicKey", key.GetKeyAsString())
+                            select new XElement(
+                                        "PublicKey", 
+                                        Encoding.UTF8.GetString(key.KeyData), 
+                                        new XAttribute("Id", key.Id),
+                                        new XAttribute("Flag", (int)key.Flag)
+                                        )
                                     )
                                 );
         }
@@ -28,7 +34,11 @@ namespace ItspServices.pServer.Persistence
             user.NormalizedUserName = element.Element("NormalizedUserName").Value;
             user.PasswordHash = element.Element("PasswordHash").Value;
             user.PublicKeys = (from key in element.Element("PublicKeys").Descendants("PublicKey")
-                               select new Key(key.Value)).ToList();
+                               select new Key() {
+                                   Id = (int)key.Attribute("Id"),
+                                   KeyData = Encoding.UTF8.GetBytes(key.Value),
+                                   Flag = (KeyFlag)(int)key.Attribute("Flag")
+                               }).ToList();
             return user;
         }
     }

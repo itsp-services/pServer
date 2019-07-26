@@ -24,6 +24,7 @@ namespace ItspServices.pServer.Persistence.Repository
         public IUnitOfWork<User> Add(User entity)
         {
             entity.Id = GetAvailableId();
+            AddIdToKeys(entity.PublicKeys);
             _unitOfWork.TransactionRecord.Add(entity, TransactionActions.ADD);
             return _unitOfWork;
         }
@@ -73,6 +74,7 @@ namespace ItspServices.pServer.Persistence.Repository
 
         public IUnitOfWork<User> Update(User entity)
         {
+            AddIdToKeys(entity.PublicKeys);
             _unitOfWork.TransactionRecord.Add(entity, TransactionActions.UPDATE);
             return _unitOfWork;
         }
@@ -81,18 +83,29 @@ namespace ItspServices.pServer.Persistence.Repository
         {
             using (StreamReader sr = new StreamReader(_filePath))
             {
-                IEnumerable<int> ids = from user in XDocument.Load(sr).Descendants("User")
-                                       orderby (int)user.Attribute("Id") ascending
-                                       select (int)user.Attribute("Id");
-                int availableId = 0;
-                foreach (int id in ids)
-                {
-                    if (id != availableId)
-                        break;
-                    availableId++;
-                }
+                int id = (from user in XDocument.Load(sr).Descendants("User")
+                                       select (int)user.Attribute("Id")).Max();
+                return id++;
+            }
+        }
 
-                return availableId;
+        private void AddIdToKeys(IEnumerable<Key> keys)
+        {
+            int highestId = -1;
+            foreach (Key key in keys)
+            {
+                if (key.Id >= 0 && key.Id > highestId)
+                    highestId = key.Id;
+            }
+            highestId++;
+
+            foreach (Key key in keys)
+            {
+                if (key.Id < 0)
+                {
+                    key.Id = highestId;
+                    highestId++;
+                }
             }
         }
     }
