@@ -14,6 +14,7 @@ namespace ItspServices.pServer.Persistence
                         new XElement("UserName", user.UserName),
                         new XElement("NormalizedUserName", user.NormalizedUserName),
                         new XElement("PasswordHash", user.PasswordHash),
+                        new XElement("Role", user.Role),
                         new XElement("PublicKeys", 
                             from key in user.PublicKeys
                             select new XElement(
@@ -33,6 +34,7 @@ namespace ItspServices.pServer.Persistence
             user.UserName = element.Element("UserName").Value;
             user.NormalizedUserName = element.Element("NormalizedUserName").Value;
             user.PasswordHash = element.Element("PasswordHash").Value;
+            user.Role = element.Element("Role").Value;
             user.PublicKeys = (from key in element.Element("PublicKeys").Descendants("PublicKey")
                                select new Key() {
                                    Id = (int)key.Attribute("Id"),

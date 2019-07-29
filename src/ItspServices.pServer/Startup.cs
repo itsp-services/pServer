@@ -40,9 +40,9 @@ namespace ItspServices.pServer
             services.AddPersistence();
 
             services.AddTransient(typeof(IUserStore<User>), typeof(UserStore));
-            services.AddTransient(typeof(IRoleStore<Role>), typeof(RoleStore));
+            services.AddTransient(typeof(IRoleStore<IdentityRole>), typeof(RoleStore));
 
-            services.AddIdentity<User, Role>();
+            services.AddIdentity<User, IdentityRole>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }

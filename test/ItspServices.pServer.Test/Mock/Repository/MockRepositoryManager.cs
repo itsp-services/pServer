@@ -8,14 +8,11 @@ namespace ItspServices.pServer.Test.Mock.Repository
     {
         public IUserRepository UserRepository { get; }
 
-        public IRoleRepository RoleRepository { get; }
-
         public IProtectedDataRepository ProtectedDataRepository { get; }
 
         public MockRepositoryManager()
         {
             UserRepository = new MockUserRepository();
-            RoleRepository = new MockRoleRepository();
             ProtectedDataRepository = new MockProtectedDataRepository();
         }
     }

@@ -4,6 +4,7 @@
     <UserName>Bar</UserName>
     <NormalizedUserName>BAR</NormalizedUserName>
     <PasswordHash>AQAAAAEAA</PasswordHash>
+    <Role>User</Role>
     <PublicKeys>
       <PublicKey Id="0" Flag="0">cgD</PublicKey>
       <PublicKey Id="1" Flag="0">lHP</PublicKey>
@@ -13,6 +14,7 @@
   <User Id="1">
     <UserName>Foo</UserName>
     <NormalizedUserName>FOO</NormalizedUserName>
+    <Role>User</Role>
     <PasswordHash>AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV</PasswordHash>
     <PublicKeys>
       <PublicKey Id="0" Flag="0">cgDzAG4AaQBjAGEALAAgAEMASQBG</PublicKey>

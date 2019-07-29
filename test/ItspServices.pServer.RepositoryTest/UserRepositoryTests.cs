@@ -114,6 +114,7 @@ namespace ItspServices.pServer.RepositoryTest
             WriteUserRepository.Add(newUser).Complete();
             User userFromFile = WriteUserRepository.GetUserByNormalizedName("FOOBAR");
 
+
             Assert.AreNotEqual(null, userFromFile);
             AreEquivalentUser(newUser, userFromFile);
         }
@@ -159,6 +160,7 @@ namespace ItspServices.pServer.RepositoryTest
             Assert.AreEqual(expected.UserName, actual.UserName);
             Assert.AreEqual(expected.NormalizedUserName, actual.NormalizedUserName);
             Assert.AreEqual(expected.PasswordHash, actual.PasswordHash);
+            Assert.AreEqual(expected.Role, actual.Role);
 
             // Collection of keys has to be compared individually because the default implementation
             // of Equals compares references

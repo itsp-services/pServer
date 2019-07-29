@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-
-namespace ItspServices.pServer.Abstraction.Models
+﻿namespace ItspServices.pServer.Abstraction.Models
 {
     public class ProtectedData
     {
         public int Id { get; set; }
+        public int OwnerId { get; set; }
         public string Name { get; set; }
+        public byte[] Data { get; set; }
     }
 }

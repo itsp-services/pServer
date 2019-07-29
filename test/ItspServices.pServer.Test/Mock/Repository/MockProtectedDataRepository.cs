@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
@@ -21,16 +22,23 @@ namespace ItspServices.pServer.Test.Mock.Repository
 
         public MockProtectedDataRepository()
         {
-            _folders.Add(rootFolder);
-
             Folder sampleSubfolder = new Folder()
             {
                 Id = 1,
                 Name = "foo"
             };
             rootFolder.Subfolder.Add(sampleSubfolder);
-
+            _folders.Add(rootFolder);
             _folders.Add(sampleSubfolder);
+
+            ProtectedData sampleData = new ProtectedData()
+            {
+                Id = 0,
+                OwnerId = 0,
+                Name = "FooData"
+            };
+            sampleData.Data = Encoding.UTF8.GetBytes("BarData");
+            _data.Add(sampleData);
         }
 
         public IEnumerable<ProtectedData> GetAll()
@@ -40,7 +48,7 @@ namespace ItspServices.pServer.Test.Mock.Repository
 
         public ProtectedData GetById(int id)
         {
-            throw new System.NotImplementedException();
+            return _data.Find(x => x.Id == id);
         }
 
         public IUnitOfWork<ProtectedData> Add(ProtectedData entity)
@@ -61,12 +69,6 @@ namespace ItspServices.pServer.Test.Mock.Repository
         public Folder GetFolderById(int? folderId)
         {
             return (folderId != null) ? _folders.Find(f => f.Id == folderId) : _folders.Find(f => f.Id == ROOT_ID);
-        }
-
-        public List<Folder> GetSubfolders(int? folderId)
-        {
-            return (folderId != null) ? _folders.Find(f => f.Id == folderId).Subfolder :
-                _folders.Find(f => f.Id == ROOT_ID).Subfolder;
         }
     }
 }

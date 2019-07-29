@@ -8,6 +8,5 @@ namespace ItspServices.pServer.Abstraction.Repository
     public interface IProtectedDataRepository : IRepository<ProtectedData>
     {
         Folder GetFolderById(int? folderId);
-        List<Folder> GetSubfolders(int? folderId);
     }
 }

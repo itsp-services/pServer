@@ -10,6 +10,7 @@ namespace ItspServices.pServer.Abstraction.Models
         public string UserName { get; set; }
         public string NormalizedUserName { get; set; }
         public string PasswordHash { get; set; }
+        public string Role { get; set; } = "User";
         public List<Key> PublicKeys { get; set; } = new List<Key>();
     }
 }
