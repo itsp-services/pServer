@@ -1,6 +1,7 @@
 ﻿using ItspServices.pServer.Abstraction;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
+using ItspServices.pServer.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -180,7 +181,12 @@ namespace ItspServices.pServer.Test
             var response = await UserClient.GetAsync("/api/protecteddata/data/0");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             string content = await response.Content.ReadAsStringAsync();
-            ProtectedData data = JsonConvert.DeserializeObject<ProtectedData>(content);
+            DataModel data = JsonConvert.DeserializeObject<DataModel>(content);
+
+            Assert.AreEqual(Data0.Name, data.Name);
+            CollectionAssert.AreEquivalent(Data0.Data, data.Data);
+            CollectionAssert.AreEquivalent(User.PublicKeys[0].KeyData, data.KeyPairs.ToList()[0].PublicKey);
+            CollectionAssert.AreEquivalent(Data0.Users.RegisterEntries[0].EncryptedKeys[0].KeyData, data.KeyPairs.ToList()[0].SymmetricKey);
         }
 
         [TestMethod]

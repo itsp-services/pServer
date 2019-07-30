@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Net;
 using ItspServices.pServer.Abstraction;
 using System.Linq;
+using ItspServices.pServer.Models;
+using System.Collections.Generic;
 
 namespace ItspServices.pServer.Controllers
 {
@@ -27,6 +29,7 @@ namespace ItspServices.pServer.Controllers
             return Task.FromResult(_repository.ProtectedDataRepository.GetFolderById(id));
         }
 
+        // Requires read permission
         [HttpGet("data/{id:int}")]
         public IActionResult GetDataById(int id)
         {
@@ -34,17 +37,25 @@ namespace ItspServices.pServer.Controllers
             if (data == null)
                 return NotFound();
 
-            int userId = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper()).Id;
-            UserRegisterEntry entry = data.Users.RegisterEntries.Find(x => x.User.Id == userId);
-            if (entry == null && data.OwnerId != userId)
+            User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
+            UserRegisterEntry entry = data.Users.RegisterEntries.Find(x => x.User.Id == user.Id);
+            if (entry == null && data.OwnerId != user.Id)
                 return StatusCode(403);
 
-            return Ok(new {
-                data.Name,
-                Owner = data.Users.RegisterEntries.Where(x => x.User.Id == data.OwnerId)
-                    .FirstOrDefault()?.User.UserName,
+            DataModel dataModel = new DataModel()
+            {
+                Name = data.Name,
                 Data = data.Data,
-            });
+            };
+
+            dataModel.KeyPairs = from symmetricKey in entry.EncryptedKeys
+                                 join publicKey in user.PublicKeys
+                                 on symmetricKey.MatchingPublicKeyId equals publicKey.Id
+                                 select new KeyPairModel() {
+                                     PublicKey = publicKey.KeyData, SymmetricKey = symmetricKey.KeyData
+                                 };
+
+            return Ok(dataModel);
         }
     }
 }
