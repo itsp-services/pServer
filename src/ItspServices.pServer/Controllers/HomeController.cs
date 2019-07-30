@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ItspServices.pServer.Models;
-using System.Security.Cryptography;
 
 namespace ItspServices.pServer.Controllers
 {
@@ -16,16 +12,13 @@ namespace ItspServices.pServer.Controllers
         {
         }
 
-        public IActionResult Login()
-        {
-            return View();
-        }
 
         public IActionResult Index()
         {
             return View();
         }
 
+        [Authorize]
         public IActionResult Privacy()
         {
             return View();

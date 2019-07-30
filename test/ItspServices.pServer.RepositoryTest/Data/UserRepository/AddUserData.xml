@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Users>
+  <User Id="0">
+    <UserName>Bar</UserName>
+    <NormalizedUserName>BAR</NormalizedUserName>
+    <PasswordHash>AQAAAAEAA</PasswordHash>
+    <Role>User</Role>
+    <PublicKeys>
+      <PublicKey Id="0" Flag="0">cgD</PublicKey>
+      <PublicKey Id="1" Flag="0">lHP</PublicKey>
+      <PublicKey Id="2" Flag="0">pPV</PublicKey>
+    </PublicKeys>
+  </User>
+  <User Id="1">
+    <UserName>Foo</UserName>
+    <NormalizedUserName>FOO</NormalizedUserName>
+    <Role>User</Role>
+    <PasswordHash>AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV</PasswordHash>
+    <PublicKeys>
+      <PublicKey Id="0" Flag="0">cgDzAG4AaQBjAGEALAAgAEMASQBG</PublicKey>
+      <PublicKey Id="1" Flag="1">lHPrzg5XPAOBOp0KoVdDaaxXbXmQ</PublicKey>
+      <PublicKey Id="2" Flag="1">pPVWQxaZLPSkVrQ0uGE3ycJYgBug</PublicKey>
+    </PublicKeys>
+  </User>
+</Users>

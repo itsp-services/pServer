@@ -1,19 +1,112 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
+using ItspServices.pServer.Abstraction.Units;
 
-namespace ItspServices.pServer.Repository
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.RepositoryTest")]
+namespace ItspServices.pServer.Persistence.Repository
 {
-    public class UserRepository : RepositoryPart<User>, IUserRepository
+    class UserRepository : IUserRepository
     {
+        private readonly string _filePath;
 
-        public UserRepository()
+        private UserUnitOfWork _unitOfWork;
+
+        public UserRepository(string filepath)
         {
+            _filePath = filepath;
+            _unitOfWork = new UserUnitOfWork(_filePath);
         }
 
-        public User GetUserByName(string name)
+        public IUnitOfWork<User> Add(User entity)
         {
-            throw new NotImplementedException();
+            entity.Id = GetAvailableId();
+            AddIdToKeys(entity.PublicKeys);
+            _unitOfWork.TransactionRecord.Add(entity, TransactionActions.ADD);
+            return _unitOfWork;
+        }
+
+        public IEnumerable<User> GetAll()
+        {
+            using (StreamReader sr = new StreamReader(_filePath))
+            {
+                IEnumerable<XElement> elements = from user in XDocument.Load(sr).Descendants("User")
+                                                 select user;
+                List<User> users = new List<User>();
+                foreach(XElement element in elements)
+                {
+                    users.Add(UserSerializer.XElementToUser(element));
+                }
+                return users;
+            }
+        }
+
+        public User GetById(int id)
+        {
+            using (StreamReader sr = new StreamReader(_filePath))
+            {
+                XElement element = (from user in XDocument.Load(sr).Descendants("User")
+                                    where (int)user.Attribute("Id") == id
+                                    select user).SingleOrDefault();
+                return (element != null) ? UserSerializer.XElementToUser(element) : null;
+            }
+        }
+
+        public User GetUserByNormalizedName(string name)
+        {
+            using (StreamReader sr = new StreamReader(_filePath))
+            {
+                XElement element = (from user in XDocument.Load(sr).Descendants("User")
+                                    where user.Element("NormalizedUserName").Value == name
+                                    select user).SingleOrDefault();
+                return (element != null) ? UserSerializer.XElementToUser(element) : null;
+            }
+        }
+
+        public IUnitOfWork<User> Remove(User entity)
+        {
+            _unitOfWork.TransactionRecord.Add(entity, TransactionActions.REMOVE);
+            return _unitOfWork;
+        }
+
+        public IUnitOfWork<User> Update(User entity)
+        {
+            AddIdToKeys(entity.PublicKeys);
+            _unitOfWork.TransactionRecord.Add(entity, TransactionActions.UPDATE);
+            return _unitOfWork;
+        }
+
+        private int GetAvailableId()
+        {
+            using (StreamReader sr = new StreamReader(_filePath))
+            {
+                int id = (from user in XDocument.Load(sr).Descendants("User")
+                                       select (int)user.Attribute("Id")).Max();
+                return id++;
+            }
+        }
+
+        private void AddIdToKeys(IEnumerable<Key> keys)
+        {
+            int highestId = -1;
+            foreach (Key key in keys)
+            {
+                if (key.Id >= 0 && key.Id > highestId)
+                    highestId = key.Id;
+            }
+            highestId++;
+
+            foreach (Key key in keys)
+            {
+                if (key.Id < 0)
+                {
+                    key.Id = highestId;
+                    highestId++;
+                }
+            }
         }
     }
 }

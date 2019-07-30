@@ -1,12 +1,14 @@
-﻿using ItspServices.pServer.Abstraction.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Abstraction.Repository
 {
-    public interface IRepository
+    public interface IRepository<T> where T : class
     {
-        IUserRepository UserPart { get; }
+        T GetById(int id);
+        IEnumerable<T> GetAll();
+        IUnitOfWork<T> Add(T entity);
+        IUnitOfWork<T> Remove(T entity);
+        IUnitOfWork<T> Update(T entity);
     }
 }

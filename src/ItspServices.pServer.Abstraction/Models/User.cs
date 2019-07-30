@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+
 
 namespace ItspServices.pServer.Abstraction.Models
 {
     public class User
     {
-        public long Id { get; set; }
-        public string Name { get; set; }
-        public List<byte[]> PublicKeys { get; }
-
-        public User()
-        {
-            PublicKeys = new List<byte[]>();
-        }
+        public const int Invalid_Id = -1;
+        public int Id { get; set; } = Invalid_Id;
+        public string UserName { get; set; }
+        public string NormalizedUserName { get; set; }
+        public string PasswordHash { get; set; }
+        public string Role { get; set; } = "User";
+        public List<Key> PublicKeys { get; set; } = new List<Key>();
     }
 }
