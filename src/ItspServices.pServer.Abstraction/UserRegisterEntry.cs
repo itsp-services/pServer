@@ -12,6 +12,6 @@ namespace ItspServices.pServer.Abstraction
 
     public enum Permission
     {
-        VIEW, READ, WRITE
+        VIEW = 0, READ = 1, WRITE = 2
     }
 }

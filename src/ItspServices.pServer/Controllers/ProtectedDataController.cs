@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using Microsoft.AspNetCore.Authorization;
-using System.Net;
 using ItspServices.pServer.Abstraction;
 using System.Linq;
 using ItspServices.pServer.Models;
@@ -39,7 +38,7 @@ namespace ItspServices.pServer.Controllers
 
             User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
             UserRegisterEntry entry = data.Users.RegisterEntries.Find(x => x.User.Id == user.Id);
-            if (entry == null && data.OwnerId != user.Id)
+            if (entry == null || (int) entry.Permission < (int) Permission.READ)
                 return StatusCode(403);
 
             DataModel dataModel = new DataModel()
@@ -56,6 +55,35 @@ namespace ItspServices.pServer.Controllers
                                  };
 
             return Ok(dataModel);
+        }
+
+        [HttpPost("data")]
+        public IActionResult AddData([FromBody]DataModel model)
+        {
+            User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
+            ProtectedData newData = new ProtectedData()
+            {
+                Name = model.Name,
+                Data = model.Data,
+                OwnerId = user.Id
+            };
+            newData.Users.RegisterEntries.Add(new UserRegisterEntry()
+            {
+                User = user,
+                Permission = Permission.WRITE,
+                EncryptedKeys = new List<SymmetricKey>(new[] {
+                    new SymmetricKey() {
+                        KeyData = model.KeyPairs.SingleOrDefault()?.SymmetricKey,
+                        MatchingPublicKeyId = (from key in user.PublicKeys
+                                               where key.KeyData.SequenceEqual(model.KeyPairs.SingleOrDefault()?.PublicKey)
+                                               select key.Id).SingleOrDefault()
+                    }
+                })
+            });
+
+            _repository.ProtectedDataRepository.Add(newData).Complete();
+
+            return Ok();
         }
     }
 }
