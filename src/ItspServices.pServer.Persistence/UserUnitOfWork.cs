@@ -55,17 +55,7 @@ namespace ItspServices.pServer.Persistence
                     XElement elementToUpdate = (from userEntry in document.Descendants("User")
                                                 where (int)userEntry.Attribute("Id") == user.Id
                                                 select userEntry).SingleOrDefault();
-                    elementToUpdate.SetElementValue("UserName", user.UserName);
-                    elementToUpdate.SetElementValue("NormalizedUserName", user.NormalizedUserName);
-                    elementToUpdate.SetElementValue("PasswordHash", user.PasswordHash);
-                    elementToUpdate.Element("PublicKeys").Descendants().Remove();
-                    elementToUpdate.Element("PublicKeys").Add(from key in user.PublicKeys
-                                                              select new XElement(
-                                                                  "PublicKey",
-                                                                  Encoding.UTF8.GetString(key.KeyData),
-                                                                  new XAttribute("Id", key.Id),
-                                                                  new XAttribute("Flag", (int)key.Flag)
-                                                                  ));
+                    UserSerializer.UpdateXElement(elementToUpdate, user);
 
                 }
             }

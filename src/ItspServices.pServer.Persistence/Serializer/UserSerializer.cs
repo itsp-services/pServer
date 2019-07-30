@@ -43,5 +43,21 @@ namespace ItspServices.pServer.Persistence
                                }).ToList();
             return user;
         }
+
+        public static void UpdateXElement(XElement element, User user)
+        {
+            element.SetElementValue("UserName", user.UserName);
+            element.SetElementValue("NormalizedUserName", user.NormalizedUserName);
+            element.SetElementValue("PasswordHash", user.PasswordHash);
+            element.SetElementValue("Role", user.Role);
+            element.Element("PublicKeys").Descendants().Remove();
+            element.Element("PublicKeys").Add(from key in user.PublicKeys
+                                              select new XElement(
+                                                    "PublicKey",
+                                                    Encoding.UTF8.GetString(key.KeyData),
+                                                    new XAttribute("Id", key.Id),
+                                                    new XAttribute("Flag", (int)key.Flag)
+                                                    ));
+        }
     }
 }

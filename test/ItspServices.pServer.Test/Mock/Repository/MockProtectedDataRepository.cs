@@ -31,14 +31,22 @@ namespace ItspServices.pServer.Test.Mock.Repository
             _folders.Add(rootFolder);
             _folders.Add(sampleSubfolder);
 
-            ProtectedData sampleData = new ProtectedData()
+            ProtectedData sampleData1 = new ProtectedData()
             {
                 Id = 0,
                 OwnerId = 0,
                 Name = "FooData"
             };
-            sampleData.Data = Encoding.UTF8.GetBytes("BarData");
-            _data.Add(sampleData);
+            sampleData1.Data = Encoding.UTF8.GetBytes("BarData");
+            _data.Add(sampleData1);
+
+            ProtectedData sampleData2 = new ProtectedData()
+            {
+                Id = 1,
+                OwnerId = 1,
+                Name = "FooData2"
+            };
+            _data.Add(sampleData2);
         }
 
         public IEnumerable<ProtectedData> GetAll()
