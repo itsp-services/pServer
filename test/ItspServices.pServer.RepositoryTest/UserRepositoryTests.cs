@@ -49,7 +49,7 @@ namespace ItspServices.pServer.RepositoryTest
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
-            ReadUserRepository = new UserRepository(Path.GetFullPath("Data\\UserRepository\\ReadUserData.xml"));
+            ReadUserRepository = new UserRepository(Path.GetFullPath(Path.Combine("Data", "UserRepository", "ReadUserData.xml")));
         }
 
         [TestMethod]
@@ -99,7 +99,7 @@ namespace ItspServices.pServer.RepositoryTest
         [TestMethod]
         public void AddUser()
         {
-            WriteUserRepository = new UserRepository("Data\\UserRepository\\AddUserData.xml");
+            WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "AddUserData.xml"));
 
             User newUser = new User()
             {
@@ -122,7 +122,7 @@ namespace ItspServices.pServer.RepositoryTest
         [TestMethod]
         public void RemoveUser()
         {
-            WriteUserRepository = new UserRepository("Data\\UserRepository\\RemoveUserData.xml");
+            WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "RemoveUserData.xml"));
 
             User user = WriteUserRepository.GetById(_readonlyUserData[0].Id);
             Assert.AreNotEqual(null, user);
@@ -137,7 +137,7 @@ namespace ItspServices.pServer.RepositoryTest
         [TestMethod]
         public void UpdateUser()
         {
-            WriteUserRepository = new UserRepository("Data\\UserRepository\\UpdateUserData.xml");
+            WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "UpdateUserData.xml"));
 
             User userToUpdate = WriteUserRepository.GetById(_readonlyUserData[1].Id);
             Assert.AreNotEqual(null, userToUpdate);

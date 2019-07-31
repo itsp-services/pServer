@@ -1,0 +1,24 @@
+language: csharp
+solution: ItspServices.pServer.sln
+mono: none
+
+matrix:
+  include:
+    - os: linux # Ubuntu 16.04
+      sudo: required
+      dotnet: 2.2
+    - os: osx # OSX 10.11
+      osx_image: xcode7.3.1
+      dotnet: 2.2.401
+
+install:
+  # dotnet info
+  - dotnet --info
+  - dotnet restore
+
+script:
+  # dotnet build
+  - dotnet build
+  # dotnet test
+  - dotnet test test/ItspServices.pServer.Test/ItspServices.pServer.Test.csproj
+  - dotnet test test/ItspServices.pServer.RepositoryTest/ItspServices.pServer.RepositoryTest.csproj
