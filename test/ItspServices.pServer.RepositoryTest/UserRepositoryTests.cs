@@ -49,7 +49,7 @@ namespace ItspServices.pServer.RepositoryTest
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
-            ReadUserRepository = new UserRepository(Path.GetFullPath("Data\\UserRepository\\ReadUserData.xml"));
+            ReadUserRepository = new UserRepository(Path.GetFullPath(Path.Combine("Data", "UserRepository", "ReadUserData.xml")));
         }
 
         [TestMethod]
