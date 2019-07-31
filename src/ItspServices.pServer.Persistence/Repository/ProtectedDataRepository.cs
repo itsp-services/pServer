@@ -14,6 +14,11 @@ namespace ItspServices.pServer.Persistence.Repository
             throw new NotImplementedException();
         }
 
+        public IUnitOfWork<ProtectedData> AddToFolder(ProtectedData data, Folder folder)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<ProtectedData> GetAll()
         {
             throw new NotImplementedException();

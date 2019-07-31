@@ -237,7 +237,7 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task AddProtectedData()
+        public async Task AddProtectedDataToRootFolder()
         {
             DataModel model = new DataModel()
             {
@@ -253,12 +253,40 @@ namespace ItspServices.pServer.Test
 
             Mock<IUnitOfWork<ProtectedData>> unit = new Mock<IUnitOfWork<ProtectedData>>();
             unit.Setup(x => x.Complete()).Verifiable();
-            ProtectedDataRepository.Setup(x => x.Add(It.IsAny<ProtectedData>())).Returns(unit.Object);
+            ProtectedDataRepository.Setup(x => x.GetFolderById(null)).Returns(RootFolder);
+            ProtectedDataRepository.Setup(x => x.AddToFolder(It.IsAny<ProtectedData>(), RootFolder)).Returns(unit.Object).Verifiable();
 
             var response = await UserClient.PostAsJsonAsync("/api/protecteddata/data", model);
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            ProtectedDataRepository.Verify(x => x.Add(It.IsAny<ProtectedData>()));
+            ProtectedDataRepository.Verify(x => x.AddToFolder(It.IsAny<ProtectedData>(), RootFolder));
+            unit.Verify(x => x.Complete());
+        }
+
+        [TestMethod]
+        public async Task AddProtectedDataToExplicitFolder()
+        {
+            DataModel model = new DataModel()
+            {
+                Name = "NewData",
+                Data = Encoding.UTF8.GetBytes("Data"),
+                KeyPairs = new[] {
+                    new KeyPairModel() {
+                        PublicKey = User.PublicKeys[0].KeyData,
+                        SymmetricKey = Encoding.UTF8.GetBytes("mQlHPrzg5XPAOBOp0KoVdDaaxXbX")
+                    }
+                }
+            };
+
+            Mock<IUnitOfWork<ProtectedData>> unit = new Mock<IUnitOfWork<ProtectedData>>();
+            unit.Setup(x => x.Complete()).Verifiable();
+            ProtectedDataRepository.Setup(x => x.AddToFolder(It.IsAny<ProtectedData>(), Folder1)).Verifiable();
+            ProtectedDataRepository.Setup(x => x.GetFolderById(1)).Returns(Folder1);
+            ProtectedDataRepository.Setup(x => x.AddToFolder(It.IsAny<ProtectedData>(), It.IsAny<Folder>())).Returns(unit.Object);
+
+            var response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/1", model);
+
+            ProtectedDataRepository.Verify(x => x.AddToFolder(It.IsAny<ProtectedData>(), Folder1));
             unit.Verify(x => x.Complete());
         }
     }

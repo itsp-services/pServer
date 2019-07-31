@@ -57,8 +57,8 @@ namespace ItspServices.pServer.Controllers
             return Ok(dataModel);
         }
 
-        [HttpPost("data")]
-        public IActionResult AddData([FromBody]DataModel model)
+        [HttpPost("data/{folderId:int?}")]
+        public IActionResult AddData([FromBody]DataModel model, int? folderId = null)
         {
             User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
             ProtectedData newData = new ProtectedData()
@@ -81,7 +81,8 @@ namespace ItspServices.pServer.Controllers
                 })
             });
 
-            _repository.ProtectedDataRepository.Add(newData).Complete();
+            _repository.ProtectedDataRepository.AddToFolder(newData,
+                _repository.ProtectedDataRepository.GetFolderById(folderId)).Complete();
 
             return Ok();
         }
