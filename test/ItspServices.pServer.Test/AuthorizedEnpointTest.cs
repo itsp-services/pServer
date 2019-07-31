@@ -289,5 +289,61 @@ namespace ItspServices.pServer.Test
             ProtectedDataRepository.Verify(x => x.AddToFolder(It.IsAny<ProtectedData>(), Folder1));
             unit.Verify(x => x.Complete());
         }
+
+        [TestMethod]
+        public async Task UpdateProtectedData()
+        {
+            DataModel model = new DataModel()
+            {
+                Name = "NewData",
+                Data = Encoding.UTF8.GetBytes("Data"),
+                KeyPairs = new[] {
+                    new KeyPairModel() {
+                        PublicKey = User.PublicKeys[0].KeyData,
+                        SymmetricKey = Encoding.UTF8.GetBytes("mQlHPrzg5XPAOBOp0KoVdDaaxXbX")
+                    }
+                }
+            };
+
+            ProtectedData data = new ProtectedData()
+            {
+                Id = 0,
+                OwnerId = 0,
+                Name = "NewData",
+                Data = Encoding.UTF8.GetBytes("OldData")
+            };
+            var entry = new UserRegisterEntry() {
+                User = User,
+                Permission = Permission.WRITE
+            };
+            entry.EncryptedKeys.Add(new SymmetricKey() { MatchingPublicKeyId = 0, KeyData = Encoding.UTF8.GetBytes("mQlHPrzg5XPAOBOp0KoVdDaaxXbX") });
+            data.Users.RegisterEntries.Add(entry);
+
+            Mock <IUnitOfWork<ProtectedData>> unit = new Mock<IUnitOfWork<ProtectedData>>();
+            unit.Setup(x => x.Complete()).Verifiable();
+            ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
+            ProtectedDataRepository.Setup(x => x.Update(It.IsAny<ProtectedData>())).Returns(unit.Object).Verifiable();
+
+            var response = await UserClient.GetAsync("/api/protecteddata/data/0");
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            string content = await response.Content.ReadAsStringAsync();
+
+            dynamic requestedData = JToken.Parse(content);
+            requestedData.Data = Encoding.UTF8.GetBytes("NewData");
+
+            response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/update/0", (JToken) requestedData);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            ProtectedDataRepository.Verify(x => x.Update(It.IsAny<ProtectedData>()));
+            unit.Verify(x => x.Complete());
+
+            Assert.AreEqual("NewData", Encoding.UTF8.GetString(data.Data));
+        }
+
+        [TestMethod]
+        public async Task RemoveProtectedData()
+        {
+
+        }
     }
 }

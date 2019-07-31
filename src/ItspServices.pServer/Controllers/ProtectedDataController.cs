@@ -86,5 +86,20 @@ namespace ItspServices.pServer.Controllers
 
             return Ok();
         }
+
+        [HttpPost("data/update/{id:int}")]
+        public IActionResult UpdateData([FromBody]DataModel model, int id)
+        {
+            ProtectedData data = _repository.ProtectedDataRepository.GetById(id);
+            if (data == null)
+                return NotFound();
+
+            data.Name = model.Name;
+            data.Data = model.Data;
+
+            _repository.ProtectedDataRepository.Update(data).Complete();
+
+            return Ok();
+        }
     }
 }
