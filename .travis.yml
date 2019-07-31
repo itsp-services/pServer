@@ -1,7 +1,7 @@
 language: csharp
 solution: ItspServices.pServer.sln
 mono: none
-dotnet: 2.2.401
+dotnet: 2.2.102
 
 matrix:
   include:
