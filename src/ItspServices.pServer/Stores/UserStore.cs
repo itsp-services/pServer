@@ -59,12 +59,16 @@ namespace ItspServices.pServer.Stores
             return Task.FromResult(IdentityResult.Success);
         }
 
-        public async Task<User> FindByIdAsync(string userId, CancellationToken cancellationToken) => 
-            await Task.Run(() => UserRepository.GetById(int.Parse(userId)));
+        public Task<User> FindByIdAsync(string userId, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(UserRepository.GetById(int.Parse(userId)));
+        }
 
 
-        public async Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) => 
-            await Task.Run(() => UserRepository.GetUserByNormalizedName(normalizedUserName));
+        public Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(UserRepository.GetUserByNormalizedName(normalizedUserName));
+        }
 
         public Task<string> GetNormalizedUserNameAsync(User user, CancellationToken cancellationToken)
         {
@@ -81,17 +85,24 @@ namespace ItspServices.pServer.Stores
             return Task.FromResult(user.UserName);
         }
 
-        public async Task SetNormalizedUserNameAsync(User user, string normalizedName, CancellationToken cancellationToken) => 
-            await Task.Run(() => { user.NormalizedUserName = normalizedName; });
+        public Task SetNormalizedUserNameAsync(User user, string normalizedName, CancellationToken cancellationToken)
+        {
+            user.NormalizedUserName = normalizedName;
+            return Task.CompletedTask;
+        }
 
-        public async Task SetUserNameAsync(User user, string userName, CancellationToken cancellationToken) =>
-            await Task.Run(() => { user.UserName = userName; });
+        public Task SetUserNameAsync(User user, string userName, CancellationToken cancellationToken)
+        {
+            user.UserName = userName;
+            return Task.CompletedTask;
+        }
 
-
-        public async Task SetPasswordHashAsync(User user, string passwordHash, CancellationToken cancellationToken) =>
-            await Task.Run(() => { user.PasswordHash = passwordHash; });
+        public Task SetPasswordHashAsync(User user, string passwordHash, CancellationToken cancellationToken)
+        {
+            user.PasswordHash = passwordHash;
+            return Task.CompletedTask;
+        }
         
-
         public Task<string> GetPasswordHashAsync(User user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.PasswordHash);
