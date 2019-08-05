@@ -18,7 +18,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer.Abstra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer.Persistence", "src\ItspServices.pServer.Persistence\ItspServices.pServer.Persistence.csproj", "{2BF99DA8-8E26-4F98-98C8-CCD9C3EAD872}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer.RepositoryTest", "test\ItspServices.pServer.RepositoryTest\ItspServices.pServer.RepositoryTest.csproj", "{6E4283A0-25AD-45F7-B4AF-8BDDC3BCE285}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItspServices.pServer.RepositoryTest", "test\ItspServices.pServer.RepositoryTest\ItspServices.pServer.RepositoryTest.csproj", "{6E4283A0-25AD-45F7-B4AF-8BDDC3BCE285}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
