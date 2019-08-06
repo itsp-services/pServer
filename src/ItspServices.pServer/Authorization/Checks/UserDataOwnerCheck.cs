@@ -9,10 +9,10 @@ namespace ItspServices.pServer.Authorization.Checks
         {
         }
 
-        public override bool Authorize()
+        protected override bool Authorize()
         {
             bool isOwner = User.Id == Data.OwnerId;
-            return isOwner || _userDataAuthorizer.Authorize();
+            return isOwner;
         }
     }
 }

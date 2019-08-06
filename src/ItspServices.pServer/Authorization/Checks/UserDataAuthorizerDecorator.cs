@@ -14,6 +14,9 @@ namespace ItspServices.pServer.Authorization.Checks
             _userDataAuthorizer = authorizer;
         }
 
-        public abstract bool Authorize();
+        protected abstract bool Authorize();
+
+        bool IAuthorizer.Authorize()
+            => this.Authorize() || _userDataAuthorizer.Authorize();
     }
 }
