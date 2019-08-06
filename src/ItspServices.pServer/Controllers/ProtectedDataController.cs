@@ -94,6 +94,12 @@ namespace ItspServices.pServer.Controllers
             if (data == null)
                 return NotFound();
 
+            User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
+
+            UserRegisterEntry entry = data.Users.RegisterEntries.Find(x => x.User.Id == user.Id);
+            if ((entry == null || (int)entry.Permission < (int)Permission.WRITE) && user.Id != data.OwnerId)
+                return StatusCode(403);
+
             data.Name = model.Name;
             data.Data = model.Data;
 

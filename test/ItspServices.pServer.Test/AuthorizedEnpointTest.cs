@@ -291,30 +291,18 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task UpdateProtectedData()
+        public async Task UpdateProtectedData_UserHasWritePermissionShouldSucceed()
         {
-            DataModel model = new DataModel()
-            {
-                Name = "NewData",
-                Data = Encoding.UTF8.GetBytes("Data"),
-                KeyPairs = new[] {
-                    new KeyPairModel() {
-                        PublicKey = User.PublicKeys[0].KeyData,
-                        SymmetricKey = Encoding.UTF8.GetBytes("mQlHPrzg5XPAOBOp0KoVdDaaxXbX")
-                    }
-                }
-            };
-
             ProtectedData data = new ProtectedData()
             {
                 Id = 0,
-                OwnerId = 0,
+                OwnerId = 999,
                 Name = "NewData",
                 Data = Encoding.UTF8.GetBytes("OldData")
             };
             var entry = new UserRegisterEntry() {
                 User = User,
-                Permission = Permission.WRITE
+                Permission = Permission.WRITE // User now has write permission and should be able to update
             };
             entry.EncryptedKeys.Add(new SymmetricKey() { MatchingPublicKeyId = 0, KeyData = Encoding.UTF8.GetBytes("mQlHPrzg5XPAOBOp0KoVdDaaxXbX") });
             data.Users.RegisterEntries.Add(entry);
@@ -341,9 +329,34 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task RemoveProtectedData()
+        public async Task UpdateProtectedData_UserHasReadPermissionShouldFail()
         {
+            ProtectedData data = new ProtectedData()
+            {
+                Id = 0,
+                OwnerId = 999,  // User is definitely not the owner of this data
+                Name = "NewData",
+                Data = Encoding.UTF8.GetBytes("OldData")
+            };
+            var entry = new UserRegisterEntry()
+            {
+                User = User,
+                Permission = Permission.READ // User only has read permission and should not be able to update
+            };
+            entry.EncryptedKeys.Add(new SymmetricKey() { MatchingPublicKeyId = 0, KeyData = Encoding.UTF8.GetBytes("mQlHPrzg5XPAOBOp0KoVdDaaxXbX") });
+            data.Users.RegisterEntries.Add(entry);
 
+            ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
+
+            var response = await UserClient.GetAsync("/api/protecteddata/data/0");
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            string content = await response.Content.ReadAsStringAsync();
+
+            dynamic requestedData = JToken.Parse(content);
+            requestedData.Data = Encoding.UTF8.GetBytes("NewData");
+
+            response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/update/0", (JToken)requestedData);
+            Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
     }
 }
