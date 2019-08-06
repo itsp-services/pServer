@@ -1,4 +1,5 @@
-﻿using ItspServices.pServer.Abstraction.Authorizer;
+﻿using ItspServices.pServer.Abstraction;
+using ItspServices.pServer.Abstraction.Authorizer;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Authorization;
 using ItspServices.pServer.Authorization.Checks;
@@ -19,13 +20,12 @@ namespace ItspServices.pServer.AuthorizationTest
 
             ProtectedData data = new ProtectedData()
             {
-                Id = 0,
                 OwnerId = user.Id
             };
 
-            IAuthorizer userAuthorizer = new UserDataOwnerCheck(new UserDataAuthorizer(user, data));
+            IAuthorizer authorizer = new UserDataOwnerCheck(new UserDataAuthorizer(user, data));
 
-            Assert.IsTrue(userAuthorizer.Authorize());
+            Assert.IsTrue(authorizer.Authorize());
         }
 
         [TestMethod]
@@ -38,13 +38,52 @@ namespace ItspServices.pServer.AuthorizationTest
 
             ProtectedData data = new ProtectedData()
             {
-                Id = 0,
                 OwnerId = 1
             };
 
-            IAuthorizer userAuthorizer = new UserDataOwnerCheck(new UserDataAuthorizer(user, data));
+            IAuthorizer authorizer = new UserDataOwnerCheck(new UserDataAuthorizer(user, data));
 
-            Assert.IsFalse(userAuthorizer.Authorize());
+            Assert.IsFalse(authorizer.Authorize());
+        }
+
+        [TestMethod]
+        public void AuthorizerUserData_UserHasPermissionTest()
+        {
+            User user = new User()
+            {
+                Id = 0
+            };
+
+            ProtectedData data = new ProtectedData();
+            data.Users.RegisterEntries.Add(new UserRegisterEntry()
+            {
+                Permission = Permission.WRITE,
+                User = user
+            });
+
+            IAuthorizer authorizer = new UserDataPermissionCheck(new UserDataAuthorizer(user, data), Permission.WRITE);
+
+            Assert.IsTrue(authorizer.Authorize());
+        }
+
+        [TestMethod]
+        public void AuthorizerUserData_UserHasNoPermissionTest()
+        {
+            User user = new User()
+            {
+                Id = 0
+            };
+
+            ProtectedData data = new ProtectedData();
+            data.Users.RegisterEntries.Add(new UserRegisterEntry()
+            {
+                Permission = Permission.VIEW,
+                User = user
+            });
+
+            IAuthorizer authorizer = new UserDataPermissionCheck(new UserDataAuthorizer(user, data), Permission.WRITE);
+
+            Assert.IsFalse(authorizer.Authorize());
         }
     }
 }

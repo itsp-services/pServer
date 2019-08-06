@@ -7,6 +7,9 @@ using ItspServices.pServer.Abstraction;
 using System.Linq;
 using ItspServices.pServer.Models;
 using System.Collections.Generic;
+using ItspServices.pServer.Abstraction.Authorizer;
+using ItspServices.pServer.Authorization;
+using ItspServices.pServer.Authorization.Checks;
 
 namespace ItspServices.pServer.Controllers
 {
@@ -35,18 +38,20 @@ namespace ItspServices.pServer.Controllers
             ProtectedData data = _repository.ProtectedDataRepository.GetById(id);
             if (data == null)
                 return NotFound();
-
             User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
-            UserRegisterEntry entry = data.Users.RegisterEntries.Find(x => x.User.Id == user.Id);
-            if (entry == null || (int) entry.Permission < (int) Permission.READ)
+
+            IAuthorizer authorizer = new UserDataPermissionCheck(new UserDataAuthorizer(user, data), Permission.READ);
+
+            if (!authorizer.Authorize())
                 return StatusCode(403);
 
             DataModel dataModel = new DataModel()
             {
                 Name = data.Name,
-                Data = data.Data,
+                Data = data.Data
             };
 
+            UserRegisterEntry entry = data.Users.RegisterEntries.Find(x => x.User.Id == user.Id);
             dataModel.KeyPairs = from symmetricKey in entry.EncryptedKeys
                                  join publicKey in user.PublicKeys
                                  on symmetricKey.MatchingPublicKeyId equals publicKey.Id
@@ -95,9 +100,9 @@ namespace ItspServices.pServer.Controllers
                 return NotFound();
 
             User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
+            IAuthorizer authorizer = new UserDataOwnerCheck(new UserDataPermissionCheck(new UserDataAuthorizer(user, data), Permission.WRITE));
 
-            UserRegisterEntry entry = data.Users.RegisterEntries.Find(x => x.User.Id == user.Id);
-            if ((entry == null || (int)entry.Permission < (int)Permission.WRITE) && user.Id != data.OwnerId)
+            if (!authorizer.Authorize())
                 return StatusCode(403);
 
             data.Name = model.Name;
