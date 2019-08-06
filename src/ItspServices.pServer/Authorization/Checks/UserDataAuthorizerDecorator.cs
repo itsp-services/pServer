@@ -1,7 +1,7 @@
-﻿using ItspServices.pServer.Abstraction.Models;
-using ItspServices.pServer.Authorization.Authorizer;
+﻿using ItspServices.pServer.Abstraction.Authorizer;
+using ItspServices.pServer.Abstraction.Models;
 
-namespace ItspServices.pServer.Authorization.Policy
+namespace ItspServices.pServer.Authorization.Checks
 {
     public abstract class UserDataAuthorizerDecorator : IUserDataAuthorizer
     {

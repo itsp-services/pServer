@@ -1,6 +1,6 @@
 ﻿using ItspServices.pServer.Abstraction.Models;
 
-namespace ItspServices.pServer.Authorization.Authorizer
+namespace ItspServices.pServer.Abstraction.Authorizer
 {
     public interface IUserDataAuthorizer : IAuthorizer
     {

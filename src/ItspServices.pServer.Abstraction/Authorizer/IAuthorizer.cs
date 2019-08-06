@@ -1,4 +1,4 @@
-﻿namespace ItspServices.pServer.Authorization
+﻿namespace ItspServices.pServer.Abstraction.Authorizer
 {
     public interface IAuthorizer
     {

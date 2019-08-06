@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\ItspServices.pServer.Abstraction\ItspServices.pServer.Abstraction.csproj" />
-    <ProjectReference Include="..\..\src\ItspServices.pServer.Authorization\ItspServices.pServer.Authorization.csproj" />
+    <ProjectReference Include="..\..\src\ItspServices.pServer\ItspServices.pServer.csproj" />
   </ItemGroup>
 
 </Project>

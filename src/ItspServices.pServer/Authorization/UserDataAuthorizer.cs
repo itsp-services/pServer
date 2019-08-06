@@ -1,6 +1,7 @@
-﻿using ItspServices.pServer.Abstraction.Models;
+﻿using ItspServices.pServer.Abstraction.Authorizer;
+using ItspServices.pServer.Abstraction.Models;
 
-namespace ItspServices.pServer.Authorization.Authorizer
+namespace ItspServices.pServer.Authorization
 {
     public class UserDataAuthorizer : IUserDataAuthorizer
     {

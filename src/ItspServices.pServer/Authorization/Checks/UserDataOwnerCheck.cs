@@ -1,6 +1,6 @@
-﻿using ItspServices.pServer.Authorization.Authorizer;
+﻿using ItspServices.pServer.Abstraction.Authorizer;
 
-namespace ItspServices.pServer.Authorization.Policy
+namespace ItspServices.pServer.Authorization.Checks
 {
     public class UserDataOwnerCheck : UserDataAuthorizerDecorator
     {
