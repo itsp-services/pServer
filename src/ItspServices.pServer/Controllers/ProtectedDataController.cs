@@ -112,5 +112,19 @@ namespace ItspServices.pServer.Controllers
 
             return Ok();
         }
+
+        [HttpPost("data/remove")]
+        public IActionResult RemoveData([FromBody]int id)
+        {
+            ProtectedData data = _repository.ProtectedDataRepository.GetById(id);
+            User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
+            IAuthorizer authorizer = new UserDataOwnerCheck(new UserDataPermissionCheck(new UserDataAuthorizer(user, data), Permission.WRITE));
+
+            if (!authorizer.Authorize())
+                return StatusCode(403);
+
+            _repository.ProtectedDataRepository.Remove(data).Complete();
+            return Ok();
+        }
     }
 }

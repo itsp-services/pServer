@@ -359,5 +359,33 @@ namespace ItspServices.pServer.Test
             response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/update/0", (JToken)requestedData);
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
+
+        [TestMethod]
+        public async Task RemoveProtectedData_UserIsOwnerShouldSucceed()
+        {
+            Mock<IUnitOfWork<ProtectedData>> uow = new Mock<IUnitOfWork<ProtectedData>>();
+            uow.Setup(x => x.Complete()).Verifiable();
+            ProtectedDataRepository.Setup(x => x.GetById(1)).Returns(Data1);
+            ProtectedDataRepository.Setup(x => x.Remove(Data1)).Returns(uow.Object).Verifiable();
+
+            var response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/remove", 1);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            ProtectedDataRepository.Verify(x => x.Remove(Data1));
+            uow.Verify(x => x.Complete());
+        }
+
+        [TestMethod]
+        public async Task RemoveProtectedData_UserHasReadPermissionShouldFail()
+        {
+            Mock<IUnitOfWork<ProtectedData>> uow = new Mock<IUnitOfWork<ProtectedData>>();
+            uow.Setup(x => x.Complete()).Verifiable();
+            ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(Data0);
+            ProtectedDataRepository.Setup(x => x.Remove(Data0)).Returns(uow.Object).Verifiable();
+
+            var response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/remove", 0);
+            Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+            uow.VerifyNoOtherCalls();
+        }
     }
 }
