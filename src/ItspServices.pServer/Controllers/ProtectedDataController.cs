@@ -38,9 +38,10 @@ namespace ItspServices.pServer.Controllers
             ProtectedData data = _repository.ProtectedDataRepository.GetById(id);
             if (data == null)
                 return NotFound();
-            User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
-
-            IAuthorizer authorizer = new UserDataPermissionCheck(new UserDataAuthorizer(user, data), Permission.READ);
+            User user = GetSessionUser();
+            IAuthorizer authorizer = new UserDataAuthorizerBuilder(user, data)
+                                            .AddRequiredPermission(Permission.READ)
+                                            .Build();
 
             if (!authorizer.Authorize())
                 return StatusCode(403);
@@ -65,13 +66,10 @@ namespace ItspServices.pServer.Controllers
         [HttpPost("data/{folderId:int?}")]
         public IActionResult AddData([FromBody]DataModel model, int? folderId = null)
         {
-            User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
-            ProtectedData newData = new ProtectedData()
-            {
-                Name = model.Name,
-                Data = model.Data,
-                OwnerId = user.Id
-            };
+            User user = GetSessionUser();
+            ProtectedData newData = DataFromModel(model);
+            newData.OwnerId = user.Id;
+
             newData.Users.RegisterEntries.Add(new UserRegisterEntry()
             {
                 User = user,
@@ -99,8 +97,11 @@ namespace ItspServices.pServer.Controllers
             if (data == null)
                 return NotFound();
 
-            User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
-            IAuthorizer authorizer = new UserDataOwnerCheck(new UserDataPermissionCheck(new UserDataAuthorizer(user, data), Permission.WRITE));
+            User user = GetSessionUser();
+            IAuthorizer authorizer = new UserDataAuthorizerBuilder(user, data)
+                                            .AddIsOwnerCheck()
+                                            .AddRequiredPermission(Permission.WRITE)
+                                            .Build();
 
             if (!authorizer.Authorize())
                 return StatusCode(403);
@@ -117,14 +118,31 @@ namespace ItspServices.pServer.Controllers
         public IActionResult RemoveData([FromBody]int id)
         {
             ProtectedData data = _repository.ProtectedDataRepository.GetById(id);
-            User user = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
-            IAuthorizer authorizer = new UserDataOwnerCheck(new UserDataPermissionCheck(new UserDataAuthorizer(user, data), Permission.WRITE));
+            User user = GetSessionUser();
+            IAuthorizer authorizer = new UserDataAuthorizerBuilder(user, data)
+                                            .AddIsOwnerCheck()
+                                            .AddRequiredPermission(Permission.WRITE)
+                                            .Build();
 
             if (!authorizer.Authorize())
                 return StatusCode(403);
 
             _repository.ProtectedDataRepository.Remove(data).Complete();
             return Ok();
+        }
+
+        private User GetSessionUser()
+        {
+            return _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
+        }
+
+        private ProtectedData DataFromModel(DataModel model)
+        {
+            return new ProtectedData()
+            {
+                Name = model.Name,
+                Data = model.Data
+            };
         }
     }
 }
