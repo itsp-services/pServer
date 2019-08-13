@@ -22,3 +22,4 @@ script:
   # dotnet test
   - dotnet test test/ItspServices.pServer.Test/ItspServices.pServer.Test.csproj
   - dotnet test test/ItspServices.pServer.RepositoryTest/ItspServices.pServer.RepositoryTest.csproj
+  - dotnet test test/ItspServices.pServer.AuthorizationTest/ItspServices.pServer.AuthorizationTest.csproj
