@@ -114,8 +114,8 @@ namespace ItspServices.pServer.Controllers
             return Ok();
         }
 
-        [HttpPost("data/remove")]
-        public IActionResult RemoveData([FromBody]int id)
+        [HttpDelete("data/{id:int}")]
+        public IActionResult RemoveData(int id)
         {
             ProtectedData data = _repository.ProtectedDataRepository.GetById(id);
             User user = GetSessionUser();
@@ -123,7 +123,7 @@ namespace ItspServices.pServer.Controllers
                                             .AddIsOwnerCheck()
                                             .AddRequiredPermission(Permission.WRITE)
                                             .Build();
-
+            
             if (!authorizer.Authorize())
                 return StatusCode(403);
 
@@ -132,11 +132,9 @@ namespace ItspServices.pServer.Controllers
         }
 
         private User GetSessionUser()
-        {
-            return _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
-        }
+            => _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
 
-        private ProtectedData DataFromModel(DataModel model)
+        private static ProtectedData DataFromModel(DataModel model)
         {
             return new ProtectedData()
             {

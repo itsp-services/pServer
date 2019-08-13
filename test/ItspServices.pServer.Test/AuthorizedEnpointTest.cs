@@ -368,7 +368,7 @@ namespace ItspServices.pServer.Test
             ProtectedDataRepository.Setup(x => x.GetById(1)).Returns(Data1);
             ProtectedDataRepository.Setup(x => x.Remove(Data1)).Returns(uow.Object).Verifiable();
 
-            var response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/remove", 1);
+            var response = await UserClient.DeleteAsync("/api/protecteddata/data/1");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             ProtectedDataRepository.Verify(x => x.Remove(Data1));
@@ -383,7 +383,7 @@ namespace ItspServices.pServer.Test
             ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(Data0);
             ProtectedDataRepository.Setup(x => x.Remove(Data0)).Returns(uow.Object).Verifiable();
 
-            var response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/remove", 0);
+            var response = await UserClient.DeleteAsync("/api/protecteddata/data/0");
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
             uow.VerifyNoOtherCalls();
         }
