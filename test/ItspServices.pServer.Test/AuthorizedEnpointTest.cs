@@ -383,6 +383,7 @@ namespace ItspServices.pServer.Test
             ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(Data0);
             ProtectedDataRepository.Setup(x => x.Remove(Data0)).Returns(uow.Object).Verifiable();
 
+
             var response = await UserClient.DeleteAsync("/api/protecteddata/data/0");
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
             uow.VerifyNoOtherCalls();
