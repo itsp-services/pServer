@@ -9,7 +9,6 @@ using ItspServices.pServer.Models;
 using System.Collections.Generic;
 using ItspServices.pServer.Abstraction.Authorizer;
 using ItspServices.pServer.Authorization;
-using ItspServices.pServer.Authorization.Checks;
 
 namespace ItspServices.pServer.Controllers
 {
@@ -26,9 +25,16 @@ namespace ItspServices.pServer.Controllers
         }
 
         [HttpGet("folder/{id:int?}")]
-        public Task<Folder> GetFolderById(int? id)
+        public Task<FolderModel> GetFolderById(int? id)
         {
-            return Task.FromResult(_repository.ProtectedDataRepository.GetFolderById(id));
+            Folder folder = _repository.ProtectedDataRepository.GetFolderById(id);
+            return Task.FromResult(
+                new FolderModel {
+                    ParentId = folder.ParentId,
+                    Name = folder.Name,
+                    ProtectedDataIds = folder.DataRegister?.Select(x => x.Id).ToList(),
+                    SubfolderIds = folder.Subfolder?.Select(x => x.Id).ToList()
+                });
         }
 
         // Requires read permission

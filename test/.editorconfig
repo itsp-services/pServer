@@ -1,0 +1,9 @@
+# Symbols
+dotnet_naming_symbols.async_methods.applicable_kinds = method
+dotnet_naming_symbols.async_methods.applicable_accessibilities = *
+dotnet_naming_symbols.async_methods.required_modifiers = async
+
+# Async methods should end with Async
+dotnet_naming_rule.async_methods_should_end_with_Async.symbols = async_methods
+dotnet_naming_rule.async_methods_should_end_with_Async.style = pascal_case
+dotnet_naming_rule.async_methods_should_end_with_Async.severity = suggestion

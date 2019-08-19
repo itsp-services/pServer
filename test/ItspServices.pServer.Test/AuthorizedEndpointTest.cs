@@ -23,7 +23,7 @@ namespace ItspServices.pServer.Test
 {
 
     [TestClass]
-    public class AuthorizedEnpointTest
+    public class AuthorizedEndpointTest
     {
         public static HttpClient AdminClient;
         public static HttpClient UserClient;
@@ -173,12 +173,20 @@ namespace ItspServices.pServer.Test
         {
             ProtectedDataRepository.Setup(x => x.GetFolderById(null)).Returns(RootFolder);
 
-            var response = await UserClient.GetAsync("/api/protecteddata/folder");
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            string content = await response.Content.ReadAsStringAsync();
-            JToken token = JToken.Parse(content);
-            Assert.AreEqual(token["id"].Value<int>(), 0);
-            Assert.AreEqual(token["name"].Value<string>(), "root");
+            using (HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/folder"))
+            {
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+                string content = await response.Content.ReadAsStringAsync();
+
+                JToken expected = JToken.FromObject(new {
+                    parentId = default(int?),
+                    name = "root",
+                    protectedDataIds = default(int[]),
+                    subfolderIds = new[] { 1 }
+                });
+
+                Assert.IsTrue(JToken.DeepEquals(JToken.Parse(content), expected));
+            }
         }
 
         [TestMethod]
@@ -186,11 +194,20 @@ namespace ItspServices.pServer.Test
         {
             ProtectedDataRepository.Setup(x => x.GetFolderById(1)).Returns(Folder1);
 
-            var response = await UserClient.GetAsync("/api/protecteddata/folder/1");
-            string content = await response.Content.ReadAsStringAsync();
-            JToken token = JToken.Parse(content);
-            Assert.AreEqual(token["id"].Value<int>(), 1);
-            Assert.AreEqual(token["name"].Value<string>(), "Folder1");
+            using (HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/folder/1"))
+            { 
+                string content = await response.Content.ReadAsStringAsync();
+
+                JToken expected = JToken.FromObject(new
+                {
+                    parentId = default(int?),
+                    name = "Folder1",
+                    protectedDataIds = default(int[]),
+                    subfolderIds = default(int[])
+                });
+
+                Assert.IsTrue(JToken.DeepEquals(JToken.Parse(content), expected));
+            }
         }
 
         [TestMethod]
