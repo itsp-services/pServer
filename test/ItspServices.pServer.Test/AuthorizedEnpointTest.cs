@@ -259,7 +259,8 @@ namespace ItspServices.pServer.Test
 
             var response = await UserClient.PostAsJsonAsync("/api/protecteddata/data", model);
 
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+            Assert.AreEqual("/api/protecteddata/data/0", response.Headers.Location.ToString());
             ProtectedDataRepository.Verify(x => x.AddToFolder(It.IsAny<ProtectedData>(), RootFolder));
             unit.Verify(x => x.Complete());
         }
