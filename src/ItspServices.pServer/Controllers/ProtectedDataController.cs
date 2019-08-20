@@ -93,7 +93,7 @@ namespace ItspServices.pServer.Controllers
             _repository.ProtectedDataRepository.AddToFolder(newData,
                 _repository.ProtectedDataRepository.GetFolderById(folderId)).Complete();
 
-            return Ok();
+            return Created($"/api/protecteddata/data/{newData.Id}", null);
         }
 
         [HttpPut("data/{id:int}")]
