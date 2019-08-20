@@ -34,13 +34,6 @@ namespace ItspServices.pServer.Test
         public static string AdminPassword = "Admin12345!";
         public static string UserPassword = "User12345!";
 
-        public static Folder RootFolder;
-        public static Folder Folder1;
-
-        public static ProtectedData Data0;
-        public static ProtectedData Data1;
-        public static ProtectedData DataWithoutRegisteredUsers;
-
         public static Mock<IRepositoryManager> RepositoryManager = new Mock<IRepositoryManager>();
         public static Mock<IUserRepository> UserRepository = new Mock<IUserRepository>();
         public Mock<IProtectedDataRepository> ProtectedDataRepository;
@@ -93,64 +86,10 @@ namespace ItspServices.pServer.Test
             UserRepository.Setup(x => x.GetById(Admin.Id)).Returns(Admin);
             UserRepository.Setup(x => x.GetById(User.Id)).Returns(User);
 
-            Folder1 = new Folder()
-            {
-                Id = 1,
-                Name = "Folder1"
-            };
-
-            RootFolder = new Folder()
-            {
-                Id = 0,
-                Name = "root",
-            };
-            RootFolder.Subfolder = new List<Folder>();
-            RootFolder.Subfolder.Add(Folder1);
-
-            Data0 = new ProtectedData()
-            {
-                Id = 0,
-                Name = "Data0",
-                OwnerId = 0
-            };
-            Data0.Data = Encoding.UTF8.GetBytes("Data0");
-            var entry1 = new UserRegisterEntry()
-            {
-                User = User,
-                Permission = Permission.READ
-            };
-            entry1.EncryptedKeys.Add(new SymmetricKey() { MatchingPublicKeyId = 1, KeyData = Encoding.UTF8.GetBytes("VdD0Koaag5XPAOBOpxXbXmQlHPrz") });
-            entry1.EncryptedKeys.Add(new SymmetricKey() { MatchingPublicKeyId = 0, KeyData = Encoding.UTF8.GetBytes("0KoVdDaaxXbXmQlHPrzg5XPAOBOp") });
-            Data0.Users.RegisterEntries.Add(entry1);
-
-            Data1 = new ProtectedData()
-            {
-                Id = 1,
-                Name = "Data1",
-                OwnerId = 1
-            };
-            Data1.Data = Encoding.UTF8.GetBytes("Data1");
-            var entry2 = new UserRegisterEntry()
-            {
-                User = Admin,
-                Permission = Permission.VIEW
-            };
-            entry2.EncryptedKeys.Add(new SymmetricKey() { MatchingPublicKeyId = 1, KeyData = Encoding.UTF8.GetBytes("VdD0Koaag5XPAOBOpxXbXmQlHPrz") });
-            entry2.EncryptedKeys.Add(new SymmetricKey() { MatchingPublicKeyId = 0, KeyData = Encoding.UTF8.GetBytes("0KoVdDaaxXbXmQlHPrzg5XPAOBOp") });
-            Data1.Users.RegisterEntries.Add(entry2);
-
-            DataWithoutRegisteredUsers = new ProtectedData()
-            {
-                Id = 2,
-                Name = "Data2",
-                OwnerId = 999
-            };
-            DataWithoutRegisteredUsers.Data = Encoding.UTF8.GetBytes("Data2");
-
             RepositoryManager.Setup(x => x.UserRepository).Returns(UserRepository.Object);
 
             AdminClient = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
-            UserClient = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
+            UserClient  = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
             await AdminClient.PostAsync("/Account/Login", new FormUrlEncodedContent(new[] {
                 new KeyValuePair<string, string>("Username", Admin.UserName),
                 new KeyValuePair<string, string>("Password", AdminPassword)
@@ -171,7 +110,13 @@ namespace ItspServices.pServer.Test
         [TestMethod]
         public async Task ProtectedDataGetRootFolder()
         {
-            ProtectedDataRepository.Setup(x => x.GetFolderById(null)).Returns(RootFolder);
+            Folder rootFolder = new Folder()
+            {
+                Id = 0,
+                Name = "root",
+                
+            };
+            ProtectedDataRepository.Setup(x => x.GetFolderById(null)).Returns(rootFolder);
 
             using (HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/folder"))
             {
@@ -182,7 +127,7 @@ namespace ItspServices.pServer.Test
                     parentId = default(int?),
                     name = "root",
                     protectedDataIds = default(int[]),
-                    subfolderIds = new[] { 1 }
+                    subfolderIds = default(int[])
                 });
 
                 Assert.IsTrue(JToken.DeepEquals(JToken.Parse(content), expected));
@@ -192,7 +137,13 @@ namespace ItspServices.pServer.Test
         [TestMethod]
         public async Task ProtectedDataGetFolderById()
         {
-            ProtectedDataRepository.Setup(x => x.GetFolderById(1)).Returns(Folder1);
+            Folder folder = new Folder()
+            {
+                Id = 1,
+                Name = "Folder1"
+            };
+
+            ProtectedDataRepository.Setup(x => x.GetFolderById(1)).Returns(folder);
 
             using (HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/folder/1"))
             { 
@@ -213,25 +164,48 @@ namespace ItspServices.pServer.Test
         [TestMethod]
         public async Task ProtectedDataGetById()
         {
-            ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(Data0);
+            ProtectedData data = new ProtectedData()
+            {
+                Name = "Data",
+                Data = Encoding.UTF8.GetBytes("DATA")
+            };
+            data.Users.RegisterEntries.Add(new UserRegisterEntry()
+            {
+                User = User,
+                Permission = Permission.READ,
+                EncryptedKeys = new[]
+                {
+                    new SymmetricKey() { KeyData = Encoding.UTF8.GetBytes("SymmetricKey1"), MatchingPublicKeyId = 0 },
+                    new SymmetricKey() { KeyData = Encoding.UTF8.GetBytes("SymmetricKey2"), MatchingPublicKeyId = 1 }
+                }.ToList()
+            });
+
+            ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
 
             var response = await UserClient.GetAsync("/api/protecteddata/data/0");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             string content = await response.Content.ReadAsStringAsync();
-            DataModel data = JsonConvert.DeserializeObject<DataModel>(content);
+            DataModel dataModel = JsonConvert.DeserializeObject<DataModel>(content);
 
-            Assert.AreEqual(Data0.Name, data.Name);
-            CollectionAssert.AreEquivalent(Data0.Data, data.Data);
-            CollectionAssert.AreEquivalent(User.PublicKeys[0].KeyData, data.KeyPairs.ToList()[0].PublicKey);
-            CollectionAssert.AreEquivalent(Data0.Users.RegisterEntries[0].EncryptedKeys[0].KeyData, data.KeyPairs.ToList()[0].SymmetricKey);
-            CollectionAssert.AreEquivalent(Data0.Users.RegisterEntries[0].EncryptedKeys[1].KeyData, data.KeyPairs.ToList()[1].SymmetricKey);
+            Assert.AreEqual(data.Name, dataModel.Name);
+            CollectionAssert.AreEquivalent(data.Data, dataModel.Data);
+            CollectionAssert.AreEquivalent(User.PublicKeys[0].KeyData, dataModel.KeyPairs.ToList()[0].PublicKey);
+            CollectionAssert.AreEquivalent(User.PublicKeys[1].KeyData, dataModel.KeyPairs.ToList()[1].PublicKey);
+            CollectionAssert.AreEquivalent(data.Users.RegisterEntries[0].EncryptedKeys[0].KeyData, dataModel.KeyPairs.ToList()[0].SymmetricKey);
+            CollectionAssert.AreEquivalent(data.Users.RegisterEntries[0].EncryptedKeys[1].KeyData, dataModel.KeyPairs.ToList()[1].SymmetricKey);
         }
 
         [TestMethod]
         public async Task UnauthorizedRequestData()
         {
-            ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(DataWithoutRegisteredUsers);
-            var response = await UserClient.GetAsync("/api/protecteddata/data/0");
+            ProtectedData data = new ProtectedData()
+            {
+                OwnerId = 999
+            };
+            ProtectedDataRepository.Setup(x => x.GetById(999)).Returns(data);
+
+            var response = await UserClient.GetAsync("/api/protecteddata/data/999");
+
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
@@ -239,17 +213,24 @@ namespace ItspServices.pServer.Test
         public async Task NotFoundRequestData()
         {
             var response = await UserClient.GetAsync("/api/protecteddata/data/999");
+
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [TestMethod]
         public async Task RequestWithViewPermission()
         {
-            ProtectedDataRepository.Setup(x => x.GetById(1)).Returns(Data1);
+            ProtectedData data = new ProtectedData()
+            {
+                OwnerId = 999
+            };
+            data.Users.RegisterEntries.Add(new UserRegisterEntry() {
+                User = User,
+                Permission = Permission.VIEW
+            });
+            ProtectedDataRepository.Setup(x => x.GetById(1)).Returns(data);
 
-            // Admin should have view permission for protected data 1
-            var response = await AdminClient.GetAsync("/api/protecteddata/data/1");
-            string output = await response.Content.ReadAsStringAsync();
+            var response = await UserClient.GetAsync("/api/protecteddata/data/1");
 
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -257,6 +238,7 @@ namespace ItspServices.pServer.Test
         [TestMethod]
         public async Task AddProtectedDataToRootFolder()
         {
+            Folder rootFolder = new Folder();
             DataModel model = new DataModel()
             {
                 Name = "NewData",
@@ -271,19 +253,24 @@ namespace ItspServices.pServer.Test
 
             Mock<IUnitOfWork<ProtectedData>> unit = new Mock<IUnitOfWork<ProtectedData>>();
             unit.Setup(x => x.Complete()).Verifiable();
-            ProtectedDataRepository.Setup(x => x.GetFolderById(null)).Returns(RootFolder);
-            ProtectedDataRepository.Setup(x => x.AddToFolder(It.IsAny<ProtectedData>(), RootFolder)).Returns(unit.Object).Verifiable();
+            ProtectedDataRepository.Setup(x => x.GetFolderById(null)).Returns(rootFolder);
+            ProtectedDataRepository.Setup(x => x.AddToFolder(It.IsAny<ProtectedData>(), rootFolder)).Returns(unit.Object).Verifiable();
 
             var response = await UserClient.PostAsJsonAsync("/api/protecteddata/data", model);
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            ProtectedDataRepository.Verify(x => x.AddToFolder(It.IsAny<ProtectedData>(), RootFolder));
+            ProtectedDataRepository.Verify(x => x.AddToFolder(It.IsAny<ProtectedData>(), rootFolder));
             unit.Verify(x => x.Complete());
         }
 
         [TestMethod]
         public async Task AddProtectedDataToExplicitFolder()
         {
+            Folder folder = new Folder()
+            {
+
+            };
+
             DataModel model = new DataModel()
             {
                 Name = "NewData",
@@ -298,13 +285,12 @@ namespace ItspServices.pServer.Test
 
             Mock<IUnitOfWork<ProtectedData>> unit = new Mock<IUnitOfWork<ProtectedData>>();
             unit.Setup(x => x.Complete()).Verifiable();
-            ProtectedDataRepository.Setup(x => x.AddToFolder(It.IsAny<ProtectedData>(), Folder1)).Verifiable();
-            ProtectedDataRepository.Setup(x => x.GetFolderById(1)).Returns(Folder1);
-            ProtectedDataRepository.Setup(x => x.AddToFolder(It.IsAny<ProtectedData>(), It.IsAny<Folder>())).Returns(unit.Object);
+            ProtectedDataRepository.Setup(x => x.AddToFolder(It.IsAny<ProtectedData>(), folder)).Returns(unit.Object).Verifiable();
+            ProtectedDataRepository.Setup(x => x.GetFolderById(1)).Returns(folder);
 
             var response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/1", model);
 
-            ProtectedDataRepository.Verify(x => x.AddToFolder(It.IsAny<ProtectedData>(), Folder1));
+            ProtectedDataRepository.Verify(x => x.AddToFolder(It.IsAny<ProtectedData>(), folder));
             unit.Verify(x => x.Complete());
         }
 
@@ -313,17 +299,14 @@ namespace ItspServices.pServer.Test
         {
             ProtectedData data = new ProtectedData()
             {
-                Id = 0,
                 OwnerId = 999,
                 Name = "NewData",
                 Data = Encoding.UTF8.GetBytes("OldData")
             };
-            var entry = new UserRegisterEntry() {
+            data.Users.RegisterEntries.Add(new UserRegisterEntry() {
                 User = User,
                 Permission = Permission.WRITE // User now has write permission and should be able to update
-            };
-            entry.EncryptedKeys.Add(new SymmetricKey() { MatchingPublicKeyId = 0, KeyData = Encoding.UTF8.GetBytes("mQlHPrzg5XPAOBOp0KoVdDaaxXbX") });
-            data.Users.RegisterEntries.Add(entry);
+            });
 
             Mock <IUnitOfWork<ProtectedData>> unit = new Mock<IUnitOfWork<ProtectedData>>();
             unit.Setup(x => x.Complete()).Verifiable();
@@ -351,18 +334,15 @@ namespace ItspServices.pServer.Test
         {
             ProtectedData data = new ProtectedData()
             {
-                Id = 0,
-                OwnerId = 999,  // User is definitely not the owner of this data
+                OwnerId = 999,  
                 Name = "NewData",
                 Data = Encoding.UTF8.GetBytes("OldData")
             };
-            var entry = new UserRegisterEntry()
+            data.Users.RegisterEntries.Add(new UserRegisterEntry()
             {
                 User = User,
                 Permission = Permission.READ // User only has read permission and should not be able to update
-            };
-            entry.EncryptedKeys.Add(new SymmetricKey() { MatchingPublicKeyId = 0, KeyData = Encoding.UTF8.GetBytes("mQlHPrzg5XPAOBOp0KoVdDaaxXbX") });
-            data.Users.RegisterEntries.Add(entry);
+            });
 
             ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
 
@@ -380,25 +360,40 @@ namespace ItspServices.pServer.Test
         [TestMethod]
         public async Task RemoveProtectedData_UserIsOwnerShouldSucceed()
         {
+            ProtectedData data = new ProtectedData()
+            {
+                OwnerId = User.Id
+            };
+
             Mock<IUnitOfWork<ProtectedData>> uow = new Mock<IUnitOfWork<ProtectedData>>();
             uow.Setup(x => x.Complete()).Verifiable();
-            ProtectedDataRepository.Setup(x => x.GetById(1)).Returns(Data1);
-            ProtectedDataRepository.Setup(x => x.Remove(Data1)).Returns(uow.Object).Verifiable();
+            ProtectedDataRepository.Setup(x => x.GetById(1)).Returns(data);
+            ProtectedDataRepository.Setup(x => x.Remove(data)).Returns(uow.Object).Verifiable();
 
             var response = await UserClient.DeleteAsync("/api/protecteddata/data/1");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            ProtectedDataRepository.Verify(x => x.Remove(Data1));
+            ProtectedDataRepository.Verify(x => x.Remove(data));
             uow.Verify(x => x.Complete());
         }
 
         [TestMethod]
         public async Task RemoveProtectedData_UserHasReadPermissionShouldFail()
         {
+            ProtectedData data = new ProtectedData()
+            {
+                OwnerId = 999
+            };
+            data.Users.RegisterEntries.Add(new UserRegisterEntry()
+            {
+                User = User,
+                Permission = Permission.READ
+            });
+
             Mock<IUnitOfWork<ProtectedData>> uow = new Mock<IUnitOfWork<ProtectedData>>();
             uow.Setup(x => x.Complete()).Verifiable();
-            ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(Data0);
-            ProtectedDataRepository.Setup(x => x.Remove(Data0)).Returns(uow.Object).Verifiable();
+            ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
+            ProtectedDataRepository.Setup(x => x.Remove(data)).Returns(uow.Object).Verifiable();
 
             var response = await UserClient.DeleteAsync("/api/protecteddata/data/0");
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
