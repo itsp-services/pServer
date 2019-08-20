@@ -260,7 +260,7 @@ namespace ItspServices.pServer.Test
 
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
             Assert.AreEqual("/api/protecteddata/data/0", response.Headers.Location.ToString());
-            ProtectedDataRepository.Verify(x => x.AddToFolder(It.IsAny<ProtectedData>(), RootFolder));
+            ProtectedDataRepository.Verify(x => x.AddToFolder(It.IsAny<ProtectedData>(), rootFolder));
             unit.Verify(x => x.Complete());
         }
 
