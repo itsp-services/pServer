@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2947A69F-1788-4262-9056-DAA917479403}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8F4A9774-BDFD-4039-960D-D750115E290C}"
+	ProjectSection(SolutionItems) = preProject
+		test\.editorconfig = test\.editorconfig
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer", "src\ItspServices.pServer\ItspServices.pServer.csproj", "{FF712B27-B695-4A9C-BCE6-6677D6391C6C}"
 EndProject
