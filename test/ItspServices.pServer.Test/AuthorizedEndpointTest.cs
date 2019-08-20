@@ -337,7 +337,7 @@ namespace ItspServices.pServer.Test
             dynamic requestedData = JToken.Parse(content);
             requestedData.Data = Encoding.UTF8.GetBytes("NewData");
 
-            response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/update/0", (JToken) requestedData);
+            response = await UserClient.PutAsJsonAsync("/api/protecteddata/data/0", (JToken) requestedData);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             ProtectedDataRepository.Verify(x => x.Update(It.IsAny<ProtectedData>()));
@@ -373,7 +373,7 @@ namespace ItspServices.pServer.Test
             dynamic requestedData = JToken.Parse(content);
             requestedData.Data = Encoding.UTF8.GetBytes("NewData");
 
-            response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/update/0", (JToken)requestedData);
+            response = await UserClient.PutAsJsonAsync("/api/protecteddata/data/0", (JToken)requestedData);
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
