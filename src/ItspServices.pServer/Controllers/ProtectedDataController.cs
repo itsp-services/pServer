@@ -90,7 +90,7 @@ namespace ItspServices.pServer.Controllers
             return Ok();
         }
 
-        [HttpPost("data/update/{id:int}")]
+        [HttpPut("data/{id:int}")]
         public IActionResult UpdateData([FromBody]DataModel model, int id)
         {
             ProtectedData data = _repository.ProtectedDataRepository.GetById(id);
