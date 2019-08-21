@@ -89,7 +89,7 @@ namespace ItspServices.pServer.Test
             RepositoryManager.Setup(x => x.UserRepository).Returns(UserRepository.Object);
 
             AdminClient = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
-            UserClient  = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
+            UserClient = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
             await AdminClient.PostAsync("/Account/Login", new FormUrlEncodedContent(new[] {
                 new KeyValuePair<string, string>("Username", Admin.UserName),
                 new KeyValuePair<string, string>("Password", AdminPassword)
@@ -110,11 +110,17 @@ namespace ItspServices.pServer.Test
         [TestMethod]
         public async Task ProtectedDataGetRootFolder()
         {
-            Folder rootFolder = new Folder()
+            Folder rootFolder = new Folder
             {
                 Id = 0,
                 Name = "root",
-                
+                Subfolder = new[] {
+                    new Folder
+                    {
+                        Id = 1,
+                        Name = "Folder1"
+                    }
+                }.ToList()
             };
             ProtectedDataRepository.Setup(x => x.GetFolderById(null)).Returns(rootFolder);
 
@@ -127,7 +133,7 @@ namespace ItspServices.pServer.Test
                     parentId = default(int?),
                     name = "root",
                     protectedDataIds = default(int[]),
-                    subfolderIds = default(int[])
+                    subfolderIds = new[] { 1 }
                 });
 
                 Assert.IsTrue(JToken.DeepEquals(JToken.Parse(content), expected));
@@ -200,7 +206,7 @@ namespace ItspServices.pServer.Test
         {
             ProtectedData data = new ProtectedData()
             {
-                OwnerId = 999
+                OwnerId = 1234
             };
             ProtectedDataRepository.Setup(x => x.GetById(999)).Returns(data);
 
@@ -267,10 +273,7 @@ namespace ItspServices.pServer.Test
         [TestMethod]
         public async Task AddProtectedDataToExplicitFolder()
         {
-            Folder folder = new Folder()
-            {
-
-            };
+            Folder folder = new Folder();
 
             DataModel model = new DataModel()
             {
