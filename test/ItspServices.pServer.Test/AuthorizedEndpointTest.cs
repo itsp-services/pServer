@@ -25,18 +25,19 @@ namespace ItspServices.pServer.Test
     [TestClass]
     public class AuthorizedEndpointTest
     {
-        public static HttpClient AdminClient;
-        public static HttpClient UserClient;
+        static WebApplicationFactory ClientFactory;
+        static HttpClient AdminClient;
+        static HttpClient UserClient;
 
-        public static User Admin;
-        public static User User;
+        static User Admin;
+        static User User;
 
-        public static string AdminPassword = "Admin12345!";
-        public static string UserPassword = "User12345!";
+        const string AdminPassword = "Admin12345!";
+        const string UserPassword = "User12345!";
 
-        public static Mock<IRepositoryManager> RepositoryManager = new Mock<IRepositoryManager>();
-        public static Mock<IUserRepository> UserRepository = new Mock<IUserRepository>();
-        public Mock<IProtectedDataRepository> ProtectedDataRepository;
+        static readonly Mock<IRepositoryManager> RepositoryManager = new Mock<IRepositoryManager>();
+        static readonly Mock<IUserRepository> UserRepository = new Mock<IUserRepository>();
+        Mock<IProtectedDataRepository> ProtectedDataRepository;
 
         class WebApplicationFactory : WebApplicationFactory<Startup>
         {
@@ -57,7 +58,7 @@ namespace ItspServices.pServer.Test
         }
 
         [ClassInitialize]
-        public static async Task InitAsync(TestContext context)
+        public static async Task InitAsync(TestContext _)
         {
             Admin = new User()
             {
@@ -88,8 +89,9 @@ namespace ItspServices.pServer.Test
 
             RepositoryManager.Setup(x => x.UserRepository).Returns(UserRepository.Object);
 
-            AdminClient = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
-            UserClient = new WebApplicationFactory().CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
+            ClientFactory = new WebApplicationFactory();
+            AdminClient = ClientFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
+            UserClient = ClientFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
             await AdminClient.PostAsync("/Account/Login", new FormUrlEncodedContent(new[] {
                 new KeyValuePair<string, string>("Username", Admin.UserName),
                 new KeyValuePair<string, string>("Password", AdminPassword)
@@ -98,6 +100,17 @@ namespace ItspServices.pServer.Test
                 new KeyValuePair<string, string>("Username", User.UserName),
                 new KeyValuePair<string, string>("Password", UserPassword)
             }));
+        }
+
+        [ClassCleanup]
+        public static void CleanupAsync()
+        {
+            ClientFactory?.Dispose();
+            AdminClient?.Dispose();
+            UserClient?.Dispose();
+            ClientFactory = null;
+            AdminClient = null;
+            UserClient = null;
         }
 
         [TestInitialize]
@@ -188,7 +201,7 @@ namespace ItspServices.pServer.Test
 
             ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
 
-            var response = await UserClient.GetAsync("/api/protecteddata/data/0");
+            HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/data/0");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             string content = await response.Content.ReadAsStringAsync();
             DataModel dataModel = JsonConvert.DeserializeObject<DataModel>(content);
@@ -210,7 +223,7 @@ namespace ItspServices.pServer.Test
             };
             ProtectedDataRepository.Setup(x => x.GetById(999)).Returns(data);
 
-            var response = await UserClient.GetAsync("/api/protecteddata/data/999");
+            HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/data/999");
 
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -218,7 +231,7 @@ namespace ItspServices.pServer.Test
         [TestMethod]
         public async Task NotFoundRequestData()
         {
-            var response = await UserClient.GetAsync("/api/protecteddata/data/999");
+            HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/data/999");
 
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
@@ -236,13 +249,13 @@ namespace ItspServices.pServer.Test
             });
             ProtectedDataRepository.Setup(x => x.GetById(1)).Returns(data);
 
-            var response = await UserClient.GetAsync("/api/protecteddata/data/1");
+            HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/data/1");
 
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
         [TestMethod]
-        public async Task AddProtectedDataToRootFolder()
+        public async Task AddProtectedDataToRootFolder_ShouldSucceed()
         {
             Folder rootFolder = new Folder();
             DataModel model = new DataModel()
@@ -262,7 +275,7 @@ namespace ItspServices.pServer.Test
             ProtectedDataRepository.Setup(x => x.GetFolderById(null)).Returns(rootFolder);
             ProtectedDataRepository.Setup(x => x.AddToFolder(It.IsAny<ProtectedData>(), rootFolder)).Returns(unit.Object).Verifiable();
 
-            var response = await UserClient.PostAsJsonAsync("/api/protecteddata/data", model);
+            HttpResponseMessage response = await UserClient.PostAsJsonAsync("/api/protecteddata/data", model);
 
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
             Assert.AreEqual("/api/protecteddata/data/0", response.Headers.Location.ToString());
@@ -271,7 +284,7 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task AddProtectedDataToExplicitFolder()
+        public async Task AddProtectedDataToExplicitFolder_ShouldSucceed()
         {
             Folder folder = new Folder();
 
@@ -292,7 +305,7 @@ namespace ItspServices.pServer.Test
             ProtectedDataRepository.Setup(x => x.AddToFolder(It.IsAny<ProtectedData>(), folder)).Returns(unit.Object).Verifiable();
             ProtectedDataRepository.Setup(x => x.GetFolderById(1)).Returns(folder);
 
-            var response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/1", model);
+            HttpResponseMessage response = await UserClient.PostAsJsonAsync("/api/protecteddata/data/1", model);
 
             ProtectedDataRepository.Verify(x => x.AddToFolder(It.IsAny<ProtectedData>(), folder));
             unit.Verify(x => x.Complete());
@@ -317,7 +330,7 @@ namespace ItspServices.pServer.Test
             ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
             ProtectedDataRepository.Setup(x => x.Update(It.IsAny<ProtectedData>())).Returns(unit.Object).Verifiable();
 
-            var response = await UserClient.GetAsync("/api/protecteddata/data/0");
+            HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/data/0");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             string content = await response.Content.ReadAsStringAsync();
 
@@ -350,7 +363,7 @@ namespace ItspServices.pServer.Test
 
             ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
 
-            var response = await UserClient.GetAsync("/api/protecteddata/data/0");
+            HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/data/0");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             string content = await response.Content.ReadAsStringAsync();
 
@@ -374,7 +387,7 @@ namespace ItspServices.pServer.Test
             ProtectedDataRepository.Setup(x => x.GetById(1)).Returns(data);
             ProtectedDataRepository.Setup(x => x.Remove(data)).Returns(uow.Object).Verifiable();
 
-            var response = await UserClient.DeleteAsync("/api/protecteddata/data/1");
+            HttpResponseMessage response = await UserClient.DeleteAsync("/api/protecteddata/data/1");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             ProtectedDataRepository.Verify(x => x.Remove(data));
@@ -399,7 +412,7 @@ namespace ItspServices.pServer.Test
             ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
             ProtectedDataRepository.Setup(x => x.Remove(data)).Returns(uow.Object).Verifiable();
 
-            var response = await UserClient.DeleteAsync("/api/protecteddata/data/0");
+            HttpResponseMessage response = await UserClient.DeleteAsync("/api/protecteddata/data/0");
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
             uow.VerifyNoOtherCalls();
         }
