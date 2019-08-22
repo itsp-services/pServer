@@ -25,6 +25,7 @@ namespace ItspServices.pServer.Test
     [TestClass]
     public class AuthorizedEndpointTest
     {
+        #region Fields
         static WebApplicationFactory ClientFactory;
         static HttpClient AdminClient;
         static HttpClient UserClient;
@@ -38,7 +39,9 @@ namespace ItspServices.pServer.Test
         static readonly Mock<IRepositoryManager> RepositoryManager = new Mock<IRepositoryManager>();
         static readonly Mock<IUserRepository> UserRepository = new Mock<IUserRepository>();
         Mock<IProtectedDataRepository> ProtectedDataRepository;
+        #endregion
 
+        #region Nested classes
         class WebApplicationFactory : WebApplicationFactory<Startup>
         {
             protected override IWebHostBuilder CreateWebHostBuilder() =>
@@ -56,7 +59,9 @@ namespace ItspServices.pServer.Test
                 });
             }
         }
+        #endregion
 
+        #region Initialize and cleanup methods
         [ClassInitialize]
         public static async Task InitAsync(TestContext _)
         {
@@ -119,7 +124,9 @@ namespace ItspServices.pServer.Test
             ProtectedDataRepository = new Mock<IProtectedDataRepository>();
             RepositoryManager.Setup(x => x.ProtectedDataRepository).Returns(ProtectedDataRepository.Object);
         }
+        #endregion
 
+        #region Test methods
         [TestMethod]
         public async Task GetFolderWithoutProvidingAnId_ShouldReturnTheRootFolder()
         {
@@ -208,7 +215,7 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task ProtectedDataGetById()
+        public async Task GetProtectedDataWithProvidingAnId_UserHasReadPermissions_ShouldSucceed()
         {
             ProtectedData data = new ProtectedData()
             {
@@ -242,7 +249,7 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task UnauthorizedRequestData()
+        public async Task GetProtectedDataWithProvidingAnId_UserHasNoPermissions_ShouldFailWithStatusCode403()
         {
             ProtectedData data = new ProtectedData()
             {
@@ -256,7 +263,7 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task NotFoundRequestData()
+        public async Task GetProtectedDataWithProvidingAnIdThatDoesNotExist_ShouldFailWithStatusCode404()
         {
             HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/data/999");
 
@@ -264,7 +271,7 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task RequestWithViewPermission()
+        public async Task GetProtectedDataWithProvidingAnId_UserHasViewPermissions_ShouldFailWithStatusCode403()
         {
             ProtectedData data = new ProtectedData()
             {
@@ -339,7 +346,7 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task UpdateProtectedData_UserHasWritePermissionShouldSucceed()
+        public async Task UpdateProtectedData_UserHasWritePermission_ShouldSucceed()
         {
             ProtectedData data = new ProtectedData()
             {
@@ -374,7 +381,7 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task UpdateProtectedData_UserHasReadPermissionShouldFail()
+        public async Task UpdateProtectedData_UserHasReadPermission_ShouldFail()
         {
             ProtectedData data = new ProtectedData()
             {
@@ -402,7 +409,7 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task RemoveProtectedData_UserIsOwnerShouldSucceed()
+        public async Task RemoveProtectedData_UserIsOwner_ShouldSucceed()
         {
             ProtectedData data = new ProtectedData()
             {
@@ -443,5 +450,6 @@ namespace ItspServices.pServer.Test
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
             uow.VerifyNoOtherCalls();
         }
+        #endregion
     }
 }
