@@ -121,19 +121,12 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task ProtectedDataGetRootFolder()
+        public async Task GetFolderWithoutProvidingAnId_ShouldReturnTheRootFolder()
         {
             Folder rootFolder = new Folder
             {
                 Id = 0,
-                Name = "root",
-                Subfolder = new[] {
-                    new Folder
-                    {
-                        Id = 1,
-                        Name = "Folder1"
-                    }
-                }.ToList()
+                Name = "root"
             };
             ProtectedDataRepository.Setup(x => x.GetFolderById(null)).Returns(rootFolder);
 
@@ -146,7 +139,7 @@ namespace ItspServices.pServer.Test
                     parentId = default(int?),
                     name = "root",
                     protectedDataIds = default(int[]),
-                    subfolderIds = new[] { 1 }
+                    subfolderIds = default(int[])
                 });
 
                 Assert.IsTrue(JToken.DeepEquals(JToken.Parse(content), expected));
@@ -154,7 +147,7 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task ProtectedDataGetFolderById()
+        public async Task GetFolderWithProvidingAnId_ShouldReturnThatFolder()
         {
             Folder folder = new Folder()
             {
@@ -174,6 +167,40 @@ namespace ItspServices.pServer.Test
                     name = "Folder1",
                     protectedDataIds = default(int[]),
                     subfolderIds = default(int[])
+                });
+
+                Assert.IsTrue(JToken.DeepEquals(JToken.Parse(content), expected));
+            }
+        }
+
+        [TestMethod]
+        public async Task GetFolderByIdThatDoesHaveSubfolders_ShouldReturnThierIdsInTheSubfolderIdsMember()
+        {
+            Folder folder = new Folder()
+            {
+                Id = 1,
+                Name = "Folder1",
+                Subfolder = new[] {
+                    new Folder
+                    {
+                        Id = 2,
+                        Name = "SubFolder1"
+                    }
+                }.ToList()
+            };
+
+            ProtectedDataRepository.Setup(x => x.GetFolderById(1)).Returns(folder);
+
+            using (HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/folder/1"))
+            {
+                string content = await response.Content.ReadAsStringAsync();
+
+                JToken expected = JToken.FromObject(new
+                {
+                    parentId = default(int?),
+                    name = "Folder1",
+                    protectedDataIds = default(int[]),
+                    subfolderIds = new int[] { 2 }
                 });
 
                 Assert.IsTrue(JToken.DeepEquals(JToken.Parse(content), expected));
