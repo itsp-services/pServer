@@ -108,7 +108,7 @@ namespace ItspServices.pServer.Test
         }
 
         [ClassCleanup]
-        public static void CleanupAsync()
+        public static void Cleanup()
         {
             ClientFactory?.Dispose();
             AdminClient?.Dispose();
@@ -181,7 +181,7 @@ namespace ItspServices.pServer.Test
         }
 
         [TestMethod]
-        public async Task GetFolderByIdThatDoesHaveSubfolders_ShouldReturnThierIdsInTheSubfolderIdsMember()
+        public async Task GetFolderByIdThatDoesHaveSubfolders_ShouldReturnTheirIdsInTheSubfolderIdsMember()
         {
             Folder folder = new Folder()
             {
