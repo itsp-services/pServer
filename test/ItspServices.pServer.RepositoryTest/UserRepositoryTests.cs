@@ -120,6 +120,29 @@ namespace ItspServices.pServer.RepositoryTest
         }
 
         [TestMethod]
+        public void AddUserToEmptyRespository_ShouldSucceed()
+        {
+            WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "EmptyAddUserData.xml"));
+
+            User newUser = new User()
+            {
+                UserName = "FooBar",
+                NormalizedUserName = "FOOBAR",
+                PasswordHash = "AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV"
+            };
+            newUser.PublicKeys.Add(new Key() { Id = 0, KeyData = Encoding.UTF8.GetBytes("cgDzAG4AaQBjAGEALAAgAEMASQBG") });
+            newUser.PublicKeys.Add(new Key() { Id = 1, KeyData = Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ") });
+            newUser.PublicKeys.Add(new Key() { Id = 2, KeyData = Encoding.UTF8.GetBytes("pPVWQxaZLPSkVrQ0uGE3ycJYgBug") });
+
+            WriteUserRepository.Add(newUser).Complete();
+            User userFromFile = WriteUserRepository.GetUserByNormalizedName("FOOBAR");
+
+
+            Assert.AreNotEqual(null, userFromFile);
+            AreEquivalentUser(newUser, userFromFile);
+        }
+
+        [TestMethod]
         public void RemoveUser()
         {
             WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "RemoveUserData.xml"));

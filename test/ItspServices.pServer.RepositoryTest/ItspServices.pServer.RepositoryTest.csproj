@@ -18,6 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Data\UserRepository\EmptyAddUserData.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\UserRepository\UpdateUserData.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -80,14 +80,10 @@ namespace ItspServices.pServer.Persistence.Repository
         }
 
         private int GetAvailableId()
-        {
-            using (StreamReader sr = new StreamReader(_filePath))
-            {
-                int id = (from user in XDocument.Load(sr).Descendants("User")
-                                       select (int)user.Attribute("Id")).Max();
-                return id++;
-            }
-        }
+            => XDocument.Load(_filePath).Descendants("User")
+                .Select(x => int.Parse(x.Attribute("Id").Value))
+                .OrderByDescending(x => x)
+                .FirstOrDefault() + 1;
 
         private void AddIdToKeys(IEnumerable<Key> keys)
         {
