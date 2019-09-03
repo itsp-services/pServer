@@ -1,4 +1,5 @@
 ﻿using ItspServices.pServer.Abstraction.Models;
+using ItspServices.pServer.Abstraction.Units;
 using ItspServices.pServer.Persistence.Repository;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
@@ -101,22 +102,23 @@ namespace ItspServices.pServer.RepositoryTest
         {
             WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "AddUserData.xml"));
 
-            User newUser = new User()
+            using (IAddUnitOfWork<User> unitOfWork = WriteUserRepository.Add())
             {
-                UserName = "FooBar",
-                NormalizedUserName = "FOOBAR",
-                PasswordHash = "AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV"
-            };
-            newUser.PublicKeys.Add(new Key() { Id = 0, KeyData = Encoding.UTF8.GetBytes("cgDzAG4AaQBjAGEALAAgAEMASQBG") });
-            newUser.PublicKeys.Add(new Key() { Id = 1, KeyData = Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ") });
-            newUser.PublicKeys.Add(new Key() { Id = 2, KeyData = Encoding.UTF8.GetBytes("pPVWQxaZLPSkVrQ0uGE3ycJYgBug") });
+                unitOfWork.Entity.UserName = "FooBar";
+                unitOfWork.Entity.NormalizedUserName = "FOOBAR";
+                unitOfWork.Entity.PasswordHash = "AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV";
 
-            WriteUserRepository.Add(newUser).Complete();
-            User userFromFile = WriteUserRepository.GetUserByNormalizedName("FOOBAR");
+                unitOfWork.Entity.PublicKeys.Add(new Key() { Id = 0, KeyData = Encoding.UTF8.GetBytes("cgDzAG4AaQBjAGEALAAgAEMASQBG") });
+                unitOfWork.Entity.PublicKeys.Add(new Key() { Id = 1, KeyData = Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ") });
+                unitOfWork.Entity.PublicKeys.Add(new Key() { Id = 2, KeyData = Encoding.UTF8.GetBytes("pPVWQxaZLPSkVrQ0uGE3ycJYgBug") });
 
+                unitOfWork.Complete();
 
-            Assert.AreNotEqual(null, userFromFile);
-            AreEquivalentUser(newUser, userFromFile);
+                User userFromFile = WriteUserRepository.GetUserByNormalizedName("FOOBAR");
+
+                Assert.AreNotEqual(null, userFromFile);
+                AreEquivalentUser(unitOfWork.Entity, userFromFile);
+            }
         }
 
         [TestMethod]
@@ -124,22 +126,23 @@ namespace ItspServices.pServer.RepositoryTest
         {
             WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "EmptyAddUserData.xml"));
 
-            User newUser = new User()
+            using (IAddUnitOfWork<User> unitOfWork = WriteUserRepository.Add())
             {
-                UserName = "FooBar",
-                NormalizedUserName = "FOOBAR",
-                PasswordHash = "AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV"
-            };
-            newUser.PublicKeys.Add(new Key() { Id = 0, KeyData = Encoding.UTF8.GetBytes("cgDzAG4AaQBjAGEALAAgAEMASQBG") });
-            newUser.PublicKeys.Add(new Key() { Id = 1, KeyData = Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ") });
-            newUser.PublicKeys.Add(new Key() { Id = 2, KeyData = Encoding.UTF8.GetBytes("pPVWQxaZLPSkVrQ0uGE3ycJYgBug") });
+                unitOfWork.Entity.UserName = "FooBar";
+                unitOfWork.Entity.NormalizedUserName = "FOOBAR";
+                unitOfWork.Entity.PasswordHash = "AQAAAAEAACcQAAAAEMLzIRUZnL3I6Pf5HnJuV";
 
-            WriteUserRepository.Add(newUser).Complete();
-            User userFromFile = WriteUserRepository.GetUserByNormalizedName("FOOBAR");
+                unitOfWork.Entity.PublicKeys.Add(new Key() { Id = 0, KeyData = Encoding.UTF8.GetBytes("cgDzAG4AaQBjAGEALAAgAEMASQBG") });
+                unitOfWork.Entity.PublicKeys.Add(new Key() { Id = 1, KeyData = Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ") });
+                unitOfWork.Entity.PublicKeys.Add(new Key() { Id = 2, KeyData = Encoding.UTF8.GetBytes("pPVWQxaZLPSkVrQ0uGE3ycJYgBug") });
 
+                unitOfWork.Complete();
 
-            Assert.AreNotEqual(null, userFromFile);
-            AreEquivalentUser(newUser, userFromFile);
+                User userFromFile = WriteUserRepository.GetUserByNormalizedName("FOOBAR");
+
+                Assert.AreNotEqual(null, userFromFile);
+                AreEquivalentUser(unitOfWork.Entity, userFromFile);
+            }
         }
 
         [TestMethod]

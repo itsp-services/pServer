@@ -21,8 +21,15 @@ namespace ItspServices.pServer.Stores
         {
             try
             {
-                IUnitOfWork<User> uow = UserRepository.Add(user);
-                uow.Complete();
+                using (IAddUnitOfWork<User> unitOfWork = UserRepository.Add())
+                {
+                    unitOfWork.Entity.UserName = user.UserName;
+                    unitOfWork.Entity.NormalizedUserName = user.NormalizedUserName;
+                    unitOfWork.Entity.PasswordHash = user.PasswordHash;
+                    unitOfWork.Entity.Role = user.Role;
+                    unitOfWork.Entity.PublicKeys.AddRange(user.PublicKeys);
+                    unitOfWork.Complete();
+                }
             }
             catch (IOException exception)
             {

@@ -7,7 +7,7 @@ namespace ItspServices.pServer.Abstraction.Repository
     {
         T GetById(int id);
         IEnumerable<T> GetAll();
-        IUnitOfWork<T> Add(T entity);
+        IAddUnitOfWork<T> Add();
         IUnitOfWork<T> Remove(T entity);
         IUnitOfWork<T> Update(T entity);
     }

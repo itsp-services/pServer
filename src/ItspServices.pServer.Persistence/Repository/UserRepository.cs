@@ -21,13 +21,8 @@ namespace ItspServices.pServer.Persistence.Repository
             _unitOfWork = new UserUnitOfWork(_filePath);
         }
 
-        public IUnitOfWork<User> Add(User entity)
-        {
-            entity.Id = GetAvailableId();
-            AddIdToKeys(entity.PublicKeys);
-            _unitOfWork.TransactionRecord.Add(entity, TransactionActions.ADD);
-            return _unitOfWork;
-        }
+        public IAddUnitOfWork<User> Add() 
+            => new AddUserUnitOfWork(_filePath);
 
         public IEnumerable<User> GetAll()
         {
@@ -78,12 +73,6 @@ namespace ItspServices.pServer.Persistence.Repository
             _unitOfWork.TransactionRecord.Add(entity, TransactionActions.UPDATE);
             return _unitOfWork;
         }
-
-        private int GetAvailableId()
-            => XDocument.Load(_filePath).Descendants("User")
-                .Select(x => int.Parse(x.Attribute("Id").Value))
-                .OrderByDescending(x => x)
-                .FirstOrDefault() + 1;
 
         private void AddIdToKeys(IEnumerable<Key> keys)
         {

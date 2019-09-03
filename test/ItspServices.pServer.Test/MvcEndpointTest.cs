@@ -94,14 +94,13 @@ namespace ItspServices.pServer.Test
         public async Task PostCredentialsRegisterTest()
         {
             User user = new User();
-            user.UserName = "Foo";
-            user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "Bar123456789!");
-            UserRepository.Setup(x => x.GetUserByNormalizedName("FOO")).Returns(user);
+            UserRepository.Setup(x => x.GetUserByNormalizedName("FOO")).Returns(() => user.NormalizedUserName == "FOO" ? user : null);
 
-            Mock<IUnitOfWork<User>> unit = new Mock<IUnitOfWork<User>>();
+            Mock<IAddUnitOfWork<User>> unit = new Mock<IAddUnitOfWork<User>>();
+            unit.Setup(x => x.Entity).Returns(user);
             unit.Setup(x => x.Complete()).Verifiable();
 
-            UserRepository.Setup(x => x.Add(It.IsAny<User>())).Returns(unit.Object).Verifiable();
+            UserRepository.Setup(x => x.Add()).Returns(unit.Object).Verifiable();
             UserRepository.Setup(x => x.GetUserByNormalizedName("Foo"));
 
             HttpResponseMessage response = await Client.PostAsync("/Account/Register?returnurl=%2F", new FormUrlEncodedContent(new[] {
@@ -111,7 +110,7 @@ namespace ItspServices.pServer.Test
             }));
 
             unit.Verify(x => x.Complete());
-            UserRepository.Verify(x => x.Add(It.IsAny<User>()));
+            UserRepository.Verify(x => x.Add());
             string content = await response.Content.ReadAsStringAsync();
             Assert.IsTrue(content.Contains("<title>Home Page"), "Redirect failed.");
         }

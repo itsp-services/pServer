@@ -1,11 +1,9 @@
-﻿using ItspServices.pServer.Abstraction.Models;
-using ItspServices.pServer.Abstraction.Units;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
+using ItspServices.pServer.Abstraction.Models;
+using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Persistence
 {
@@ -30,11 +28,6 @@ namespace ItspServices.pServer.Persistence
         }
 
         public void Dispose()
-        {
-            Rollback();
-        }
-
-        public void Rollback()
         {
             TransactionRecord.Clear();
         }

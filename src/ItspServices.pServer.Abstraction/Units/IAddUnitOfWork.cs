@@ -2,8 +2,8 @@
 
 namespace ItspServices.pServer.Abstraction.Units
 {
-    public interface IUnitOfWork<T> : IDisposable
+    public interface IAddUnitOfWork<T> : IUnitOfWork<T>
     {
-        void Complete();
+        T Entity { get; }
     }
 }

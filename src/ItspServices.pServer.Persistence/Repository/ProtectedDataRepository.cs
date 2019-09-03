@@ -9,7 +9,7 @@ namespace ItspServices.pServer.Persistence.Repository
 {
     class ProtectedDataRepository : IProtectedDataRepository
     {
-        public IUnitOfWork<ProtectedData> Add(ProtectedData entity)
+        public IAddUnitOfWork<ProtectedData> Add()
         {
             throw new NotImplementedException();
         }
