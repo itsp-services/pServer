@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ItspServices.pServer.Abstraction.Models
+﻿namespace ItspServices.pServer.Abstraction.Models
 {
     public class Id
     {
