@@ -1,14 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
-using Microsoft.AspNetCore.Authorization;
 using ItspServices.pServer.Abstraction;
-using System.Linq;
 using ItspServices.pServer.Models;
-using System.Collections.Generic;
 using ItspServices.pServer.Abstraction.Authorizer;
 using ItspServices.pServer.Authorization;
+using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Controllers
 {
@@ -99,42 +100,47 @@ namespace ItspServices.pServer.Controllers
         [HttpPut("data/{id:int}")]
         public IActionResult UpdateData([FromBody]DataModel model, int id)
         {
-            ProtectedData data = _repository.ProtectedDataRepository.GetById(id);
-            if (data == null)
-                return NotFound();
+            using (IUpdateUnitOfWork<ProtectedData> unitOfWork = _repository.ProtectedDataRepository.Update(id))
+            {
+                if (unitOfWork == null)
+                    return NotFound();
 
-            User user = GetSessionUser();
-            IAuthorizer authorizer = new UserDataAuthorizerBuilder(user, data)
-                                            .AddIsOwnerCheck()
-                                            .AddRequiredPermission(Permission.WRITE)
-                                            .Build();
+                User user = GetSessionUser();
+                IAuthorizer authorizer = new UserDataAuthorizerBuilder(user, unitOfWork.Entity)
+                                                .AddIsOwnerCheck()
+                                                .AddRequiredPermission(Permission.WRITE)
+                                                .Build();
 
-            if (!authorizer.Authorize())
-                return StatusCode(403);
+                if (!authorizer.Authorize())
+                    return StatusCode(403);
 
-            data.Name = model.Name;
-            data.Data = model.Data;
+                unitOfWork.Entity.Name = model.Name;
+                unitOfWork.Entity.Data = model.Data;
 
-            _repository.ProtectedDataRepository.Update(data).Complete();
+                unitOfWork.Complete();
 
-            return Ok();
+                return Ok();
+            }
         }
 
         [HttpDelete("data/{id:int}")]
         public IActionResult RemoveData(int id)
         {
-            ProtectedData data = _repository.ProtectedDataRepository.GetById(id);
-            User user = GetSessionUser();
-            IAuthorizer authorizer = new UserDataAuthorizerBuilder(user, data)
-                                            .AddIsOwnerCheck()
-                                            .AddRequiredPermission(Permission.WRITE)
-                                            .Build();
-            
-            if (!authorizer.Authorize())
-                return StatusCode(403);
+            using (IRemoveUnitOfWork<ProtectedData> unitOfWork = _repository.ProtectedDataRepository.Remove(id))
+            {
+                User user = GetSessionUser();
+                IAuthorizer authorizer = new UserDataAuthorizerBuilder(user, unitOfWork.Entity)
+                                                .AddIsOwnerCheck()
+                                                .AddRequiredPermission(Permission.WRITE)
+                                                .Build();
 
-            _repository.ProtectedDataRepository.Remove(data).Complete();
-            return Ok();
+                if (!authorizer.Authorize())
+                    return StatusCode(403);
+
+                unitOfWork.Complete();
+                return Ok();
+
+            }
         }
 
         private User GetSessionUser()

@@ -1,7 +1,8 @@
 ﻿namespace ItspServices.pServer.Abstraction.Units
 {
-    public interface IAddUnitOfWork<T> : IUnitOfWork<T>
+    public interface IRemoveUnitOfWork<T> : IUnitOfWork<T>
     {
+        int Id { get; }
         T Entity { get; }
     }
 }

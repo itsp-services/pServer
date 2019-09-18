@@ -1,8 +1,9 @@
-﻿using ItspServices.pServer.Abstraction.Models;
-using ItspServices.pServer.Abstraction.Repository;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Text;
+using ItspServices.pServer.Abstraction.Models;
+using ItspServices.pServer.Abstraction.Repository;
+using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Controllers
 {
@@ -27,9 +28,15 @@ namespace ItspServices.pServer.Controllers
         {
             if (newKey == null)
                 return;
+
+
             User user = _userRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
-            user.PublicKeys.Add(new Key() { KeyData = Encoding.UTF8.GetBytes(newKey) });
-            _userRepository.Update(user).Complete();
+
+            using (IUpdateUnitOfWork<User> unitOfWork = _userRepository.Update(user.Id))
+            {
+                unitOfWork.Entity.PublicKeys.Add(new Key() { KeyData = Encoding.UTF8.GetBytes(newKey) });
+                unitOfWork.Complete();
+            }
         }
     }
 }
