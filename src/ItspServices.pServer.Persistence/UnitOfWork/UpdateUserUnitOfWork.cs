@@ -4,7 +4,7 @@ using System.Xml.Linq;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Units;
 
-namespace ItspServices.pServer.Persistence
+namespace ItspServices.pServer.Persistence.UnitOfWork
 {
     class UpdateUserUnitOfWork : IUpdateUnitOfWork<User>
     {
@@ -32,7 +32,7 @@ namespace ItspServices.pServer.Persistence
             if (_isCompleted)
                 return;
 
-            lock (_lockObject)
+            lock (LockObject.Lock)
             {
                 XDocument document = XDocument.Load(_filePath);
                 XElement elementToUpdate = (from userEntry in document.Descendants("User")
