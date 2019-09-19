@@ -7,17 +7,20 @@ namespace ItspServices.pServer.Persistence.UnitOfWork
 {
     class RemoveUserUnitOfWork : IRemoveUnitOfWork<User>
     {
-        static object _lockObject = new object();
-        private string _filePath;
+        static readonly object _lockObject = new object();
+        string _filePath;
         bool _isCompleted;
 
-        public int? Id { get; set; }
+        public int Id { get; }
 
-        public RemoveUserUnitOfWork(string filePath)
+        public User Entity { get; }
+
+        public RemoveUserUnitOfWork(string filePath, User entity)
         {
-            Id = null;
             _filePath = filePath;
             _isCompleted = false;
+            Id = entity.Id;
+            Entity = entity;
         }
 
         public void Complete()
@@ -25,7 +28,7 @@ namespace ItspServices.pServer.Persistence.UnitOfWork
             if (_isCompleted)
                 return;
 
-            lock (_lockObject)
+            lock (LockObject.Lock)
             {
                 XDocument document = XDocument.Load(_filePath);
                 document.Root.Elements()

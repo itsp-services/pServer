@@ -1,4 +1,5 @@
-﻿using System.Linq;
+using System;
+using System.Linq;
 using System.Xml.Linq;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Units;
@@ -7,28 +8,31 @@ namespace ItspServices.pServer.Persistence.UnitOfWork
 {
     class UpdateUserUnitOfWork : IUpdateUnitOfWork<User>
     {
-        static object _lockObject = new object();
+        static readonly object _lockObject = new object();
         private string _filePath;
         bool _isCompleted;
 
-        public int? Id { get; set; }
+        public int Id { get; }
 
         public User Entity { get; }
 
-        public UpdateUserUnitOfWork(string filePath)
+        public UpdateUserUnitOfWork(string filePath, User user)
         {
-            Entity = new User();
-            Id = null;
+            Entity = user;
+            Id = user.Id;
             _filePath = filePath;
             _isCompleted = false;
         }
 
         public void Complete()
         {
+            if (Entity.Id != Id)
+                throw new InvalidOperationException("Change of the Id to update is not supported.");
+
             if (_isCompleted)
                 return;
 
-            lock (_lockObject)
+            lock (LockObject.Lock)
             {
                 XDocument document = XDocument.Load(_filePath);
                 XElement elementToUpdate = (from userEntry in document.Descendants("User")

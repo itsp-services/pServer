@@ -3,12 +3,12 @@ using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Abstraction.Repository
 {
-    public interface IRepository<T> where T : class
+    public interface IRepository<Tentity, Tkey> where Tentity : class
     {
-        T GetById(int id);
-        IEnumerable<T> GetAll();
-        IAddUnitOfWork<T> Add();
-        IUnitOfWork<T> Remove(T entity);
-        IUnitOfWork<T> Update(T entity);
+        Tentity GetById(int id);
+        IEnumerable<Tentity> GetAll();
+        IAddUnitOfWork<Tentity> Add();
+        IRemoveUnitOfWork<Tentity> Remove(Tkey key);
+        IUpdateUnitOfWork<Tentity> Update(Tkey key);
     }
 }

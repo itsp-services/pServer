@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
+using ItspServices.pServer.Persistence.UnitOfWork;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.RepositoryTest")]
 namespace ItspServices.pServer.Persistence.Repository
@@ -61,37 +62,22 @@ namespace ItspServices.pServer.Persistence.Repository
             }
         }
 
-        public IUnitOfWork<User> Remove(User entity)
+        public IRemoveUnitOfWork<User> Remove(int key)
         {
-            _unitOfWork.TransactionRecord.Add(entity, TransactionActions.REMOVE);
-            return _unitOfWork;
+            User user = GetById(key);
+            if (user == null)
+                throw new System.InvalidOperationException($"User with id {key} does not exist.");
+
+            return new RemoveUserUnitOfWork(_filePath, user);
         }
 
-        public IUnitOfWork<User> Update(User entity)
+        public IUpdateUnitOfWork<User> Update(int key)
         {
-            AddIdToKeys(entity.PublicKeys);
-            _unitOfWork.TransactionRecord.Add(entity, TransactionActions.UPDATE);
-            return _unitOfWork;
-        }
+            User user = GetById(key);
+            if (user == null)
+                return null;
 
-        private void AddIdToKeys(IEnumerable<Key> keys)
-        {
-            int highestId = -1;
-            foreach (Key key in keys)
-            {
-                if (key.Id >= 0 && key.Id > highestId)
-                    highestId = key.Id;
-            }
-            highestId++;
-
-            foreach (Key key in keys)
-            {
-                if (key.Id < 0)
-                {
-                    key.Id = highestId;
-                    highestId++;
-                }
-            }
+            return new UpdateUserUnitOfWork(_filePath, user);
         }
     }
 }

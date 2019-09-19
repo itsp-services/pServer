@@ -2,6 +2,7 @@
 {
     public interface IRemoveUnitOfWork<T> : IUnitOfWork<T>
     {
-        int? Id { get; set; }
+        int Id { get; }
+        T Entity { get; }
     }
 }
