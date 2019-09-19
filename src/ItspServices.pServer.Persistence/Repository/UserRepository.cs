@@ -14,12 +14,9 @@ namespace ItspServices.pServer.Persistence.Repository
     {
         private readonly string _filePath;
 
-        private UserUnitOfWork _unitOfWork;
-
         public UserRepository(string filepath)
         {
             _filePath = filepath;
-            _unitOfWork = new UserUnitOfWork(_filePath);
         }
 
         public IAddUnitOfWork<User> Add() 
