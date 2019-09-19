@@ -5,20 +5,23 @@ using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Persistence.UnitOfWork
 {
-    class AddUserUnitOfWork : IAddUnitOfWork<User>
+    class RemoveUserUnitOfWork : IRemoveUnitOfWork<User, int>
     {
-        static object _lockObject = new object();
+        static readonly object _lockObject = new object();
         string _filePath;
         bool _isCompleted;
 
-        public AddUserUnitOfWork(string filePath)
-        {
-            _filePath = filePath;
-            Entity = new User();
-            _isCompleted = false;
-        }
+        public int Id { get; }
 
         public User Entity { get; }
+
+        public RemoveUserUnitOfWork(string filePath, User entity)
+        {
+            _filePath = filePath;
+            _isCompleted = false;
+            Id = entity.Id;
+            Entity = entity;
+        }
 
         public void Complete()
         {
@@ -28,14 +31,10 @@ namespace ItspServices.pServer.Persistence.UnitOfWork
             lock (LockObject.Lock)
             {
                 XDocument document = XDocument.Load(_filePath);
-                Entity.Id = document.Descendants("User")
-                    .Select(x => int.Parse(x.Attribute("Id").Value))
-                    .OrderByDescending(x => x)
-                    .FirstOrDefault() + 1;
-
-                document.Element("Users").Add(UserSerializer.UserToXElement(Entity));
+                document.Root.Elements()
+                             .Where(x => (int)x.Attribute("Id") == Id)
+                             .Remove();
                 document.Save(_filePath);
-
                 _isCompleted = true;
             }
         }

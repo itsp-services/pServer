@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ItspServices.pServer.Abstraction.Units
+﻿namespace ItspServices.pServer.Abstraction.Units
 {
     public interface IAddUnitOfWork<T> : IUnitOfWork<T>
     {

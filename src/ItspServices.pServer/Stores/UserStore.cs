@@ -42,8 +42,8 @@ namespace ItspServices.pServer.Stores
         {
             try
             {
-                IUnitOfWork<User> uow = UserRepository.Remove(user);
-                uow.Complete();
+                using (IRemoveUnitOfWork<User, int> uow = UserRepository.Remove(user.Id))
+                    uow.Complete();
             }
             catch (IOException exception)
             {
@@ -56,8 +56,18 @@ namespace ItspServices.pServer.Stores
         {
             try
             {
-                IUnitOfWork<User> uow = UserRepository.Update(user);
-                uow.Complete();
+                using (IUpdateUnitOfWork<User, int> uow = UserRepository.Update(user.Id))
+                {
+                    if (uow != null)
+                    {
+                        uow.Entity.NormalizedUserName = user.NormalizedUserName;
+                        uow.Entity.PasswordHash = user.PasswordHash;
+                        uow.Entity.PublicKeys = user.PublicKeys;
+                        uow.Entity.Role = user.Role;
+                    }
+
+                    uow.Complete();
+                }
             }
             catch (IOException exception)
             {
@@ -126,9 +136,11 @@ namespace ItspServices.pServer.Stores
 
         private static Task<IdentityResult> GetResultFromUnitCompleteException(IOException exception)
         {
-            IdentityError error = new IdentityError();
-            error.Code = exception.Source;
-            error.Description = exception.Message;
+            IdentityError error = new IdentityError
+            {
+                Code = exception.Source,
+                Description = exception.Message
+            };
             return Task.FromResult(IdentityResult.Failed(error));
         }
     }

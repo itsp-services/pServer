@@ -48,7 +48,7 @@ namespace ItspServices.pServer.RepositoryTest
         }
 
         [ClassInitialize]
-        public static void ClassInit(TestContext context)
+        public static void ClassInit(TestContext _)
         {
             ReadUserRepository = new UserRepository(Path.GetFullPath(Path.Combine("Data", "UserRepository", "ReadUserData.xml")));
         }
@@ -150,14 +150,14 @@ namespace ItspServices.pServer.RepositoryTest
         {
             WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "RemoveUserData.xml"));
 
-            User user = WriteUserRepository.GetById(_readonlyUserData[0].Id);
-            Assert.AreNotEqual(null, user);
-            AreEquivalentUser(_readonlyUserData[0], user);
+            using (IRemoveUnitOfWork<User, int> unitOfWork = WriteUserRepository.Remove(_readonlyUserData[0].Id))
+            {
+                Assert.AreNotEqual(null, unitOfWork);
+                AreEquivalentUser(_readonlyUserData[0], unitOfWork.Entity);
+                unitOfWork.Complete();
+            }
 
-            WriteUserRepository.Remove(_readonlyUserData[0]).Complete();
-
-            user = WriteUserRepository.GetById(_readonlyUserData[0].Id);
-            Assert.AreEqual(null, user);
+            Assert.AreEqual(null, WriteUserRepository.GetById(_readonlyUserData[0].Id));
         }
 
         [TestMethod]
@@ -165,19 +165,20 @@ namespace ItspServices.pServer.RepositoryTest
         {
             WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "UpdateUserData.xml"));
 
-            User userToUpdate = WriteUserRepository.GetById(_readonlyUserData[1].Id);
-            Assert.AreNotEqual(null, userToUpdate);
-            AreEquivalentUser(_readonlyUserData[1], userToUpdate);
+            using (IUpdateUnitOfWork<User, int> unitOfWork = WriteUserRepository.Update(_readonlyUserData[1].Id))
+            {
+                Assert.AreNotEqual(null, unitOfWork);
 
-            userToUpdate.UserName = "BarFoo";
-            userToUpdate.NormalizedUserName = userToUpdate.UserName.ToUpper();
-            userToUpdate.PublicKeys.Add(new Key() { Id = 3, KeyData = Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ") });
+                unitOfWork.Entity.UserName = "BarFoo";
+                unitOfWork.Entity.NormalizedUserName = unitOfWork.Entity.UserName.ToUpper();
+                unitOfWork.Entity.PublicKeys.Add(new Key() { Id = 3, KeyData = Encoding.UTF8.GetBytes("lHPrzg5XPAOBOp0KoVdDaaxXbXmQ") });
 
-            WriteUserRepository.Update(userToUpdate).Complete();
+                unitOfWork.Complete();
 
-            User userFromFile = WriteUserRepository.GetById(_readonlyUserData[1].Id);
-            Assert.AreNotEqual(null, userFromFile);
-            AreEquivalentUser(userToUpdate, userFromFile);
+                User userFromFile = WriteUserRepository.GetById(_readonlyUserData[1].Id);
+                Assert.AreNotEqual(null, userFromFile);
+                AreEquivalentUser(unitOfWork.Entity, userFromFile);
+            }
         }
 
         private static void AreEquivalentUser(User expected, User actual)
