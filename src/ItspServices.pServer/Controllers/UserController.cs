@@ -32,7 +32,7 @@ namespace ItspServices.pServer.Controllers
 
             User user = _userRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
 
-            using (IUpdateUnitOfWork<User> unitOfWork = _userRepository.Update(user.Id))
+            using (IUpdateUnitOfWork<User, int> unitOfWork = _userRepository.Update(user.Id))
             {
                 unitOfWork.Entity.PublicKeys.Add(new Key() { KeyData = Encoding.UTF8.GetBytes(newKey) });
                 unitOfWork.Complete();

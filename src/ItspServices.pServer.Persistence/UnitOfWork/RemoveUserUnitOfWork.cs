@@ -5,7 +5,7 @@ using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Persistence.UnitOfWork
 {
-    class RemoveUserUnitOfWork : IRemoveUnitOfWork<User>
+    class RemoveUserUnitOfWork : IRemoveUnitOfWork<User, int>
     {
         static readonly object _lockObject = new object();
         string _filePath;

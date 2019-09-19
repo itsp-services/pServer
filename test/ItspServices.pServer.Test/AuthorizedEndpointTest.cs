@@ -360,7 +360,7 @@ namespace ItspServices.pServer.Test
                 Permission = Permission.WRITE // User now has write permission and should be able to update
             });
 
-            Mock <IUpdateUnitOfWork<ProtectedData>> unit = new Mock<IUpdateUnitOfWork<ProtectedData>>();
+            Mock <IUpdateUnitOfWork<ProtectedData, int>> unit = new Mock<IUpdateUnitOfWork<ProtectedData, int>>();
             unit.Setup(x => x.Complete()).Verifiable();
             unit.Setup(x => x.Entity).Returns(data);
             ProtectedDataRepository.Setup(x => x.GetById(data.Id)).Returns(data);
@@ -398,7 +398,7 @@ namespace ItspServices.pServer.Test
                 Permission = Permission.READ // User only has read permission and should not be able to update
             });
 
-            Mock<IUpdateUnitOfWork<ProtectedData>> unit = new Mock<IUpdateUnitOfWork<ProtectedData>>();
+            Mock<IUpdateUnitOfWork<ProtectedData, int>> unit = new Mock<IUpdateUnitOfWork<ProtectedData, int>>();
             unit.Setup(x => x.Complete()).Verifiable();
             unit.Setup(x => x.Entity).Returns(data);
 
@@ -425,7 +425,7 @@ namespace ItspServices.pServer.Test
                 OwnerId = User.Id
             };
 
-            Mock<IRemoveUnitOfWork<ProtectedData>> uow = new Mock<IRemoveUnitOfWork<ProtectedData>>();
+            Mock<IRemoveUnitOfWork<ProtectedData, int>> uow = new Mock<IRemoveUnitOfWork<ProtectedData, int>>();
             uow.Setup(x => x.Entity).Returns(data);
             uow.Setup(x => x.Complete()).Verifiable();
             ProtectedDataRepository.Setup(x => x.Remove(data.Id)).Returns(uow.Object).Verifiable();
@@ -451,7 +451,7 @@ namespace ItspServices.pServer.Test
                 Permission = Permission.READ
             });
 
-            Mock<IRemoveUnitOfWork<ProtectedData>> uow = new Mock<IRemoveUnitOfWork<ProtectedData>>();
+            Mock<IRemoveUnitOfWork<ProtectedData, int>> uow = new Mock<IRemoveUnitOfWork<ProtectedData, int>>();
             uow.Setup(x => x.Entity).Returns(data);
             uow.Setup(x => x.Complete()).Verifiable();
             ProtectedDataRepository.Setup(x => x.Remove(data.Id)).Returns(uow.Object).Verifiable();

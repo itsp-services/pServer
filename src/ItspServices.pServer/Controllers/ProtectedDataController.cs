@@ -100,7 +100,7 @@ namespace ItspServices.pServer.Controllers
         [HttpPut("data/{id:int}")]
         public IActionResult UpdateData([FromBody]DataModel model, int id)
         {
-            using (IUpdateUnitOfWork<ProtectedData> unitOfWork = _repository.ProtectedDataRepository.Update(id))
+            using (IUpdateUnitOfWork<ProtectedData, int> unitOfWork = _repository.ProtectedDataRepository.Update(id))
             {
                 if (unitOfWork == null)
                     return NotFound();
@@ -126,7 +126,7 @@ namespace ItspServices.pServer.Controllers
         [HttpDelete("data/{id:int}")]
         public IActionResult RemoveData(int id)
         {
-            using (IRemoveUnitOfWork<ProtectedData> unitOfWork = _repository.ProtectedDataRepository.Remove(id))
+            using (IRemoveUnitOfWork<ProtectedData, int> unitOfWork = _repository.ProtectedDataRepository.Remove(id))
             {
                 User user = GetSessionUser();
                 IAuthorizer authorizer = new UserDataAuthorizerBuilder(user, unitOfWork.Entity)

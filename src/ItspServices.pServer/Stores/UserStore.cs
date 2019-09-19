@@ -42,7 +42,7 @@ namespace ItspServices.pServer.Stores
         {
             try
             {
-                using (IRemoveUnitOfWork<User> uow = UserRepository.Remove(user.Id))
+                using (IRemoveUnitOfWork<User, int> uow = UserRepository.Remove(user.Id))
                     uow.Complete();
             }
             catch (IOException exception)
@@ -56,7 +56,7 @@ namespace ItspServices.pServer.Stores
         {
             try
             {
-                using (IUpdateUnitOfWork<User> uow = UserRepository.Update(user.Id))
+                using (IUpdateUnitOfWork<User, int> uow = UserRepository.Update(user.Id))
                 {
                     if (uow != null)
                     {

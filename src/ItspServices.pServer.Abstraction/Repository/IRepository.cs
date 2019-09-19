@@ -8,7 +8,7 @@ namespace ItspServices.pServer.Abstraction.Repository
         Tentity GetById(int id);
         IEnumerable<Tentity> GetAll();
         IAddUnitOfWork<Tentity> Add();
-        IRemoveUnitOfWork<Tentity> Remove(Tkey key);
-        IUpdateUnitOfWork<Tentity> Update(Tkey key);
+        IRemoveUnitOfWork<Tentity, Tkey> Remove(Tkey key);
+        IUpdateUnitOfWork<Tentity, Tkey> Update(Tkey key);
     }
 }

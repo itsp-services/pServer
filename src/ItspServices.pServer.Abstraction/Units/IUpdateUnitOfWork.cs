@@ -1,7 +1,8 @@
 ﻿namespace ItspServices.pServer.Abstraction.Units
 {
-    public interface IUpdateUnitOfWork<T> : IUnitOfWork<T>
+    public interface IUpdateUnitOfWork<Tentity, Tkey> : IUnitOfWork<Tentity>
     {
-        T Entity { get; }
+        Tkey Id { get; }
+        Tentity Entity { get; }
     }
 }

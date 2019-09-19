@@ -39,12 +39,12 @@ namespace ItspServices.pServer.Persistence.Repository
             throw new NotImplementedException();
         }
 
-        public IRemoveUnitOfWork<ProtectedData> Remove(int key)
+        public IRemoveUnitOfWork<ProtectedData, int> Remove(int key)
         {
             throw new NotImplementedException();
         }
 
-        public IUpdateUnitOfWork<ProtectedData> Update(int key)
+        public IUpdateUnitOfWork<ProtectedData, int> Update(int key)
         {
             throw new NotImplementedException();
         }

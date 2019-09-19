@@ -150,7 +150,7 @@ namespace ItspServices.pServer.RepositoryTest
         {
             WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "RemoveUserData.xml"));
 
-            using (IRemoveUnitOfWork<User> unitOfWork = WriteUserRepository.Remove(_readonlyUserData[0].Id))
+            using (IRemoveUnitOfWork<User, int> unitOfWork = WriteUserRepository.Remove(_readonlyUserData[0].Id))
             {
                 Assert.AreNotEqual(null, unitOfWork);
                 AreEquivalentUser(_readonlyUserData[0], unitOfWork.Entity);
@@ -165,7 +165,7 @@ namespace ItspServices.pServer.RepositoryTest
         {
             WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "UpdateUserData.xml"));
 
-            using (IUpdateUnitOfWork<User> unitOfWork = WriteUserRepository.Update(_readonlyUserData[1].Id))
+            using (IUpdateUnitOfWork<User, int> unitOfWork = WriteUserRepository.Update(_readonlyUserData[1].Id))
             {
                 Assert.AreNotEqual(null, unitOfWork);
 

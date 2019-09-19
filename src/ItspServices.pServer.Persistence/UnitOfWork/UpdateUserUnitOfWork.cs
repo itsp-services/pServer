@@ -6,7 +6,7 @@ using ItspServices.pServer.Abstraction.Units;
 
 namespace ItspServices.pServer.Persistence.UnitOfWork
 {
-    class UpdateUserUnitOfWork : IUpdateUnitOfWork<User>
+    class UpdateUserUnitOfWork : IUpdateUnitOfWork<User, int>
     {
         static readonly object _lockObject = new object();
         private string _filePath;

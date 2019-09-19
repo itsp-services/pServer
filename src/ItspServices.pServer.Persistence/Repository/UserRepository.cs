@@ -62,7 +62,7 @@ namespace ItspServices.pServer.Persistence.Repository
             }
         }
 
-        public IRemoveUnitOfWork<User> Remove(int key)
+        public IRemoveUnitOfWork<User, int> Remove(int key)
         {
             User user = GetById(key);
             if (user == null)
@@ -71,7 +71,7 @@ namespace ItspServices.pServer.Persistence.Repository
             return new RemoveUserUnitOfWork(_filePath, user);
         }
 
-        public IUpdateUnitOfWork<User> Update(int key)
+        public IUpdateUnitOfWork<User, int> Update(int key)
         {
             User user = GetById(key);
             if (user == null)
