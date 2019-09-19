@@ -3,7 +3,7 @@ using System.Xml.Linq;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Units;
 
-namespace ItspServices.pServer.Persistence
+namespace ItspServices.pServer.Persistence.UnitOfWork
 {
     class AddUserUnitOfWork : IAddUnitOfWork<User>
     {
@@ -25,7 +25,7 @@ namespace ItspServices.pServer.Persistence
             if (_isCompleted)
                 return;
 
-            lock (_lockObject)
+            lock (LockObject.Lock)
             {
                 XDocument document = XDocument.Load(_filePath);
                 Entity.Id = document.Descendants("User")

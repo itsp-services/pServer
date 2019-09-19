@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
+using ItspServices.pServer.Persistence.UnitOfWork;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.RepositoryTest")]
 namespace ItspServices.pServer.Persistence.Repository
