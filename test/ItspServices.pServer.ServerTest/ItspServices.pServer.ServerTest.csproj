@@ -23,4 +23,22 @@
     <ProjectReference Include="..\..\src\ItspServices.pServer\ItspServices.pServer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="RepositoryTests\Data\UserRepository\AddUserData.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="RepositoryTests\Data\UserRepository\EmptyAddUserData.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="RepositoryTests\Data\UserRepository\ReadUserData.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="RepositoryTests\Data\UserRepository\RemoveUserData.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="RepositoryTests\Data\UserRepository\UpdateUserData.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

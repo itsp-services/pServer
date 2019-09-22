@@ -50,7 +50,7 @@ namespace ItspServices.pServer.RepositoryTest
         [ClassInitialize]
         public static void ClassInit(TestContext _)
         {
-            ReadUserRepository = new UserRepository(Path.GetFullPath(Path.Combine("Data", "UserRepository", "ReadUserData.xml")));
+            ReadUserRepository = new UserRepository(Path.GetFullPath(Path.Combine("RepositoryTests", "Data", "UserRepository", "ReadUserData.xml")));
         }
 
         [TestMethod]
@@ -100,7 +100,7 @@ namespace ItspServices.pServer.RepositoryTest
         [TestMethod]
         public void AddUser()
         {
-            WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "AddUserData.xml"));
+            WriteUserRepository = new UserRepository(Path.Combine("RepositoryTests", "Data", "UserRepository", "AddUserData.xml"));
 
             using (IAddUnitOfWork<User> unitOfWork = WriteUserRepository.Add())
             {
@@ -124,7 +124,7 @@ namespace ItspServices.pServer.RepositoryTest
         [TestMethod]
         public void AddUserToEmptyRespository_ShouldSucceed()
         {
-            WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "EmptyAddUserData.xml"));
+            WriteUserRepository = new UserRepository(Path.Combine("RepositoryTests", "Data", "UserRepository", "EmptyAddUserData.xml"));
 
             using (IAddUnitOfWork<User> unitOfWork = WriteUserRepository.Add())
             {
@@ -148,7 +148,7 @@ namespace ItspServices.pServer.RepositoryTest
         [TestMethod]
         public void RemoveUser()
         {
-            WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "RemoveUserData.xml"));
+            WriteUserRepository = new UserRepository(Path.Combine("RepositoryTests", "Data", "UserRepository", "RemoveUserData.xml"));
 
             using (IRemoveUnitOfWork<User, int> unitOfWork = WriteUserRepository.Remove(_readonlyUserData[0].Id))
             {
@@ -163,7 +163,7 @@ namespace ItspServices.pServer.RepositoryTest
         [TestMethod]
         public void UpdateUser()
         {
-            WriteUserRepository = new UserRepository(Path.Combine("Data", "UserRepository", "UpdateUserData.xml"));
+            WriteUserRepository = new UserRepository(Path.Combine("RepositoryTests", "Data", "UserRepository", "UpdateUserData.xml"));
 
             using (IUpdateUnitOfWork<User, int> unitOfWork = WriteUserRepository.Update(_readonlyUserData[1].Id))
             {
