@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
+using ItspServices.pServer.Persistence.UnitOfWork;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.RepositoryTest")]
 namespace ItspServices.pServer.Persistence.Repository
@@ -13,21 +14,13 @@ namespace ItspServices.pServer.Persistence.Repository
     {
         private readonly string _filePath;
 
-        private UserUnitOfWork _unitOfWork;
-
         public UserRepository(string filepath)
         {
             _filePath = filepath;
-            _unitOfWork = new UserUnitOfWork(_filePath);
         }
 
-        public IUnitOfWork<User> Add(User entity)
-        {
-            entity.Id = GetAvailableId();
-            AddIdToKeys(entity.PublicKeys);
-            _unitOfWork.TransactionRecord.Add(entity, TransactionActions.ADD);
-            return _unitOfWork;
-        }
+        public IAddUnitOfWork<User> Add() 
+            => new AddUserUnitOfWork(_filePath);
 
         public IEnumerable<User> GetAll()
         {
@@ -66,43 +59,22 @@ namespace ItspServices.pServer.Persistence.Repository
             }
         }
 
-        public IUnitOfWork<User> Remove(User entity)
+        public IRemoveUnitOfWork<User, int> Remove(int key)
         {
-            _unitOfWork.TransactionRecord.Add(entity, TransactionActions.REMOVE);
-            return _unitOfWork;
+            User user = GetById(key);
+            if (user == null)
+                throw new System.InvalidOperationException($"User with id {key} does not exist.");
+
+            return new RemoveUserUnitOfWork(_filePath, user);
         }
 
-        public IUnitOfWork<User> Update(User entity)
+        public IUpdateUnitOfWork<User, int> Update(int key)
         {
-            AddIdToKeys(entity.PublicKeys);
-            _unitOfWork.TransactionRecord.Add(entity, TransactionActions.UPDATE);
-            return _unitOfWork;
-        }
+            User user = GetById(key);
+            if (user == null)
+                return null;
 
-        private int GetAvailableId()
-            => XDocument.Load(_filePath).Descendants("User")
-                .Select(x => int.Parse(x.Attribute("Id").Value))
-                .OrderByDescending(x => x)
-                .FirstOrDefault() + 1;
-
-        private void AddIdToKeys(IEnumerable<Key> keys)
-        {
-            int highestId = -1;
-            foreach (Key key in keys)
-            {
-                if (key.Id >= 0 && key.Id > highestId)
-                    highestId = key.Id;
-            }
-            highestId++;
-
-            foreach (Key key in keys)
-            {
-                if (key.Id < 0)
-                {
-                    key.Id = highestId;
-                    highestId++;
-                }
-            }
+            return new UpdateUserUnitOfWork(_filePath, user);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace ItspServices.pServer.Persistence.Repository
 {
     class ProtectedDataRepository : IProtectedDataRepository
     {
-        public IUnitOfWork<ProtectedData> Add(ProtectedData entity)
+        public IAddUnitOfWork<ProtectedData> Add()
         {
             throw new NotImplementedException();
         }
@@ -39,12 +39,12 @@ namespace ItspServices.pServer.Persistence.Repository
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork<ProtectedData> Remove(ProtectedData entity)
+        public IRemoveUnitOfWork<ProtectedData, int> Remove(int key)
         {
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork<ProtectedData> Update(ProtectedData entity)
+        public IUpdateUnitOfWork<ProtectedData, int> Update(int key)
         {
             throw new NotImplementedException();
         }

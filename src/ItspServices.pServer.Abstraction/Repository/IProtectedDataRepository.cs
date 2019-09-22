@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ItspServices.pServer.Abstraction.Repository
 {
-    public interface IProtectedDataRepository : IRepository<ProtectedData>
+    public interface IProtectedDataRepository : IRepository<ProtectedData, int>
     {
         IUnitOfWork<ProtectedData> AddToFolder(ProtectedData data, Folder folder);
         Folder GetFolderById(int? folderId);
