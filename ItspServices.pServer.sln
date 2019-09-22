@@ -12,11 +12,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8F4A9774-B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer", "src\ItspServices.pServer\ItspServices.pServer.csproj", "{FF712B27-B695-4A9C-BCE6-6677D6391C6C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer.Test", "test\ItspServices.pServer.Test\ItspServices.pServer.Test.csproj", "{05CFF29B-7642-4E25-A02A-05769BED0EB9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{FF712B27-B695-4A9C-BCE6-6677D6391C6C} = {FF712B27-B695-4A9C-BCE6-6677D6391C6C}
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer.Abstraction", "src\ItspServices.pServer.Abstraction\ItspServices.pServer.Abstraction.csproj", "{DC421953-B5A8-4754-85CD-687796DE435B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer.Persistence", "src\ItspServices.pServer.Persistence\ItspServices.pServer.Persistence.csproj", "{2BF99DA8-8E26-4F98-98C8-CCD9C3EAD872}"
@@ -42,10 +37,6 @@ Global
 		{FF712B27-B695-4A9C-BCE6-6677D6391C6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF712B27-B695-4A9C-BCE6-6677D6391C6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF712B27-B695-4A9C-BCE6-6677D6391C6C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{05CFF29B-7642-4E25-A02A-05769BED0EB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{05CFF29B-7642-4E25-A02A-05769BED0EB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{05CFF29B-7642-4E25-A02A-05769BED0EB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{05CFF29B-7642-4E25-A02A-05769BED0EB9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DC421953-B5A8-4754-85CD-687796DE435B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DC421953-B5A8-4754-85CD-687796DE435B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC421953-B5A8-4754-85CD-687796DE435B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -72,7 +63,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FF712B27-B695-4A9C-BCE6-6677D6391C6C} = {2947A69F-1788-4262-9056-DAA917479403}
-		{05CFF29B-7642-4E25-A02A-05769BED0EB9} = {8F4A9774-BDFD-4039-960D-D750115E290C}
 		{DC421953-B5A8-4754-85CD-687796DE435B} = {2947A69F-1788-4262-9056-DAA917479403}
 		{2BF99DA8-8E26-4F98-98C8-CCD9C3EAD872} = {2947A69F-1788-4262-9056-DAA917479403}
 		{6E4283A0-25AD-45F7-B4AF-8BDDC3BCE285} = {8F4A9774-BDFD-4039-960D-D750115E290C}
