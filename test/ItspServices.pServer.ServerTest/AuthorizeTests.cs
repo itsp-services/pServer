@@ -1,9 +1,9 @@
-﻿using ItspServices.pServer.Abstraction;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ItspServices.pServer.Abstraction;
 using ItspServices.pServer.Abstraction.Authorizer;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Authorization;
 using ItspServices.pServer.Authorization.Checks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ItspServices.pServer.AuthorizationTest
 {
