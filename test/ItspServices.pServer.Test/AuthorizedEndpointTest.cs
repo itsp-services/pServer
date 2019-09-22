@@ -350,6 +350,7 @@ namespace ItspServices.pServer.Test
         {
             ProtectedData data = new ProtectedData()
             {
+                Id = 0,
                 OwnerId = 999,
                 Name = "NewData",
                 Data = Encoding.UTF8.GetBytes("OldData")
@@ -359,22 +360,23 @@ namespace ItspServices.pServer.Test
                 Permission = Permission.WRITE // User now has write permission and should be able to update
             });
 
-            Mock <IUnitOfWork<ProtectedData>> unit = new Mock<IUnitOfWork<ProtectedData>>();
+            Mock <IUpdateUnitOfWork<ProtectedData, int>> unit = new Mock<IUpdateUnitOfWork<ProtectedData, int>>();
             unit.Setup(x => x.Complete()).Verifiable();
-            ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
-            ProtectedDataRepository.Setup(x => x.Update(It.IsAny<ProtectedData>())).Returns(unit.Object).Verifiable();
+            unit.Setup(x => x.Entity).Returns(data);
+            ProtectedDataRepository.Setup(x => x.GetById(data.Id)).Returns(data);
+            ProtectedDataRepository.Setup(x => x.Update(data.Id)).Returns(unit.Object).Verifiable();
 
-            HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/data/0");
+            HttpResponseMessage response = await UserClient.GetAsync($"/api/protecteddata/data/{data.Id}");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             string content = await response.Content.ReadAsStringAsync();
 
             dynamic requestedData = JToken.Parse(content);
             requestedData.Data = Encoding.UTF8.GetBytes("NewData");
 
-            response = await UserClient.PutAsJsonAsync("/api/protecteddata/data/0", (JToken) requestedData);
+            response = await UserClient.PutAsJsonAsync($"/api/protecteddata/data/{data.Id}", (JToken) requestedData);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            ProtectedDataRepository.Verify(x => x.Update(It.IsAny<ProtectedData>()));
+            ProtectedDataRepository.Verify(x => x.Update(data.Id));
             unit.Verify(x => x.Complete());
 
             Assert.AreEqual("NewData", Encoding.UTF8.GetString(data.Data));
@@ -385,6 +387,7 @@ namespace ItspServices.pServer.Test
         {
             ProtectedData data = new ProtectedData()
             {
+                Id = 0,
                 OwnerId = 999,  
                 Name = "NewData",
                 Data = Encoding.UTF8.GetBytes("OldData")
@@ -395,16 +398,21 @@ namespace ItspServices.pServer.Test
                 Permission = Permission.READ // User only has read permission and should not be able to update
             });
 
-            ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
+            Mock<IUpdateUnitOfWork<ProtectedData, int>> unit = new Mock<IUpdateUnitOfWork<ProtectedData, int>>();
+            unit.Setup(x => x.Complete()).Verifiable();
+            unit.Setup(x => x.Entity).Returns(data);
 
-            HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/data/0");
+            ProtectedDataRepository.Setup(x => x.GetById(data.Id)).Returns(data);
+            ProtectedDataRepository.Setup(x => x.Update(data.Id)).Returns(unit.Object);
+
+            HttpResponseMessage response = await UserClient.GetAsync($"/api/protecteddata/data/{data.Id}");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             string content = await response.Content.ReadAsStringAsync();
 
             dynamic requestedData = JToken.Parse(content);
             requestedData.Data = Encoding.UTF8.GetBytes("NewData");
 
-            response = await UserClient.PutAsJsonAsync("/api/protecteddata/data/0", (JToken)requestedData);
+            response = await UserClient.PutAsJsonAsync($"/api/protecteddata/data/{data.Id}", (JToken)requestedData);
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
@@ -413,18 +421,19 @@ namespace ItspServices.pServer.Test
         {
             ProtectedData data = new ProtectedData()
             {
+                Id = 1,
                 OwnerId = User.Id
             };
 
-            Mock<IUnitOfWork<ProtectedData>> uow = new Mock<IUnitOfWork<ProtectedData>>();
+            Mock<IRemoveUnitOfWork<ProtectedData, int>> uow = new Mock<IRemoveUnitOfWork<ProtectedData, int>>();
+            uow.Setup(x => x.Entity).Returns(data);
             uow.Setup(x => x.Complete()).Verifiable();
-            ProtectedDataRepository.Setup(x => x.GetById(1)).Returns(data);
-            ProtectedDataRepository.Setup(x => x.Remove(data)).Returns(uow.Object).Verifiable();
+            ProtectedDataRepository.Setup(x => x.Remove(data.Id)).Returns(uow.Object).Verifiable();
 
-            HttpResponseMessage response = await UserClient.DeleteAsync("/api/protecteddata/data/1");
+            HttpResponseMessage response = await UserClient.DeleteAsync($"/api/protecteddata/data/{data.Id}");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            ProtectedDataRepository.Verify(x => x.Remove(data));
+            ProtectedDataRepository.Verify(x => x.Remove(data.Id));
             uow.Verify(x => x.Complete());
         }
 
@@ -433,6 +442,7 @@ namespace ItspServices.pServer.Test
         {
             ProtectedData data = new ProtectedData()
             {
+                Id = 0,
                 OwnerId = 999
             };
             data.Users.RegisterEntries.Add(new UserRegisterEntry()
@@ -441,13 +451,15 @@ namespace ItspServices.pServer.Test
                 Permission = Permission.READ
             });
 
-            Mock<IUnitOfWork<ProtectedData>> uow = new Mock<IUnitOfWork<ProtectedData>>();
+            Mock<IRemoveUnitOfWork<ProtectedData, int>> uow = new Mock<IRemoveUnitOfWork<ProtectedData, int>>();
+            uow.Setup(x => x.Entity).Returns(data);
             uow.Setup(x => x.Complete()).Verifiable();
-            ProtectedDataRepository.Setup(x => x.GetById(0)).Returns(data);
-            ProtectedDataRepository.Setup(x => x.Remove(data)).Returns(uow.Object).Verifiable();
+            ProtectedDataRepository.Setup(x => x.Remove(data.Id)).Returns(uow.Object).Verifiable();
 
-            HttpResponseMessage response = await UserClient.DeleteAsync("/api/protecteddata/data/0");
+            HttpResponseMessage response = await UserClient.DeleteAsync($"/api/protecteddata/data/{data.Id}");
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+            uow.Verify(x => x.Dispose());
+            uow.VerifyGet(x => x.Entity);
             uow.VerifyNoOtherCalls();
         }
         #endregion
