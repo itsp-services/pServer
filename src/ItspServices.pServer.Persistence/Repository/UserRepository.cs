@@ -7,7 +7,7 @@ using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
 using ItspServices.pServer.Persistence.UnitOfWork;
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.RepositoryTest")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.ServerTest")]
 namespace ItspServices.pServer.Persistence.Repository
 {
     class UserRepository : IUserRepository

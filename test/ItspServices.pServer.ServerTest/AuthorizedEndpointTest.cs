@@ -1,23 +1,23 @@
-﻿using ItspServices.pServer.Abstraction;
-using ItspServices.pServer.Abstraction.Models;
-using ItspServices.pServer.Abstraction.Repository;
-using ItspServices.pServer.Abstraction.Units;
-using ItspServices.pServer.Models;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ItspServices.pServer.Abstraction;
+using ItspServices.pServer.Abstraction.Models;
+using ItspServices.pServer.Abstraction.Repository;
+using ItspServices.pServer.Abstraction.Units;
+using ItspServices.pServer.Models;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ItspServices.pServer.Test
 {
@@ -142,7 +142,8 @@ namespace ItspServices.pServer.Test
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
                 string content = await response.Content.ReadAsStringAsync();
 
-                JToken expected = JToken.FromObject(new {
+                JToken expected = JToken.FromObject(new
+                {
                     parentId = default(int?),
                     name = "root",
                     protectedDataIds = default(int[]),
@@ -165,7 +166,7 @@ namespace ItspServices.pServer.Test
             ProtectedDataRepository.Setup(x => x.GetFolderById(1)).Returns(folder);
 
             using (HttpResponseMessage response = await UserClient.GetAsync("/api/protecteddata/folder/1"))
-            { 
+            {
                 string content = await response.Content.ReadAsStringAsync();
 
                 JToken expected = JToken.FromObject(new
@@ -277,7 +278,8 @@ namespace ItspServices.pServer.Test
             {
                 OwnerId = 999
             };
-            data.Users.RegisterEntries.Add(new UserRegisterEntry() {
+            data.Users.RegisterEntries.Add(new UserRegisterEntry()
+            {
                 User = User,
                 Permission = Permission.VIEW
             });
@@ -355,12 +357,13 @@ namespace ItspServices.pServer.Test
                 Name = "NewData",
                 Data = Encoding.UTF8.GetBytes("OldData")
             };
-            data.Users.RegisterEntries.Add(new UserRegisterEntry() {
+            data.Users.RegisterEntries.Add(new UserRegisterEntry()
+            {
                 User = User,
                 Permission = Permission.WRITE // User now has write permission and should be able to update
             });
 
-            Mock <IUpdateUnitOfWork<ProtectedData, int>> unit = new Mock<IUpdateUnitOfWork<ProtectedData, int>>();
+            Mock<IUpdateUnitOfWork<ProtectedData, int>> unit = new Mock<IUpdateUnitOfWork<ProtectedData, int>>();
             unit.Setup(x => x.Complete()).Verifiable();
             unit.Setup(x => x.Entity).Returns(data);
             ProtectedDataRepository.Setup(x => x.GetById(data.Id)).Returns(data);
@@ -373,7 +376,7 @@ namespace ItspServices.pServer.Test
             dynamic requestedData = JToken.Parse(content);
             requestedData.Data = Encoding.UTF8.GetBytes("NewData");
 
-            response = await UserClient.PutAsJsonAsync($"/api/protecteddata/data/{data.Id}", (JToken) requestedData);
+            response = await UserClient.PutAsJsonAsync($"/api/protecteddata/data/{data.Id}", (JToken)requestedData);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             ProtectedDataRepository.Verify(x => x.Update(data.Id));
@@ -388,7 +391,7 @@ namespace ItspServices.pServer.Test
             ProtectedData data = new ProtectedData()
             {
                 Id = 0,
-                OwnerId = 999,  
+                OwnerId = 999,
                 Name = "NewData",
                 Data = Encoding.UTF8.GetBytes("OldData")
             };
