@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System;
+using System.Text;
+using System.Text.Json;
 
 namespace ItspServices.pServer.ClientTest
 {
@@ -30,13 +32,22 @@ namespace ItspServices.pServer.ClientTest
             public HttpClient GetClient()
             {
                 HttpClient client = new HttpClient(new MockHttpMessageHandler());
+                client.BaseAddress = new Uri("http://test.com");
                 return client;
             }
         }
         #endregion
 
+        #region test init
+        [TestInitialize]
+        public void TestInit()
+        {
+            MockHttpMessageHandler.Callback = (request) => new HttpResponseMessage();
+        }
+        #endregion
+
         [TestMethod]
-        public void ServerCommunicator_RequestRootFolder_ShouldReturnRootFolder()
+        public async Task ServerCommunicator_RequestRootFolder_ShouldReturnRootFolder()
         {
             FolderModel rootFolder = new FolderModel()
             {
@@ -46,13 +57,16 @@ namespace ItspServices.pServer.ClientTest
                 SubfolderIds = new List<int>()
             };
 
-            // Arrange
+            MockHttpMessageHandler.Callback = (request) =>
+            {
+                Assert.AreEqual("/api/protecteddata/folder", request.RequestUri.LocalPath);
+                string json = JsonSerializer.Serialize<FolderModel>(rootFolder);
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = new StringContent(json) };
+            };
             ServerCommunicator communicator = new ServerCommunicator(new MockClientProvider());
 
-            // Act
-            FolderModel responseFolder = communicator.RequestFolderById(null);
+            FolderModel responseFolder = await communicator.RequestFolderById(null);
 
-            // Assert
             Assert.AreEqual(rootFolder.ParentId, responseFolder.ParentId);
             Assert.AreEqual(rootFolder.Name, responseFolder.Name);
             CollectionAssert.AreEquivalent(rootFolder.ProtectedDataIds.ToArray(), responseFolder.ProtectedDataIds.ToArray());
@@ -71,18 +85,14 @@ namespace ItspServices.pServer.ClientTest
             };
 
             MockHttpMessageHandler.Callback = (request) =>
-                new HttpResponseMessage(System.Net.HttpStatusCode.OK)
-                {
-                    Content = new FormUrlEncodedContent(new[] 
-                    {
-                        new KeyValuePair<string, string>("ParentId", fooFolder.ParentId.ToString()),
-                        new KeyValuePair<string, string>("Name", fooFolder.Name)
-                    })
-                };
-
+            {
+                Assert.AreEqual("/api/protecteddata/folder/1", request.RequestUri.LocalPath);
+                string json = JsonSerializer.Serialize<FolderModel>(fooFolder);
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = new StringContent(json) };
+            };
             ServerCommunicator communicator = new ServerCommunicator(new MockClientProvider());
 
-            FolderModel responseFolder = communicator.RequestFolderById(1);
+            FolderModel responseFolder = await communicator.RequestFolderById(1);
 
             Assert.AreEqual(fooFolder.ParentId, responseFolder.ParentId);
             Assert.AreEqual(fooFolder.Name, responseFolder.Name);

@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 using ItspServices.pServer.Client.Model;
 
 namespace ItspServices.pServer.Client.Communicator
@@ -13,15 +14,18 @@ namespace ItspServices.pServer.Client.Communicator
             _provider = provider;
         }
 
-        public FolderModel RequestFolderById(int? id)
+        public async Task<FolderModel> RequestFolderById(int? id)
         {
-            return new FolderModel()
+            HttpClient client = _provider.GetClient();
+            string url = "/api/protecteddata/folder";
+
+            if(id != null)
             {
-                ParentId = null,
-                Name = "root",
-                ProtectedDataIds = new List<int>(),
-                SubfolderIds = new List<int>()
-            };
+                url += "/" + id;
+            }
+            HttpResponseMessage response = await client.GetAsync(url);
+            FolderModel responseFolder = JsonSerializer.Deserialize<FolderModel>(await response.Content.ReadAsStringAsync());
+            return responseFolder;
         }
     }
 }
