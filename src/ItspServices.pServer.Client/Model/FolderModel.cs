@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.ClientTest")]
+
 namespace ItspServices.pServer.Client.Model
 {
-    public class FolderModel
+    class FolderModel
     {
         public int? ParentId { get; set; }
         public string Name { get; set; }
