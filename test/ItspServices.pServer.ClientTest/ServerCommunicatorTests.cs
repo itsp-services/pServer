@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System;
 using System.Text.Json;
+using Moq;
 
 namespace ItspServices.pServer.ClientTest
 {
@@ -18,30 +19,17 @@ namespace ItspServices.pServer.ClientTest
         #region nested classes
         class MockHttpMessageHandler : HttpMessageHandler
         {
-            public static Func<HttpRequestMessage, HttpResponseMessage> Callback;
+            public Func<HttpRequestMessage, HttpResponseMessage> Callback { get; set; }
+
+            public MockHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> callback)
+            {
+                Callback = callback;
+            }
 
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 return Task.FromResult(Callback(request));
             }
-        }
-
-        class MockClientProvider : IHttpClientFactory
-        {
-            public HttpClient CreateClient(string name)
-            {
-                HttpClient client = new HttpClient(new MockHttpMessageHandler());
-                client.BaseAddress = new Uri("http://test.com");
-                return client;
-            }
-        }
-        #endregion
-
-        #region test init
-        [TestInitialize]
-        public void TestInit()
-        {
-            MockHttpMessageHandler.Callback = (request) => new HttpResponseMessage();
         }
         #endregion
 
@@ -55,14 +43,16 @@ namespace ItspServices.pServer.ClientTest
                 ProtectedDataIds = new List<int>(),
                 SubfolderIds = new List<int>()
             };
-
-            MockHttpMessageHandler.Callback = (request) =>
+            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
+            Func<HttpRequestMessage, HttpResponseMessage> callback = (request) =>
             {
                 Assert.AreEqual("/api/protecteddata/folder/", request.RequestUri.LocalPath);
                 string json = JsonSerializer.Serialize(rootFolder);
                 return new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = new StringContent(json) };
             };
-            ServerCommunicator communicator = new ServerCommunicator(new MockClientProvider());
+            clientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient(new MockHttpMessageHandler(callback)) { BaseAddress = new Uri("http://test.com") });
+
+            ServerCommunicator communicator = new ServerCommunicator(clientFactory.Object);
 
             FolderModel responseFolder = await communicator.RequestFolderById(null);
 
@@ -82,15 +72,16 @@ namespace ItspServices.pServer.ClientTest
                 ProtectedDataIds = new int[] { 1, 2, 3 }.ToList(),
                 SubfolderIds = new int[] { 4, 5, 6 }.ToList()
             };
-
-            MockHttpMessageHandler.Callback = (request) =>
+            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
+            Func<HttpRequestMessage, HttpResponseMessage> callback = (request) =>
             {
                 Assert.AreEqual("/api/protecteddata/folder/1", request.RequestUri.LocalPath);
-                string json = JsonSerializer.Serialize<FolderModel>(fooFolder);
+                string json = JsonSerializer.Serialize(fooFolder);
                 return new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = new StringContent(json) };
             };
-            ServerCommunicator communicator = new ServerCommunicator(new MockClientProvider());
+            clientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient(new MockHttpMessageHandler(callback)) { BaseAddress = new Uri("http://test.com") });
 
+            ServerCommunicator communicator = new ServerCommunicator(clientFactory.Object);
             FolderModel responseFolder = await communicator.RequestFolderById(1);
 
             Assert.AreEqual(fooFolder.ParentId, responseFolder.ParentId);
