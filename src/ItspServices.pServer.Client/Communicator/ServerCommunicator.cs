@@ -3,29 +3,26 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using ItspServices.pServer.Client.Model;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.ClientTest")]
+
 namespace ItspServices.pServer.Client.Communicator
 {
-    public class ServerCommunicator
+    class ServerCommunicator
     {
-        private IClientProvider _provider;
+        IHttpClientFactory _provider;
 
-        public ServerCommunicator(IClientProvider provider)
+        public ServerCommunicator(IHttpClientFactory provider)
         {
             _provider = provider;
         }
 
         public async Task<FolderModel> RequestFolderById(int? id)
         {
-            HttpClient client = _provider.GetClient();
-            string url = "/api/protecteddata/folder";
-
-            if(id != null)
+            using (HttpClient client = _provider.CreateClient())
             {
-                url += "/" + id;
+                using(HttpResponseMessage response = await client.GetAsync($"/api/protecteddata/folder/{id}"))
+                    return await JsonSerializer.DeserializeAsync<FolderModel>(await response.Content.ReadAsStreamAsync());
             }
-            HttpResponseMessage response = await client.GetAsync(url);
-            FolderModel responseFolder = JsonSerializer.Deserialize<FolderModel>(await response.Content.ReadAsStringAsync());
-            return responseFolder;
         }
     }
 }

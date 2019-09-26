@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System;
-using System.Text;
 using System.Text.Json;
 
 namespace ItspServices.pServer.ClientTest
@@ -27,9 +26,9 @@ namespace ItspServices.pServer.ClientTest
             }
         }
 
-        class MockClientProvider : IClientProvider
+        class MockClientProvider : IHttpClientFactory
         {
-            public HttpClient GetClient()
+            public HttpClient CreateClient(string name)
             {
                 HttpClient client = new HttpClient(new MockHttpMessageHandler());
                 client.BaseAddress = new Uri("http://test.com");
@@ -59,8 +58,8 @@ namespace ItspServices.pServer.ClientTest
 
             MockHttpMessageHandler.Callback = (request) =>
             {
-                Assert.AreEqual("/api/protecteddata/folder", request.RequestUri.LocalPath);
-                string json = JsonSerializer.Serialize<FolderModel>(rootFolder);
+                Assert.AreEqual("/api/protecteddata/folder/", request.RequestUri.LocalPath);
+                string json = JsonSerializer.Serialize(rootFolder);
                 return new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = new StringContent(json) };
             };
             ServerCommunicator communicator = new ServerCommunicator(new MockClientProvider());
