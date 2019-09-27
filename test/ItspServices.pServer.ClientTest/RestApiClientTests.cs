@@ -1,19 +1,19 @@
-﻿using System.Net.Http;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ItspServices.pServer.Client.Communicator;
-using ItspServices.pServer.Client.Model;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System;
 using System.Text.Json;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using ItspServices.pServer.Client.RestApi;
+using ItspServices.pServer.Client.Model;
 
 namespace ItspServices.pServer.ClientTest
 {
     [TestClass]
-    public class ServerCommunicatorTests
+    public class RestApiClientTests
     {
 
         #region nested classes
@@ -27,14 +27,12 @@ namespace ItspServices.pServer.ClientTest
             }
 
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                return Task.FromResult(Callback(request));
-            }
+                => Task.FromResult(Callback(request));
         }
         #endregion
 
         [TestMethod]
-        public async Task ServerCommunicator_RequestRootFolder_ShouldReturnRootFolder()
+        public async Task RequestRootFolder_ShouldReturnRootFolder()
         {
             FolderModel rootFolder = new FolderModel()
             {
@@ -44,17 +42,24 @@ namespace ItspServices.pServer.ClientTest
                 SubfolderIds = new List<int>()
             };
             Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
-            Func<HttpRequestMessage, HttpResponseMessage> callback = (request) =>
+            HttpResponseMessage Callback (HttpRequestMessage request)
             {
                 Assert.AreEqual("/api/protecteddata/folder/", request.RequestUri.LocalPath);
                 string json = JsonSerializer.Serialize(rootFolder);
                 return new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = new StringContent(json) };
-            };
-            clientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient(new MockHttpMessageHandler(callback)) { BaseAddress = new Uri("http://test.com") });
+            }
 
-            ServerCommunicator communicator = new ServerCommunicator(clientFactory.Object);
+            clientFactory
+                .Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(
+                    new HttpClient(new MockHttpMessageHandler(Callback))
+                    { 
+                        BaseAddress = new Uri("http://test.com") 
+                    });
 
-            FolderModel responseFolder = await communicator.RequestFolderById(null);
+            RestApiClient restApiClient = new RestApiClient(clientFactory.Object);
+
+            FolderModel responseFolder = await restApiClient.RequestFolderById(null);
 
             Assert.AreEqual(rootFolder.ParentId, responseFolder.ParentId);
             Assert.AreEqual(rootFolder.Name, responseFolder.Name);
@@ -63,7 +68,7 @@ namespace ItspServices.pServer.ClientTest
         }
 
         [TestMethod]
-        public async Task ServerCommunicator_RequestAnyFolderById_ShouldReturnCorrectFolder()
+        public async Task RequestAnyFolderById_ShouldReturnCorrectFolder()
         {
             FolderModel fooFolder = new FolderModel()
             {
@@ -73,16 +78,23 @@ namespace ItspServices.pServer.ClientTest
                 SubfolderIds = new int[] { 4, 5, 6 }.ToList()
             };
             Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
-            Func<HttpRequestMessage, HttpResponseMessage> callback = (request) =>
+            HttpResponseMessage Callback(HttpRequestMessage request)
             {
                 Assert.AreEqual("/api/protecteddata/folder/1", request.RequestUri.LocalPath);
                 string json = JsonSerializer.Serialize(fooFolder);
                 return new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = new StringContent(json) };
-            };
-            clientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient(new MockHttpMessageHandler(callback)) { BaseAddress = new Uri("http://test.com") });
+            }
 
-            ServerCommunicator communicator = new ServerCommunicator(clientFactory.Object);
-            FolderModel responseFolder = await communicator.RequestFolderById(1);
+            clientFactory
+                .Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(
+                    new HttpClient(new MockHttpMessageHandler(Callback)) 
+                    { 
+                        BaseAddress = new Uri("http://test.com") 
+                    });
+
+            RestApiClient restApiClient = new RestApiClient(clientFactory.Object);
+            FolderModel responseFolder = await restApiClient.RequestFolderById(1);
 
             Assert.AreEqual(fooFolder.ParentId, responseFolder.ParentId);
             Assert.AreEqual(fooFolder.Name, responseFolder.Name);

@@ -5,13 +5,13 @@ using ItspServices.pServer.Client.Model;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.ClientTest")]
 
-namespace ItspServices.pServer.Client.Communicator
+namespace ItspServices.pServer.Client.RestApi
 {
-    class ServerCommunicator
+    class RestApiClient
     {
         IHttpClientFactory _provider;
 
-        public ServerCommunicator(IHttpClientFactory provider)
+        public RestApiClient(IHttpClientFactory provider)
         {
             _provider = provider;
         }

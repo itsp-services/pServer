@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.ClientTest")]
-
 namespace ItspServices.pServer.Client.Model
 {
     class FolderModel
