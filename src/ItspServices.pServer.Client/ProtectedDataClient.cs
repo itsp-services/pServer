@@ -18,22 +18,28 @@ namespace ItspServices.pServer.Client
         {
             FolderModel root = await _restClient.RequestFolderById(null);
             string folderPath = destination.Substring(0, destination.LastIndexOf('/'));
-            FolderModel folder = await FindFolder("", folderPath, root);
+            FolderModel folder = await FindFolder(root, folderPath);
 
             // TODO: request secrets
         }
 
-        private async Task<FolderModel> FindFolder(string path, string destination, FolderModel currentFolder)
+        private async Task<FolderModel> FindFolder(FolderModel currentFolder, string destination, string path = "")
         {
             if (currentFolder.Name != "root")
                 path += '/' + currentFolder.Name;
             if (path == destination)
                 return currentFolder;
+            if (!destination.Contains(path))
+                return null;
+
+            FolderModel folder = null;
             foreach (int folderId in currentFolder.SubfolderIds)
             {
-                return await FindFolder(path, destination, await _restClient.RequestFolderById(folderId));
+                folder = await FindFolder(currentFolder, destination, path);
+                if (folder != null)
+                    break;
             }
-            return null;
+            return folder;
         }
     }
 }
