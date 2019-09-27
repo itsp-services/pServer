@@ -29,7 +29,7 @@ namespace ItspServices.pServer.Client
                 path += '/' + currentFolder.Name;
             if (path == destination)
                 return currentFolder;
-            if (!destination.Contains(path))
+            if (!destination.StartsWith(path))
                 return null;
 
             FolderModel folder = null;
