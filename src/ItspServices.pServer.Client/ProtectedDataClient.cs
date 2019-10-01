@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using ItspServices.pServer.Client.Model;
 using ItspServices.pServer.Client.RestApi;
@@ -16,30 +17,28 @@ namespace ItspServices.pServer.Client
 
         public async Task Set(string destination, string protectedData)
         {
-            FolderModel root = await _restClient.RequestFolderById(null);
-            string folderPath = destination.Substring(0, destination.LastIndexOf('/'));
-            // FolderModel folder = await FindFolder(root, folderPath);
+            FolderModel folder = await _restClient.RequestFolderById(null);
+            if (folder is null)
+                throw new InvalidOperationException();
+
+            folder = await FindFolder(1, folder);
+            async Task<FolderModel> FindFolder(int position, FolderModel currentFolder)
+            {
+                int folderNameEnd = destination.IndexOf('/', position);
+                if (folderNameEnd == -1)
+                    return currentFolder;
+
+                int length = folderNameEnd - position;
+                foreach (int subFolderId in currentFolder.SubfolderIds)
+                {
+                    FolderModel subFolder = await _restClient.RequestFolderById(subFolderId);
+                    if (string.Compare(destination, position, subFolder.Name, 0, length, StringComparison.InvariantCultureIgnoreCase) == 0)
+                        return await FindFolder(folderNameEnd + 1, subFolder);
+                }
+                return null;
+            }
 
             // TODO: request secrets
-        }
-
-        private async Task<FolderModel> FindFolder(FolderModel currentFolder, string destination, string path = "")
-        {
-            if (currentFolder.Name != "root")
-                path += '/' + currentFolder.Name;
-            if (path == destination)
-                return currentFolder;
-            if (!destination.StartsWith(path))
-                return null;
-
-            FolderModel folder = null;
-            foreach (int folderId in currentFolder.SubfolderIds)
-            {
-                folder = await FindFolder(currentFolder, destination, path);
-                if (folder != null)
-                    break;
-            }
-            return folder;
         }
     }
 }
