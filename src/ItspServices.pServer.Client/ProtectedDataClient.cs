@@ -18,7 +18,7 @@ namespace ItspServices.pServer.Client
         {
             FolderModel root = await _restClient.RequestFolderById(null);
             string folderPath = destination.Substring(0, destination.LastIndexOf('/'));
-            FolderModel folder = await FindFolder(root, folderPath);
+            // FolderModel folder = await FindFolder(root, folderPath);
 
             // TODO: request secrets
         }
