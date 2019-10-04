@@ -2,21 +2,21 @@
 -- Table Roles
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS Roles (
-  Name VARCHAR(20) NOT NULL,
-  PRIMARY KEY (Name)
+  ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  Name VARCHAR(20) NOT NULL
 );
 
 -- -----------------------------------------------------
 -- Table Users
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS Users (
-  UserID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   Username VARCHAR(45) NOT NULL,
   PasswordHash VARCHAR(45) NULL,
-  Role VARCHAR(20) NOT NULL,
-  CONSTRAINT fk_User_Roles1
-    FOREIGN KEY (Role)
-    REFERENCES Roles (Name)
+  RoleID NOT NULL,
+  CONSTRAINT fk_User_Roles
+    FOREIGN KEY (RoleID)
+    REFERENCES Roles (ID)
 );
 
 -- -----------------------------------------------------
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS PublicKeys (
   PRIMARY KEY (UserID, PublicKeyNumber),
   CONSTRAINT fk_PublicKeys_User
     FOREIGN KEY (UserID)
-    REFERENCES Users (UserID)
+    REFERENCES Users (ID)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
@@ -39,49 +39,41 @@ CREATE TABLE IF NOT EXISTS PublicKeys (
 -- Table Folders
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS Folders (
-  FolderID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   FolderName VARCHAR(45) NOT NULL,
-  ParentFolderID INT NOT NULL,
-  CONSTRAINT fk_Folder_Folder1
-    FOREIGN KEY (ParentFolderID)
-    REFERENCES Folders (FolderID)
+  Parent INT NOT NULL,
+  CONSTRAINT fk_Folder_Folder
+    FOREIGN KEY (Parent)
+    REFERENCES Folders (ID)
 );
 
 -- -----------------------------------------------------
 -- Table ProtectedData
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS ProtectedData (
-  DataID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  ParentFolderID INT NOT NULL,
+  ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  Folder INT NOT NULL,
   DataName VARCHAR(45) NOT NULL,
   Data MEDIUMBLOB NULL,
-  CONSTRAINT fk_ProtectedData_Folder1
-    FOREIGN KEY (ParentFolderID)
-    REFERENCES Folders (FolderID)
-);
-
-CREATE TABLE IF NOT EXISTS Permission 
-(
-  Name VARCHAR(10) NOT NULL PRIMARY KEY
+  CONSTRAINT fk_ProtectedData_Folder
+    FOREIGN KEY (Folder)
+    REFERENCES Folders (ID)
 );
 
 -- -----------------------------------------------------
--- Table Users_manipulate_ProtectedData
+-- Table ProtectedDataPermissions
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Users_manipulate_ProtectedData (
+CREATE TABLE IF NOT EXISTS ProtectedDataPermissions (
   UserID INT NOT NULL,
   DataID INT NOT NULL,
   Permission VARCHAR(10) NOT NULL,
   PRIMARY KEY (UserID, DataID),
-  CONSTRAINT fk_Users_manipulate_ProtectedData_User
+  CONSTRAINT fk_ProtectedDataPermissions_User
     FOREIGN KEY (UserID)
-    REFERENCES Users (UserID),
-  CONSTRAINT fk_Users_manipulate_ProtectedData_ProtectedData
+    REFERENCES Users (ID),
+  CONSTRAINT fk_ProtectedDataPermissions_ProtectedData
     FOREIGN KEY (DataID)
-    REFERENCES ProtectedData (DataID),
-  CONSTRAINT fk_Users_manipulate_ProtectedData_Permission
-    FOREIGN KEY (Permission)
-    REFERENCES Permission (Name)
+    REFERENCES ProtectedData (ID)
 );
 
 -- -----------------------------------------------------
@@ -89,18 +81,18 @@ CREATE TABLE IF NOT EXISTS Users_manipulate_ProtectedData (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS SymmetricKeys (
   UserID INT NOT NULL,
-  PublicKeyNumber INT NOT NULL,
+  PublicKey INT NOT NULL,
   DataID INT NOT NULL,
   KeyData MEDIUMBLOB NULL,
   PRIMARY KEY (UserID, PublicKeyNumber, DataID),
-  CONSTRAINT fk_SymmetricKeys_PublicKeys1
-    FOREIGN KEY (UserID , PublicKeyNumber)
+  CONSTRAINT fk_SymmetricKeys_PublicKeys
+    FOREIGN KEY (UserID , PublicKey)
     REFERENCES PublicKeys (UserID , PublicKeyNumber)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-  CONSTRAINT fk_SymmetricKeys_ProtectedData1
+  CONSTRAINT fk_SymmetricKeys_ProtectedData
     FOREIGN KEY (DataID)
-    REFERENCES ProtectedData (DataID)
+    REFERENCES ProtectedData (ID)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
