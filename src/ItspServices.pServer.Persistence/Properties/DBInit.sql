@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS ProtectedData (
 CREATE TABLE IF NOT EXISTS ProtectedDataPermissions (
   UserID INT NOT NULL,
   DataID INT NOT NULL,
-  Permission VARCHAR(10) NOT NULL,
+  Permission INT NOT NULL,
   PRIMARY KEY (UserID, DataID),
   CONSTRAINT fk_ProtectedDataPermissions_User
     FOREIGN KEY (UserID)
