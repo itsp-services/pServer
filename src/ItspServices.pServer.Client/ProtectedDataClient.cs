@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
-using ItspServices.pServer.Client.Model;
+using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.RestApi;
 
 namespace ItspServices.pServer.Client
@@ -15,30 +16,52 @@ namespace ItspServices.pServer.Client
             _restClient = new RestApiClient(factory);
         }
 
-        public async Task Set(string destination, string protectedData)
+        public async Task Set(string destination, byte[] protectedData)
         {
             FolderModel folder = await _restClient.RequestFolderById(null);
             if (folder is null)
                 throw new InvalidOperationException();
 
-            folder = await FindFolder(1, folder);
-            async Task<FolderModel> FindFolder(int position, FolderModel currentFolder)
+            folder = await FindFolder(destination, folder);
+
+            int? dataId = null;
+            DataModel dataModel = null;
+            foreach (int protectedDataId in folder.ProtectedDataIds)
             {
-                int folderNameEnd = destination.IndexOf('/', position);
-                if (folderNameEnd == -1)
-                    return currentFolder;
-
-                int length = folderNameEnd - position;
-                foreach (int subFolderId in currentFolder.SubfolderIds)
+                dataModel = await _restClient.RequestProtectedDataById(protectedDataId);
+                if (destination.EndsWith(dataModel.Name))
                 {
-                    FolderModel subFolder = await _restClient.RequestFolderById(subFolderId);
-                    if (string.Compare(destination, position, subFolder.Name, 0, length, StringComparison.InvariantCultureIgnoreCase) == 0)
-                        return await FindFolder(folderNameEnd + 1, subFolder);
+                    dataId = protectedDataId;
+                    break;
                 }
-                return null;
             }
+            if (dataId != null)
+            {
+                // TODO: Encrypt data with symmetric of requested datamodel
+                dataModel.Data = protectedData;
+                await _restClient.SendUpdateData((int) dataId, dataModel);
+            } 
+            else
+            {
+                // TODO: Create new datamodel and encrypt data with new symmetric key and send create request
 
-            // TODO: request secrets
+
+            }
+        }
+
+        private async Task<FolderModel> FindFolder(string destination, FolderModel currentFolder, string path = "")
+        {
+            if (destination.IndexOf('/', path.Length + 1) == -1)
+                return currentFolder;
+
+            FolderModel subFolder = null;
+            foreach (int subFolderId in currentFolder.SubfolderIds)
+            {
+                subFolder = await _restClient.RequestFolderById(subFolderId);
+                if (destination.StartsWith(path + '/' + subFolder.Name))
+                    return await FindFolder(destination, subFolder, path += '/' + subFolder.Name);
+            }
+            return null;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,7 +46,7 @@ namespace ItspServices.pServer.ClientTest
                         content = "{\"ParentId\":null,\"Name\":\"FirstFolder\",\"ProtectedDataIds\":[],\"SubfolderIds\":[]}";
                         break;
                     case "/api/protecteddata/folder/2":
-                        content = "{\"ParentId\":null,\"Name\":\"Andys Passwords\",\"ProtectedDataIds\":[],\"SubfolderIds\":[4,5,6]}";
+                        content = "{\"ParentId\":null,\"Name\":\"Andys Passwords\",\"ProtectedDataIds\":[1],\"SubfolderIds\":[4,5,6]}";
                         break;
                     case "/api/protecteddata/folder/3":
                     case "/api/protecteddata/folder/4":
@@ -76,7 +77,7 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             ProtectedDataClient client = new ProtectedDataClient(clientFactory.Object);
-            await client.Set("/Andys Passwords/MailAccount", "SecretPassword");
+            await client.Set("/Andys Passwords/MailAccount", Encoding.UTF8.GetBytes("SecretPassword"));
 
             Assert.IsTrue(setHasBeenCalled);
         }
