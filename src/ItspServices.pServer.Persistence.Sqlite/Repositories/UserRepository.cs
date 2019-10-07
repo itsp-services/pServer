@@ -3,15 +3,15 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.ServerTest")]
 namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 {
-    class SqlUserRepository
+    class UserRepository
     {
         private DbProviderFactory _sqlFactory;
         private readonly string _connectionString;
 
-        public SqlUserRepository(DbProviderFactory sqlFactory, SqlOptions options)
+        public UserRepository(DbProviderFactory sqlFactory, string connectionString)
         {
             _sqlFactory = sqlFactory;
-            _connectionString = options.ConnectionString;
+            _connectionString = connectionString;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace ItspServices.pServer.Persistence.Sqlite
 {
-    public class SqlOptions
+    public class PersistenceOption
     {
         public string ConnectionString { get; set; }
     }

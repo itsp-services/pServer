@@ -1,23 +1,20 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ItspServices.pServer.Persistence.Sqlite.Repositories;
-using ItspServices.pServer.Persistence.Sqlite;
-using System.Data.SQLite;
-using System.Data.Common;
+using Microsoft.Data.Sqlite;
 
 namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 {
     [TestClass]
     public class UserRepositoryTests
     {
-        SqlUserRepository repository;
+        UserRepository repository;
 
         #region Initialize and cleanup methods
 
         [TestInitialize]
         public void Init()
         {
-            SqlOptions options = new SqlOptions() { ConnectionString = "Data Source=:memory:;Version=3;New=True;" };
-            repository = new SqlUserRepository(new SQLiteFactory(), options);
+            repository = new UserRepository(SqliteFactory.Instance, "Data Source=pServer; Mode=Memory; Cache=Shared");
         }
 
         [TestCleanup]
