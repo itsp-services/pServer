@@ -9,7 +9,7 @@ namespace ItspServices.pServer.Abstraction.Models
         public int Id { get; set; }
         public int? ParentId { get; set; }
         public string Name { get; set; }
-        public List<ProtectedData> DataRegister { get; set; }
-        public List<Folder> Subfolder { get; set; }
+        public List<int> DataIds { get; set; }
+        public List<int> SubfolderIds { get; set; }
     }
 }
