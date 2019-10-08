@@ -22,7 +22,14 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 
         public Folder GetById(int id)
         {
-            return new Folder() {  };
+
+            return new Folder() {
+                Id = 0,
+                Name = "root",
+                ParentId = 0,
+                Subfolder = new List<Folder>(),
+                DataRegister = new List<ProtectedData>()
+            };
         }
 
         public IEnumerable<Folder> GetAll()

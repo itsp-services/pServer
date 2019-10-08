@@ -66,7 +66,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         #endregion
 
         [TestMethod]
-        public void CreateRootFolderTest_ShouldSucced()
+        public void GetRootFolderTest_ShouldSucced()
         {
             DbCommand command = memoryDbConnection.CreateCommand();
             command.CommandText = "INSERT INTO Folders('ID', 'Foldername', 'Parent') VALUES "
@@ -76,6 +76,11 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 
             Folder root = repository.GetById(0);
 
+            Assert.AreEqual("root", root.Name);
+            Assert.AreEqual(0, root.Id);
+            Assert.AreEqual(0, root.ParentId);
+            Assert.IsTrue(root.Subfolder.Count == 0);
+            Assert.IsTrue(root.DataRegister.Count == 0);
         }
     }
 }
