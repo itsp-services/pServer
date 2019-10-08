@@ -11,6 +11,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
     [TestClass]
     public class FolderRepositoryTests
     {
+        static string InitSQLScript;
         private TestContext _testContext;
         public TestContext TestContext
         {
@@ -23,6 +24,21 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 
         #region Initialize and cleanup methods
 
+        [ClassInitialize]
+        public static void ClassInit(TestContext _)
+        {
+            Assembly assembly = typeof(UserRepository).GetTypeInfo().Assembly;
+            Stream schemaSqlResource = assembly.GetManifestResourceStream("ItspServices.pServer.Persistence.Sqlite.DatabaseScripts.DBInit.sql");
+            using (TextReader reader = new StreamReader(schemaSqlResource))
+                InitSQLScript = reader.ReadToEnd();
+        }
+
+        [ClassCleanup]
+        public static void ClassCleanup()
+        {
+            InitSQLScript = null;
+        }
+
         [TestInitialize]
         public void Init()
         {
@@ -32,19 +48,12 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             // A connection has to be open during the tests so the in-memory
             // database will not be freed each time the repository closes the connection.
             memoryDbConnection.Open();
-            InitSchema(memoryDbConnection);
-            repository = new FolderRepository(SqliteFactory.Instance, testConnectionString);
-        }
 
-        private static void InitSchema(DbConnection con)
-        {
-            Assembly assembly = typeof(UserRepository).GetTypeInfo().Assembly;
-            Stream schemaSqlResource = assembly.GetManifestResourceStream("ItspServices.pServer.Persistence.Sqlite.DatabaseScripts.DBInit.sql");
-            DbCommand initSchema = SqliteFactory.Instance.CreateCommand();
-            initSchema.Connection = con;
-            using (TextReader reader = new StreamReader(schemaSqlResource))
-                initSchema.CommandText = reader.ReadToEnd();
-            initSchema.ExecuteNonQuery();
+            DbCommand init = memoryDbConnection.CreateCommand();
+            init.CommandText = InitSQLScript;
+            init.ExecuteNonQuery();
+
+            repository = new FolderRepository(SqliteFactory.Instance, testConnectionString);
         }
 
         [TestCleanup]
