@@ -188,13 +188,7 @@ namespace ItspServices.pServer.Test
             {
                 Id = 1,
                 Name = "Folder1",
-                Subfolder = new[] {
-                    new Folder
-                    {
-                        Id = 2,
-                        Name = "SubFolder1"
-                    }
-                }.ToList()
+                SubfolderIds = new[] { 2 }.ToList()
             };
 
             ProtectedDataRepository.Setup(x => x.GetFolderById(1)).Returns(folder);
