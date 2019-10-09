@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ItspServices.pServer.Persistence.Sqlite.Repositories;
 using System.Reflection;
 using System.IO;
+using ItspServices.pServer.Abstraction.Models;
 
 namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 {
@@ -70,8 +71,15 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             DbCommand insertTestData = memoryDbConnection.CreateCommand();
             insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');"
                                        + "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES "
-                                       + "('TestUser', 'SecretPasswordHash', 1)";
+                                       + "('FooUser', 'SecretPasswordHash', 1)";
             insertTestData.ExecuteNonQuery();
+
+            User fooUser = repository.GetById(1);
+
+            Assert.AreEqual(1, fooUser.Id);
+            Assert.AreEqual("FooUser", fooUser.UserName);
+            Assert.AreEqual("FooUser".Normalize(), fooUser.NormalizedUserName);
+            Assert.AreEqual("User", fooUser.Role);
         }
     }
 }
