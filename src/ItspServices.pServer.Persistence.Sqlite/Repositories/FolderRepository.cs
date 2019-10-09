@@ -27,8 +27,8 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                 Id = 0,
                 Name = "root",
                 ParentId = 0,
-                Subfolder = new List<Folder>(),
-                DataRegister = new List<ProtectedData>()
+                SubfolderIds = new List<int>(),
+                DataIds = new List<int>()
             };
         }
 

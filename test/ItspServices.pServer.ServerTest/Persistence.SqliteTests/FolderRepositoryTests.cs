@@ -79,8 +79,18 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             Assert.AreEqual("root", root.Name);
             Assert.AreEqual(0, root.Id);
             Assert.AreEqual(0, root.ParentId);
-            Assert.IsTrue(root.Subfolder.Count == 0);
-            Assert.IsTrue(root.DataRegister.Count == 0);
+            Assert.IsTrue(root.SubfolderIds.Count == 0);
+            Assert.IsTrue(root.DataIds.Count == 0);
+        }
+
+        [TestMethod]
+        public void GetFolderByID_ShouldSucced()
+        {
+            DbCommand command = memoryDbConnection.CreateCommand();
+            command.CommandText = "INSERT INTO Folders('ID', 'Foldername', 'Parent') VALUES "
+                                   + "(0, 'root', 0)";
+
+
         }
     }
 }
