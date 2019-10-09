@@ -5,6 +5,7 @@ using ItspServices.pServer.Persistence.Sqlite.Repositories;
 using System.Reflection;
 using System.IO;
 using ItspServices.pServer.Abstraction.Models;
+using System.Text;
 
 namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 {
@@ -69,9 +70,11 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         public void GetUserById_ShouldSucceed()
         {
             DbCommand insertTestData = memoryDbConnection.CreateCommand();
-            insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');"
-                                       + "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES "
-                                       + "('FooUser', 'SecretPasswordHash', 1)";
+            insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');" +
+                                         "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES " +
+                                         "('FooUser', 'SecretPassword', 1);" +
+                                         "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES " +
+                                         "(1, 1, 'data', 1);";
             insertTestData.ExecuteNonQuery();
 
             User fooUser = repository.GetById(1);
@@ -79,7 +82,17 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             Assert.AreEqual(1, fooUser.Id);
             Assert.AreEqual("FooUser", fooUser.UserName);
             Assert.AreEqual("FooUser".Normalize(), fooUser.NormalizedUserName);
+            Assert.AreEqual("SecretPassword", fooUser.PasswordHash);
             Assert.AreEqual("User", fooUser.Role);
+            Assert.AreEqual(1, fooUser.PublicKeys.Count);
+            Assert.AreEqual(1, fooUser.PublicKeys[0].Id);
+            Assert.AreEqual(Key.KeyFlag.ACTIVE, fooUser.PublicKeys[0].Flag);
+            byte[] expectedKeyData = new byte[256];
+            expectedKeyData[0] = (byte) 'd';
+            expectedKeyData[1] = (byte) 'a';
+            expectedKeyData[2] = (byte) 't';
+            expectedKeyData[3] = (byte) 'a';
+            CollectionAssert.AreEquivalent(expectedKeyData, fooUser.PublicKeys[0].KeyData);
         }
     }
 }

@@ -76,6 +76,18 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                 DbCommand queryKeys = con.CreateCommand();
                 queryKeys.CommandText = "SELECT PublicKeys.PublicKeyNumber, PublicKeys.KeyData, PublicKeys.Active FROM PublicKeys " +
                                        $"WHERE PublicKeys.UserID={user.Id};";
+                using (IDataReader reader = queryKeys.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Key k = new Key();
+                        k.Id = reader.GetInt32(0);
+                        k.KeyData = new byte[256];
+                        reader.GetBytes(1, 0, k.KeyData, 0, 256);
+                        k.Flag = reader.GetBoolean(2) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET;
+                        user.PublicKeys.Add(k);
+                    }
+                }
             }
         }
 
