@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS SymmetricKeys (
   PublicKey INT NOT NULL,
   DataID INT NOT NULL,
   KeyData MEDIUMBLOB NULL,
-  PRIMARY KEY (UserID, PublicKeyNumber, DataID),
+  PRIMARY KEY (UserID, PublicKey, DataID),
   CONSTRAINT fk_SymmetricKeys_PublicKeys
     FOREIGN KEY (UserID , PublicKey)
     REFERENCES PublicKeys (UserID , PublicKeyNumber)

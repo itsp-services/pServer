@@ -33,8 +33,8 @@ namespace ItspServices.pServer.Controllers
                 new FolderModel {
                     ParentId = folder.ParentId,
                     Name = folder.Name,
-                    ProtectedDataIds = folder.DataRegister?.Select(x => x.Id).ToList(),
-                    SubfolderIds = folder.Subfolder?.Select(x => x.Id).ToList()
+                    ProtectedDataIds = folder.DataIds,
+                    SubfolderIds = folder.SubfolderIds
                 });
         }
 

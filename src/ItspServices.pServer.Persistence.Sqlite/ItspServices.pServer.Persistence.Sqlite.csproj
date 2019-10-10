@@ -7,4 +7,8 @@
   <ItemGroup>
     <EmbeddedResource Include="DatabaseScripts/DBInit.sql" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ItspServices.pServer.Abstraction\ItspServices.pServer.Abstraction.csproj" />
+  </ItemGroup>
 </Project>
