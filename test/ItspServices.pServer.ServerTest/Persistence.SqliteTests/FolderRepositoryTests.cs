@@ -49,9 +49,11 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             // database will not be freed each time the repository closes the connection.
             memoryDbConnection.Open();
 
-            DbCommand init = memoryDbConnection.CreateCommand();
-            init.CommandText = InitSQLScript;
-            init.ExecuteNonQuery();
+            using (DbCommand init = memoryDbConnection.CreateCommand())
+            {
+                init.CommandText = InitSQLScript;
+                init.ExecuteNonQuery();
+            }
 
             repository = new FolderRepository(SqliteFactory.Instance, testConnectionString);
         }

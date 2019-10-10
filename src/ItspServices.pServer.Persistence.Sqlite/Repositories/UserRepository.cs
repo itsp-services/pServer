@@ -46,20 +46,22 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                 con.ConnectionString = _connectionString;
                 con.Open();
 
-                DbCommand selectUser = con.CreateCommand();
-                selectUser.CommandText = "SELECT Users.ID, Users.Username, Users.PasswordHash, Roles.Name AS Role FROM Users " +
-                                         "INNER JOIN Roles ON Users.RoleID=Roles.ID " +
-                                        $"WHERE Users.ID={id};";
-                using (IDataReader reader = selectUser.ExecuteReader())
+                using (DbCommand selectUser = con.CreateCommand())
                 {
-                    if (reader.Read())
+                    selectUser.CommandText = "SELECT Users.ID, Users.Username, Users.PasswordHash, Roles.Name AS Role FROM Users " +
+                                             "INNER JOIN Roles ON Users.RoleID=Roles.ID " +
+                                            $"WHERE Users.ID={id};";
+                    using (IDataReader reader = selectUser.ExecuteReader())
                     {
-                        user = new User();
-                        user.Id = reader.GetInt32(0);
-                        user.UserName = reader.GetString(1);
-                        user.NormalizedUserName = user.UserName.Normalize();
-                        user.PasswordHash = reader.GetString(2);
-                        user.Role = reader.GetString(3);
+                        if (reader.Read())
+                        {
+                            user = new User();
+                            user.Id = reader.GetInt32(0);
+                            user.UserName = reader.GetString(1);
+                            user.NormalizedUserName = user.UserName.Normalize();
+                            user.PasswordHash = reader.GetString(2);
+                            user.Role = reader.GetString(3);
+                        }
                     }
                 }
             }
@@ -73,19 +75,21 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                 con.ConnectionString = _connectionString;
                 con.Open();
 
-                DbCommand queryKeys = con.CreateCommand();
-                queryKeys.CommandText = "SELECT PublicKeys.PublicKeyNumber, PublicKeys.KeyData, PublicKeys.Active FROM PublicKeys " +
-                                       $"WHERE PublicKeys.UserID={user.Id};";
-                using (IDataReader reader = queryKeys.ExecuteReader())
+                using (DbCommand queryKeys = con.CreateCommand())
                 {
-                    while (reader.Read())
+                    queryKeys.CommandText = "SELECT PublicKeys.PublicKeyNumber, PublicKeys.KeyData, PublicKeys.Active FROM PublicKeys " +
+                                           $"WHERE PublicKeys.UserID={user.Id};";
+                    using (IDataReader reader = queryKeys.ExecuteReader())
                     {
-                        Key k = new Key();
-                        k.Id = reader.GetInt32(0);
-                        k.KeyData = new byte[256];
-                        reader.GetBytes(1, 0, k.KeyData, 0, 256);
-                        k.Flag = reader.GetBoolean(2) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET;
-                        user.PublicKeys.Add(k);
+                        while (reader.Read())
+                        {
+                            Key k = new Key();
+                            k.Id = reader.GetInt32(0);
+                            k.KeyData = new byte[256];
+                            reader.GetBytes(1, 0, k.KeyData, 0, 256);
+                            k.Flag = reader.GetBoolean(2) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET;
+                            user.PublicKeys.Add(k);
+                        }
                     }
                 }
             }

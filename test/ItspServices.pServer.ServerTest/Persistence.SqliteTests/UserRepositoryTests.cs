@@ -50,9 +50,11 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             // database will not be freed each time the repository closes the connection.
             memoryDbConnection.Open();
 
-            DbCommand init = memoryDbConnection.CreateCommand();
-            init.CommandText = InitSQLScript;
-            init.ExecuteNonQuery();
+            using (DbCommand init = memoryDbConnection.CreateCommand())
+            {
+                init.CommandText = InitSQLScript;
+                init.ExecuteNonQuery();
+            }
 
             repository = new UserRepository(SqliteFactory.Instance, testConnectionString);
         }
@@ -69,13 +71,15 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         [TestMethod]
         public void GetUserById_ShouldSucceed()
         {
-            DbCommand insertTestData = memoryDbConnection.CreateCommand();
-            insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');" +
-                                         "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES " +
-                                         "('FooUser', 'SecretPassword', 1);" +
-                                         "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES " +
-                                         "(1, 1, 'data', 1);";
-            insertTestData.ExecuteNonQuery();
+            using (DbCommand insertTestData = memoryDbConnection.CreateCommand())
+            {
+                insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');" +
+                                             "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES " +
+                                             "('FooUser', 'SecretPassword', 1);" +
+                                             "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES " +
+                                             "(1, 1, 'data', 1);";
+                insertTestData.ExecuteNonQuery();
+            }
 
             User fooUser = repository.GetById(1);
 
