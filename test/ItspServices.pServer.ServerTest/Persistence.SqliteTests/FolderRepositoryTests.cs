@@ -70,12 +70,6 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         [TestMethod]
         public void GetRootFolderTest_ShouldSucced()
         {
-            DbCommand command = memoryDbConnection.CreateCommand();
-            command.CommandText = "INSERT INTO Folders('ID', 'Foldername', 'Parent') VALUES "
-                                   + "(0, 'root', 0)";
-
-            command.ExecuteNonQuery();
-
             Folder root = repository.GetById(0);
 
             Assert.AreEqual("root", root.Name);
@@ -86,11 +80,14 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         }
 
         [TestMethod]
-        public void GetFolderByID_ShouldSucced()
+        public void GetFolderById_ShouldSucced()
         {
-            DbCommand command = memoryDbConnection.CreateCommand();
-            command.CommandText = "INSERT INTO Folders('ID', 'Foldername', 'Parent') VALUES "
-                                   + "(0, 'root', 0)";
+            using (DbCommand command = memoryDbConnection.CreateCommand())
+            {
+                command.CommandText = "INSERT INTO Folders('FolderName', 'Parent') VALUES " +
+                                      "('testFolder', 0)";
+                command.ExecuteNonQuery();
+            }
 
 
         }

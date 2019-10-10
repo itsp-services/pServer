@@ -18,6 +18,23 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
         {
             _sqlFactory = sqlFactory;
             _connectionString = connectionString;
+            InitRootFolder();
+        }
+
+        public void InitRootFolder()
+        {
+            using (DbConnection con = _sqlFactory.CreateConnection())
+            {
+                con.ConnectionString = _connectionString;
+                con.Open();
+
+                using (DbCommand insertRoot = con.CreateCommand())
+                {
+                    insertRoot.CommandText = "INSERT INTO Folders('ID', 'FolderName', 'Parent') VALUES " +
+                                             "(0, 'root', 0);";
+                    insertRoot.ExecuteNonQuery();
+                }
+            }
         }
 
         public Folder GetById(int id)
