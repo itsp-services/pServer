@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ItspServices.pServer.Client.Model
+namespace ItspServices.pServer.Client.Models
 {
     class FolderModel
     {

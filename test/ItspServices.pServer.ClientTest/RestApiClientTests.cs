@@ -8,7 +8,7 @@ using System.Text.Json;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ItspServices.pServer.Client.RestApi;
-using ItspServices.pServer.Client.Model;
+using ItspServices.pServer.Client.Models;
 
 namespace ItspServices.pServer.ClientTest
 {
