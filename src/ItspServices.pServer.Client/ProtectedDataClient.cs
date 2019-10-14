@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.RestApi;
@@ -16,13 +16,13 @@ namespace ItspServices.pServer.Client
             _restClient = new RestApiClient(factory);
         }
 
-        public async Task Set(string destination, byte[] protectedData)
+        public async Task Set(string destination, string protectedData)
         {
-            FolderModel folder = await _restClient.RequestFolderById(null);
-            if (folder is null)
+            FolderModel rootFolder = await _restClient.RequestFolderById(null);
+            if (rootFolder is null)
                 throw new InvalidOperationException();
 
-            folder = await FindFolder(destination, folder);
+            FolderModel folder = await FindFolder(destination, rootFolder);
 
             int? dataId = null;
             DataModel dataModel = null;
@@ -37,15 +37,32 @@ namespace ItspServices.pServer.Client
             }
             if (dataId != null)
             {
-                // TODO: Encrypt data with symmetric of requested datamodel
+                // TODO: Encrypt data with symmetric key of requested datamodel
                 dataModel.Data = protectedData;
                 await _restClient.SendUpdateData((int) dataId, dataModel);
             } 
             else
             {
                 // TODO: Create new datamodel and encrypt data with new symmetric key and send create request
-
-
+                int newId;
+                for (newId = 1; true; newId++)
+                {
+                    try
+                    {
+                        DataModel data = await _restClient.RequestProtectedDataById(newId);
+                    }
+                    catch (Exception)
+                    {
+                        break;
+                    }
+                }
+                DataModel newDataModel = new DataModel()
+                {
+                    Name = destination.Substring(destination.LastIndexOf('/') + 1),
+                    Data = protectedData
+                    // TODO: New Keypair ??
+                };
+                await _restClient.SendCreateData(newId, newDataModel);
             }
         }
 

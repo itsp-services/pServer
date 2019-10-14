@@ -25,12 +25,17 @@ namespace ItspServices.pServer.Client.RestApi
                     return await JsonSerializer.DeserializeAsync<FolderModel>(await response.Content.ReadAsStreamAsync());
             }
         }
+
         public async Task<DataModel> RequestProtectedDataById(int id)
         {
             using (HttpClient client = _provider.CreateClient())
             {
                 using (HttpResponseMessage response = await client.GetAsync($"/api/protecteddata/data/{id}"))
+                {
+                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                        throw new FileNotFoundException();
                     return await JsonSerializer.DeserializeAsync<DataModel>(await response.Content.ReadAsStreamAsync());
+                }
             }
         }
 
@@ -46,5 +51,16 @@ namespace ItspServices.pServer.Client.RestApi
             }
         }
 
+        public async Task SendCreateData(int id, DataModel dataModel)
+        {
+            using (HttpClient client = _provider.CreateClient())
+            {
+                string serializedModel = JsonSerializer.Serialize(dataModel);
+                HttpContent content = new StringContent(serializedModel);
+                using (HttpResponseMessage response = await client.PostAsync($"/api/protecteddata/data/{id}", content))
+                {
+                }
+            }
+        }
     }
 }
