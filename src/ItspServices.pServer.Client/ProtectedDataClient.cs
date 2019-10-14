@@ -76,7 +76,7 @@ namespace ItspServices.pServer.Client
             {
                 subFolder = await _restClient.RequestFolderById(subFolderId);
                 if (destination.StartsWith(path + '/' + subFolder.Name))
-                    return await FindFolder(destination, subFolder, path += '/' + subFolder.Name);
+                    return await FindFolder(destination, subFolder, path + '/' + subFolder.Name);
             }
             return null;
         }
