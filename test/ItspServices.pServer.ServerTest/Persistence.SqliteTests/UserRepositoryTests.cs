@@ -5,7 +5,10 @@ using ItspServices.pServer.Persistence.Sqlite.Repositories;
 using System.Reflection;
 using System.IO;
 using ItspServices.pServer.Abstraction.Models;
+using ItspServices.pServer.Abstraction.Units;
+using System.Collections.Generic;
 using System.Text;
+using System.Data;
 
 namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 {
@@ -73,9 +76,10 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         {
             using (DbCommand insertTestData = memoryDbConnection.CreateCommand())
             {
-                insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');" +
+                insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User'), ('Admin');" +
                                              "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES " +
-                                             "('FooUser', 'SecretPassword', 1);" +
+                                             "('FooUser', 'SecretPassword', 1)," +
+                                             "('BarUser', 'OtherPassword', 2);" +
                                              "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES " +
                                              "(1, 1, 'data', 1);";
                 insertTestData.ExecuteNonQuery();
@@ -97,6 +101,66 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             expectedKeyData[2] = (byte) 't';
             expectedKeyData[3] = (byte) 'a';
             CollectionAssert.AreEquivalent(expectedKeyData, fooUser.PublicKeys[0].KeyData);
+
+            User barUser = repository.GetById(2);
+
+            Assert.AreEqual(2, barUser.Id);
+            Assert.AreEqual("BarUser", barUser.UserName);
+            Assert.AreEqual("BarUser".Normalize(), barUser.NormalizedUserName);
+            Assert.AreEqual("OtherPassword", barUser.PasswordHash);
+            Assert.AreEqual("Admin", barUser.Role);
+            Assert.AreEqual(0, barUser.PublicKeys.Count);
+        }
+
+        [TestMethod]
+        public void GetUserByInvalidId_ShouldReturnNull()
+        {
+            User invalidUser = repository.GetById(999);
+            Assert.IsNull(invalidUser);
+        }
+
+        [TestMethod]
+        public void AddUser_ShouldSucceed()
+        {
+            using (DbCommand insertTestData = memoryDbConnection.CreateCommand())
+            {
+                insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');";
+                insertTestData.ExecuteNonQuery();
+            }
+
+            using (IAddUnitOfWork<User> uow = repository.Add())
+            {
+                uow.Entity.UserName = "FooUser";
+                uow.Entity.NormalizedUserName = uow.Entity.UserName.Normalize();
+                uow.Entity.PasswordHash = "pw";
+                uow.Entity.Role = "User";
+                uow.Entity.PublicKeys = new List<Key>();
+                uow.Entity.PublicKeys.Add(new Key() { 
+                    KeyData = Encoding.UTF8.GetBytes("keydata"),
+                    Flag = Key.KeyFlag.ACTIVE
+                });
+
+                uow.Complete();
+            }
+
+            using (DbCommand queryData = memoryDbConnection.CreateCommand())
+            {
+                queryData.CommandText = "SELECT * FROM Users;";
+                using (IDataReader reader = queryData.ExecuteReader())
+                {
+                    reader.Read();
+                    Assert.AreEqual(1, reader.GetInt32(0));
+                    Assert.AreEqual("FooUser", reader.GetString(1));
+                    Assert.AreEqual("pw", reader.GetString(2));
+                    Assert.AreEqual(1, reader.GetInt32(3));
+                }
+                queryData.CommandText = "SELECT * FROM PublicKeys;";
+                using (IDataReader reader = queryData.ExecuteReader())
+                {
+                    reader.Read();
+                    Assert.AreEqual(1, reader.GetInt32(0));
+                }
+            }
         }
     }
 }

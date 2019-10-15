@@ -4,6 +4,7 @@ using System.Data.Common;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
+using ItspServices.pServer.Persistence.Sqlite.Units.UserUnits;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.ServerTest")]
 namespace ItspServices.pServer.Persistence.Sqlite.Repositories
@@ -102,7 +103,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 
         public IAddUnitOfWork<User> Add()
         {
-            throw new System.NotImplementedException();
+            return new AddUserUnitOfWork(_sqlFactory, _connectionString);
         }
 
         public IRemoveUnitOfWork<User, int> Remove(int key)
