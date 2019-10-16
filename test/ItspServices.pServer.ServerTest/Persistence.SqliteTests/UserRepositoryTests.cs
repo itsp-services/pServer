@@ -148,17 +148,17 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                 queryData.CommandText = "SELECT * FROM Users;";
                 using (IDataReader reader = queryData.ExecuteReader())
                 {
-                    reader.Read();
+                    Assert.IsTrue(reader.Read());
                     Assert.AreEqual(1, reader.GetInt32(0));
                     Assert.AreEqual("FooUser", reader.GetString(1));
                     Assert.AreEqual("pw", reader.GetString(2));
                     Assert.AreEqual(1, reader.GetInt32(3));
+                    Assert.IsFalse(reader.Read());
                 }
                 queryData.CommandText = "SELECT * FROM PublicKeys;";
                 using (IDataReader reader = queryData.ExecuteReader())
                 {
                     reader.Read();
-                    Assert.AreEqual(1, reader.GetInt32(0));
                 }
             }
         }

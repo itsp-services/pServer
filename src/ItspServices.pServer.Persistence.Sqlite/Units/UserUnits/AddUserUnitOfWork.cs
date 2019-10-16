@@ -17,30 +17,14 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
 
         protected override void Complete(DbConnection con)
         {
-            int roleId = 0;
-            using (DbCommand queryRole = con.CreateCommand())
-            {
-                queryRole.CommandText = "SELECT ID FROM Roles " +
-                                       $"WHERE Roles.Name='{Entity.Role}';";
-                using (IDataReader reader = queryRole.ExecuteReader())
-                {
-                    if (reader.Read())
-                        roleId = reader.GetInt32(0);
-                    else
-                        return;
-                }
-            }
-
             using (DbCommand insert = con.CreateCommand())
             {
-                insert.CommandText = "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES" +
-                                        $"('{Entity.UserName}', '{Entity.PasswordHash}', {roleId});";
+                // TODO: Use DbParameter for user input
+                insert.CommandText = "INSERT INTO Users(Username, PasswordHash, RoleID) " +
+                                    $"SELECT N, Pw, ID FROM(SELECT '{Entity.UserName}' AS N, '{Entity.PasswordHash}' AS Pw) " +
+                                    $"JOIN Roles ON Roles.Name='{Entity.Role}';";
+                // TODO: Add Keys
                 insert.ExecuteNonQuery();
-                insert.CommandText = "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active) VALUES ";
-                foreach (Key key in Entity.PublicKeys)
-                {
-                    // TODO: Insert keys
-                }
             }
         }
 
