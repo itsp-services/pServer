@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<ItspServices.pServer.Abstraction.Models.User> SignInManager
 
-<ul class="navbar-nav">
+<ul class="navbar-nav ml-auto">
     @if (SignInManager.IsSignedIn(User))
     {
         <li class="nav-item">
@@ -15,10 +15,10 @@
     }
     else
     {
-        <li class="nav-item float-right">
+        <li class="nav-item">
             <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
         </li>
-        <li class="nav-item float-right">
+        <li class="nav-item">
             <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
         </li>
     }
