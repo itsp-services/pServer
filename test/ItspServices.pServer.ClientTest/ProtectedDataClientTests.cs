@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,11 +90,6 @@ namespace ItspServices.pServer.ClientTest
         {
             bool setHasBeenCalled = false;
 
-            using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
-            {
-                // TODO
-            }
-
             Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
             HttpResponseMessage Callback(HttpRequestMessage request)
             {
@@ -144,6 +140,30 @@ namespace ItspServices.pServer.ClientTest
             await client.Set("/Andys Passwords/MailAccount", "SecretPassword");
 
             Assert.IsTrue(setHasBeenCalled);
+        }
+
+        [TestMethod]
+        public async Task CreateProtectedData_ShouldEncrypt()
+        {
+            // TODO
+            using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
+            {
+                string str = "str";
+                byte[] data = RSA.Encrypt(Encoding.UTF8.GetBytes(str), true);
+                str = data.ToString();
+            }
+        }
+
+        [TestMethod]
+        public async Task UpdateProtectedData_ShouldEncrypt()
+        {
+            // TODO
+            using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
+            {
+                string str = "str";
+                byte[] data = RSA.Encrypt(Encoding.UTF8.GetBytes(str), true);
+                str = data.ToString();
+            }
         }
     }
 }

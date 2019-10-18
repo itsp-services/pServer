@@ -4,12 +4,14 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.RestApi;
+using ItspServices.pServer.Client.Security;
 
 namespace ItspServices.pServer.Client
 {
     public class ProtectedDataClient
     {
         private RestApiClient _restClient;
+        private DataEncryptor _encryptor = new DataEncryptor();
 
         public ProtectedDataClient(IHttpClientFactory factory)
         {
@@ -43,7 +45,7 @@ namespace ItspServices.pServer.Client
             } 
             else
             {
-                // TODO: Create new datamodel and encrypt data with new symmetric key and send create request
+                // TODO: Encrypt data with new symmetric key
                 int newId;
                 for (newId = 1; true; newId++)
                 {
