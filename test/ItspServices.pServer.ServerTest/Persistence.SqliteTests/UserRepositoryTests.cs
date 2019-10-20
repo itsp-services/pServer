@@ -95,12 +95,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             Assert.AreEqual(1, fooUser.PublicKeys.Count);
             Assert.AreEqual(1, fooUser.PublicKeys[0].Id);
             Assert.AreEqual(Key.KeyFlag.ACTIVE, fooUser.PublicKeys[0].Flag);
-            byte[] expectedKeyData = new byte[256];
-            expectedKeyData[0] = (byte) 'd';
-            expectedKeyData[1] = (byte) 'a';
-            expectedKeyData[2] = (byte) 't';
-            expectedKeyData[3] = (byte) 'a';
-            CollectionAssert.AreEquivalent(expectedKeyData, fooUser.PublicKeys[0].KeyData);
+            Assert.AreEqual("data", Encoding.UTF8.GetString(fooUser.PublicKeys[0].KeyData));
 
             User barUser = repository.GetById(2);
 
@@ -124,7 +119,8 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         {
             using (DbCommand insertTestData = memoryDbConnection.CreateCommand())
             {
-                insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');";
+                insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');" +
+                                             "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);";
                 insertTestData.ExecuteNonQuery();
             }
 
@@ -136,8 +132,13 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                 uow.Entity.Role = "User";
                 uow.Entity.PublicKeys = new List<Key>();
                 uow.Entity.PublicKeys.Add(new Key() { 
-                    KeyData = Encoding.UTF8.GetBytes("keydata"),
+                    KeyData = Encoding.UTF8.GetBytes("keydata1"),
                     Flag = Key.KeyFlag.ACTIVE
+                });
+                uow.Entity.PublicKeys.Add(new Key()
+                {
+                    KeyData = Encoding.UTF8.GetBytes("keydata2"),
+                    Flag = Key.KeyFlag.OBSOLET
                 });
 
                 uow.Complete();
@@ -145,11 +146,11 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 
             using (DbCommand queryData = memoryDbConnection.CreateCommand())
             {
-                queryData.CommandText = "SELECT * FROM Users;";
+                queryData.CommandText = "SELECT * FROM Users WHERE Users.Username='FooUser';";
                 using (IDataReader reader = queryData.ExecuteReader())
                 {
                     Assert.IsTrue(reader.Read());
-                    Assert.AreEqual(1, reader.GetInt32(0));
+                    Assert.AreEqual(2, reader.GetInt32(0));
                     Assert.AreEqual("FooUser", reader.GetString(1));
                     Assert.AreEqual("pw", reader.GetString(2));
                     Assert.AreEqual(1, reader.GetInt32(3));
@@ -158,7 +159,17 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                 queryData.CommandText = "SELECT * FROM PublicKeys;";
                 using (IDataReader reader = queryData.ExecuteReader())
                 {
-                    reader.Read();
+                    Assert.IsTrue(reader.Read());
+                    Assert.AreEqual(2, reader.GetInt32(0));
+                    Assert.AreEqual(1, reader.GetInt32(1));
+                    Assert.AreEqual("keydata1", reader.GetString(2));
+                    Assert.IsTrue(reader.GetBoolean(3));
+                    Assert.IsTrue(reader.Read());
+                    Assert.AreEqual(2, reader.GetInt32(0));
+                    Assert.AreEqual(2, reader.GetInt32(1));
+                    Assert.AreEqual("keydata2", reader.GetString(2));
+                    Assert.IsFalse(reader.GetBoolean(3));
+                    Assert.IsFalse(reader.Read());
                 }
             }
         }

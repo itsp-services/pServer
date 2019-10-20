@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Text;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
@@ -86,8 +87,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                         {
                             Key k = new Key();
                             k.Id = reader.GetInt32(0);
-                            k.KeyData = new byte[256];
-                            reader.GetBytes(1, 0, k.KeyData, 0, 256);
+                            k.KeyData = Encoding.UTF8.GetBytes(reader.GetString(1));
                             k.Flag = reader.GetBoolean(2) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET;
                             user.PublicKeys.Add(k);
                         }
