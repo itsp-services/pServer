@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS Roles (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS Users (
   ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  Username VARCHAR(45) NOT NULL,
+  Username VARCHAR(45) NOT NULL UNIQUE,
   PasswordHash VARCHAR(45) NULL,
   RoleID NOT NULL,
   CONSTRAINT fk_User_Roles
