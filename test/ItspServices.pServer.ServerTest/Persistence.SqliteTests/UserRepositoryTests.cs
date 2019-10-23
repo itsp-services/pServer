@@ -9,6 +9,7 @@ using ItspServices.pServer.Abstraction.Units;
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
+using System;
 
 namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 {
@@ -95,7 +96,13 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             Assert.AreEqual(1, fooUser.PublicKeys.Count);
             Assert.AreEqual(1, fooUser.PublicKeys[0].Id);
             Assert.AreEqual(Key.KeyFlag.ACTIVE, fooUser.PublicKeys[0].Flag);
-            Assert.AreEqual("data", Encoding.UTF8.GetString(fooUser.PublicKeys[0].KeyData));
+            byte[] expectedKey = new byte[364];
+            expectedKey.Initialize();
+            expectedKey[0] = (byte)'d';
+            expectedKey[1] = (byte)'a';
+            expectedKey[2] = (byte)'t';
+            expectedKey[3] = (byte)'a';
+            Assert.AreEqual(Convert.ToBase64String(expectedKey), Convert.ToBase64String(fooUser.PublicKeys[0].KeyData));
 
             User barUser = repository.GetById(2);
 
