@@ -1,6 +1,6 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.Common;
-using System.Text;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Units;
 
@@ -20,15 +20,27 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
         {
             using (DbCommand insert = con.CreateCommand())
             {
-                // TODO: Use DbParameter for user input
+                DbParameter username = insert.CreateParameter();
+                username.ParameterName = "username";
+                username.Value = Entity.UserName;
+                DbParameter password = insert.CreateParameter();
+                password.ParameterName = "password";
+                password.Value = Entity.PasswordHash;
+                DbParameter role = insert.CreateParameter();
+                role.ParameterName = "role";
+                role.Value = Entity.Role;
+                insert.Parameters.Add(username);
+                insert.Parameters.Add(password);
+                insert.Parameters.Add(role);
+
                 insert.CommandText = "INSERT INTO Users(Username, PasswordHash, RoleID) " +
-                                    $"SELECT N, Pw, ID FROM(SELECT '{Entity.UserName}' AS N, '{Entity.PasswordHash}' AS Pw) " +
-                                    $"JOIN Roles ON Roles.Name='{Entity.Role}';";
+                                    $"SELECT N, Pw, ID FROM(SELECT @username AS N, @password AS Pw) " +
+                                    $"JOIN Roles ON Roles.Name=@role;";
                 insert.ExecuteNonQuery();
 
                 if (Entity.PublicKeys.Count > 0)
                 {
-                    insert.CommandText = $"SELECT ID FROM Users WHERE Users.UserName='{Entity.UserName}';";
+                    insert.CommandText = $"SELECT ID FROM Users WHERE Users.UserName=@username;";
                     int userID = -1;
                     using (IDataReader reader = insert.ExecuteReader())
                     {
@@ -38,8 +50,13 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
                     insert.CommandText = "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES ";
                     for (int i = 0; i < Entity.PublicKeys.Count; i++)
                     {
+                        DbParameter keydata = insert.CreateParameter();
+                        keydata.ParameterName = $"keydata{i}";
+                        keydata.Value = Convert.ToBase64String(Entity.PublicKeys[i].KeyData);
+                        insert.Parameters.Add(keydata);
+
                         int active = (Entity.PublicKeys[i].Flag == Key.KeyFlag.ACTIVE) ? 1 : 0;
-                        insert.CommandText += $"({userID}, {i + 1}, '{Encoding.UTF8.GetString(Entity.PublicKeys[i].KeyData)}', {active})";
+                        insert.CommandText += $"({userID}, {i + 1}, @keydata{i}, {active})";
                         if (i >= Entity.PublicKeys.Count - 1)
                         {
                             insert.CommandText += ';';

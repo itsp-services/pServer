@@ -169,12 +169,12 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                     Assert.IsTrue(reader.Read());
                     Assert.AreEqual(2, reader.GetInt32(0));
                     Assert.AreEqual(1, reader.GetInt32(1));
-                    Assert.AreEqual("keydata1", reader.GetString(2));
+                    Assert.AreEqual(Convert.ToBase64String(Encoding.UTF8.GetBytes("keydata1")), reader.GetString(2));
                     Assert.IsTrue(reader.GetBoolean(3));
                     Assert.IsTrue(reader.Read());
                     Assert.AreEqual(2, reader.GetInt32(0));
                     Assert.AreEqual(2, reader.GetInt32(1));
-                    Assert.AreEqual("keydata2", reader.GetString(2));
+                    Assert.AreEqual(Convert.ToBase64String(Encoding.UTF8.GetBytes("keydata2")), reader.GetString(2));
                     Assert.IsFalse(reader.GetBoolean(3));
                     Assert.IsFalse(reader.Read());
                 }
