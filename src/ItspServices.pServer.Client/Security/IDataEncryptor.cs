@@ -3,5 +3,6 @@
     public interface IDataEncryptor
     {
         byte[] EncryptWithSymmetricKey(byte[] data, byte[] keydata);
+        byte[] DecryptWithSymmetricKey(byte[] data, byte[] keydata);
     }
 }
