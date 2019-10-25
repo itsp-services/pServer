@@ -20,18 +20,9 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
         {
             using (DbCommand insert = con.CreateCommand())
             {
-                DbParameter username = insert.CreateParameter();
-                username.ParameterName = "username";
-                username.Value = Entity.UserName;
-                DbParameter password = insert.CreateParameter();
-                password.ParameterName = "password";
-                password.Value = Entity.PasswordHash;
-                DbParameter role = insert.CreateParameter();
-                role.ParameterName = "role";
-                role.Value = Entity.Role;
-                insert.Parameters.Add(username);
-                insert.Parameters.Add(password);
-                insert.Parameters.Add(role);
+                insert.AddParameterWithValue("username", Entity.UserName);
+                insert.AddParameterWithValue("password", Entity.PasswordHash);
+                insert.AddParameterWithValue("role", Entity.Role);
 
                 insert.CommandText = "INSERT INTO Users(Username, PasswordHash, RoleID) " +
                                     $"SELECT N, Pw, ID FROM(SELECT @username AS N, @password AS Pw) " +
@@ -50,10 +41,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
                     insert.CommandText = "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES ";
                     for (int i = 0; i < Entity.PublicKeys.Count; i++)
                     {
-                        DbParameter keydata = insert.CreateParameter();
-                        keydata.ParameterName = $"keydata{i}";
-                        keydata.Value = Convert.ToBase64String(Entity.PublicKeys[i].KeyData);
-                        insert.Parameters.Add(keydata);
+                        insert.AddParameterWithValue($"keydata{i}", Convert.ToBase64String(Entity.PublicKeys[i].KeyData));
 
                         int active = (Entity.PublicKeys[i].Flag == Key.KeyFlag.ACTIVE) ? 1 : 0;
                         insert.CommandText += $"({userID}, {i + 1}, @keydata{i}, {active})";
