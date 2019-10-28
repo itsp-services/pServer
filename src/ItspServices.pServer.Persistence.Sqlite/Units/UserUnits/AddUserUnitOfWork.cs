@@ -8,10 +8,10 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
 {
     class AddUserUnitOfWork : SqliteUnitOfWork<User>, IAddUnitOfWork<User>
     {
-        public User Entity { get; }
+        public User Entity { get; private set; }
 
-        public AddUserUnitOfWork(DbProviderFactory sqlFactory, string connectionString)
-            : base(sqlFactory, connectionString)
+        public AddUserUnitOfWork(DbProviderFactory dbFactory, string connectionString)
+            : base(dbFactory, connectionString)
         {
             Entity = new User();
         }
@@ -25,13 +25,13 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
                 insert.AddParameterWithValue("role", Entity.Role);
 
                 insert.CommandText = "INSERT INTO Users(Username, PasswordHash, RoleID) " +
-                                    $"SELECT N, Pw, ID FROM(SELECT @username AS N, @password AS Pw) " +
-                                    $"JOIN Roles ON Roles.Name=@role;";
+                                     "SELECT N, Pw, ID FROM(SELECT @username AS N, @password AS Pw) " +
+                                     "JOIN Roles ON Roles.Name=@role;";
                 insert.ExecuteNonQuery();
 
-                if (Entity.PublicKeys.Count > 0)
+                if (Entity.HasKeys())
                 {
-                    insert.CommandText = $"SELECT ID FROM Users WHERE Users.UserName=@username;";
+                    insert.CommandText = "SELECT ID FROM Users WHERE Users.UserName=@username;";
                     int userID = -1;
                     using (IDataReader reader = insert.ExecuteReader())
                     {
@@ -41,9 +41,9 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
                     insert.CommandText = "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES ";
                     for (int i = 0; i < Entity.PublicKeys.Count; i++)
                     {
-                        insert.AddParameterWithValue($"keydata{i}", Convert.ToBase64String(Entity.PublicKeys[i].KeyData));
-
+                        insert.AddParameterWithValue($"keydata{i}", Entity.PublicKeys[i].AsBase64String());
                         int active = (Entity.PublicKeys[i].Flag == Key.KeyFlag.ACTIVE) ? 1 : 0;
+
                         insert.CommandText += $"({userID}, {i + 1}, @keydata{i}, {active})";
                         if (i >= Entity.PublicKeys.Count - 1)
                         {
@@ -61,8 +61,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
 
         public override void Dispose()
         {
-
+            Entity = null;
         }
-
     }
 }
