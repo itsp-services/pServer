@@ -6,7 +6,6 @@ using System.Reflection;
 using System.IO;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Units;
-using System.Collections.Generic;
 using System.Text;
 using System.Data;
 using System;
@@ -137,7 +136,6 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                 uow.Entity.NormalizedUserName = uow.Entity.UserName.Normalize();
                 uow.Entity.PasswordHash = "pw";
                 uow.Entity.Role = "User";
-                uow.Entity.PublicKeys = new List<Key>();
                 uow.Entity.PublicKeys.Add(new Key() { 
                     KeyData = Encoding.UTF8.GetBytes("keydata1"),
                     Flag = Key.KeyFlag.ACTIVE
@@ -178,6 +176,27 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                     Assert.IsFalse(reader.GetBoolean(3));
                     Assert.IsFalse(reader.Read());
                 }
+            }
+        }
+
+        [TestMethod]
+        public void AddUser_UsernameAlreadyExists_ShouldNotThrowException()
+        {
+            using (DbCommand inserTestData = memoryDbConnection.CreateCommand())
+            {
+                inserTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');" +
+                                            "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);";
+                inserTestData.ExecuteNonQuery();
+            }
+
+            using (IAddUnitOfWork<User> uow = repository.Add())
+            {
+                uow.Entity.UserName = "BarUser";
+                uow.Entity.NormalizedUserName = uow.Entity.UserName.Normalize();
+                uow.Entity.PasswordHash = "pw";
+                uow.Entity.Role = "User";
+
+                uow.Complete();
             }
         }
     }

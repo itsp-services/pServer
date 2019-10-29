@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Units;
@@ -24,10 +23,22 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
                 insert.AddParameterWithValue("password", Entity.PasswordHash);
                 insert.AddParameterWithValue("role", Entity.Role);
 
+                insert.CommandText = "SELECT Username FROM Users " +
+                                     "WHERE Users.Username=@username;";
+                using (IDataReader reader = insert.ExecuteReader())
+                {
+                    if(reader.Read())
+                    {
+                        // TODO: Log
+                        return;
+                    }
+                }
+
                 insert.CommandText = "INSERT INTO Users(Username, PasswordHash, RoleID) " +
                                      "SELECT N, Pw, ID FROM(SELECT @username AS N, @password AS Pw) " +
                                      "JOIN Roles ON Roles.Name=@role;";
                 insert.ExecuteNonQuery();
+
 
                 if (Entity.HasKeys())
                 {
