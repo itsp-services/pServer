@@ -1,6 +1,5 @@
 ﻿using System.Data.Common;
 using ItspServices.pServer.Abstraction.Units;
-using Microsoft.Extensions.Logging;
 
 namespace ItspServices.pServer.Persistence.Sqlite.Units
 {
