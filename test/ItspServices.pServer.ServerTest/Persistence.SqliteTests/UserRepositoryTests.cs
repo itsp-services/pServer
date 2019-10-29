@@ -199,5 +199,45 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                 uow.Complete();
             }
         }
+
+        [TestMethod]
+        public void RemoveUser_ShouldSucceed()
+        {
+            using (DbCommand inserTestData = memoryDbConnection.CreateCommand())
+            {
+                inserTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');" +
+                                            "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);" +
+                                            "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES (1, 1, 'data', 1);";
+                inserTestData.ExecuteNonQuery();
+            }
+
+            using (IRemoveUnitOfWork<User, int> uow = repository.Remove(1))
+            {
+                uow.Complete();
+            }
+
+            using (DbCommand queryData = memoryDbConnection.CreateCommand())
+            {
+                queryData.CommandText = "SELECT * FROM Users WHERE Users.Username='BarUser';";
+                using (IDataReader reader = queryData.ExecuteReader())
+                {
+                    Assert.IsFalse(reader.Read());
+                }
+                queryData.CommandText = "SELECT * FROM PublicKeys WHERE PublicKeys.UserID=1;";
+                using (IDataReader reader = queryData.ExecuteReader())
+                {
+                    Assert.IsFalse(reader.Read());
+                }
+            }
+        }
+
+        [TestMethod]
+        public void RemoveNotExistingUser_ShouldNotThrowException()
+        {
+            using (IRemoveUnitOfWork<User, int> uow = repository.Remove(99))
+            {
+                uow.Complete();
+            }
+        }
     }
 }

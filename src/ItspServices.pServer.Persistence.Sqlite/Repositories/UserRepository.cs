@@ -11,12 +11,12 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 {
     class UserRepository : IUserRepository
     {
-        private DbProviderFactory _sqlFactory;
+        private DbProviderFactory _dbFactory;
         private readonly string _connectionString;
 
-        public UserRepository(DbProviderFactory sqlFactory, string connectionString)
+        public UserRepository(DbProviderFactory dbFactory, string connectionString)
         {
-            _sqlFactory = sqlFactory;
+            _dbFactory = dbFactory;
             _connectionString = connectionString;
         }
 
@@ -42,7 +42,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
         private User ReadUserData(int id)
         {
             User user = null;
-            using (DbConnection con = _sqlFactory.CreateConnection())
+            using (DbConnection con = _dbFactory.CreateConnection())
             {
                 con.ConnectionString = _connectionString;
                 con.Open();
@@ -71,7 +71,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 
         private void AddPublicKeys(User user)
         {
-            using (DbConnection con = _sqlFactory.CreateConnection())
+            using (DbConnection con = _dbFactory.CreateConnection())
             {
                 con.ConnectionString = _connectionString;
                 con.Open();
@@ -103,12 +103,15 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 
         public IAddUnitOfWork<User> Add()
         {
-            return new AddUserUnitOfWork(_sqlFactory, _connectionString);
+            return new AddUserUnitOfWork(_dbFactory, _connectionString);
         }
 
         public IRemoveUnitOfWork<User, int> Remove(int key)
         {
-            throw new System.NotImplementedException();
+            return new RemoveUserUnitOfWork(_dbFactory, _connectionString)
+            {
+                Id = key
+            };
         }
 
         public IUpdateUnitOfWork<User, int> Update(int key)
