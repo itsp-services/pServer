@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS Roles (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS Users (
   ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  Username VARCHAR(45) NOT NULL,
+  Username VARCHAR(45) NOT NULL UNIQUE,
   PasswordHash VARCHAR(45) NULL,
   RoleID NOT NULL,
   CONSTRAINT fk_User_Roles
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS Users (
 CREATE TABLE IF NOT EXISTS PublicKeys (
   UserID INT NOT NULL,
   PublicKeyNumber INT NOT NULL,
-  KeyData VARBINARY(256) NULL,
+  KeyData VARCHAR(364) NULL,
   Active TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (UserID, PublicKeyNumber),
   CONSTRAINT fk_PublicKeys_User
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS SymmetricKeys (
   UserID INT NOT NULL,
   PublicKey INT NOT NULL,
   DataID INT NOT NULL,
-  KeyData MEDIUMBLOB NULL,
+  KeyData VARCHAR(364) NULL,
   PRIMARY KEY (UserID, PublicKey, DataID),
   CONSTRAINT fk_SymmetricKeys_PublicKeys
     FOREIGN KEY (UserID , PublicKey)
