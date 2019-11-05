@@ -116,7 +116,10 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 
         public IUpdateUnitOfWork<User, int> Update(int key)
         {
-            throw new System.NotImplementedException();
+            return new UpdateUserUnitOfWork(_dbFactory, _connectionString, GetById(key))
+            {
+                Id = key
+            };
         }
     }
 }

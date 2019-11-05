@@ -239,5 +239,33 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                 uow.Complete();
             }
         }
+
+        [TestMethod]
+        public void UpdateUser_ShouldSucceed()
+        {
+            using (DbCommand inserTestData = memoryDbConnection.CreateCommand())
+            {
+                inserTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User'), ('Admin');" +
+                                            "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);" +
+                                            "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES (1, 1, 'data', 1);";
+                inserTestData.ExecuteNonQuery();
+            }
+
+            using (IUpdateUnitOfWork<User, int> uow = repository.Update(1))
+            {
+                uow.Entity.UserName = "FooUser";
+                uow.Entity.NormalizedUserName = "FooUser".Normalize();
+                uow.Entity.PasswordHash = "newPassword";
+                uow.Entity.PublicKeys[0].Flag = Key.KeyFlag.OBSOLET;
+                uow.Entity.PublicKeys[0].KeyData = Encoding.UTF8.GetBytes("ChangedKeyData");
+                uow.Entity.Role = "Admin";
+                uow.Complete();
+            }
+
+            User u = repository.GetById(1);
+            Assert.AreEqual("FooUser", u.UserName);
+            Assert.AreEqual("FooUser".Normalize(), u.NormalizedUserName);
+            Assert.AreEqual("newPassword", u.PasswordHash);
+        }
     }
 }
