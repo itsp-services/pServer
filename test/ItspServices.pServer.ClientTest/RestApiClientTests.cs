@@ -30,7 +30,7 @@ namespace ItspServices.pServer.ClientTest
                 => Task.FromResult(Callback(request));
         }
         #endregion
-
+        
         [TestMethod]
         public async Task RequestRootFolder_ShouldReturnRootFolder()
         {
@@ -57,9 +57,9 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com") 
                     });
 
-            RestApiClient restApiClient = new RestApiClient(clientFactory.Object);
-
-            FolderModel responseFolder = await restApiClient.RequestFolderById(null);
+            IRestApiClient restClient = new RestApiClient();
+            restClient._provider = clientFactory.Object;
+            FolderModel responseFolder = await restClient.RequestFolderById(null);
 
             Assert.AreEqual(rootFolder.ParentId, responseFolder.ParentId);
             Assert.AreEqual(rootFolder.Name, responseFolder.Name);
@@ -93,7 +93,8 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com") 
                     });
 
-            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            IRestApiClient restClient = new RestApiClient();
+            restClient._provider = clientFactory.Object;
             FolderModel responseFolder = await restClient.RequestFolderById(1);
 
             Assert.AreEqual(fooFolder.ParentId, responseFolder.ParentId);
@@ -128,11 +129,39 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com")
                     });
 
-            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            IRestApiClient restClient = new RestApiClient();
+            restClient._provider = clientFactory.Object;
             DataModel dataModel = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
 
             Assert.AreEqual("MailAccount.data", dataModel.Name);
             Assert.AreEqual("SecretPassword", dataModel.Data);
+        }
+
+
+        [TestMethod]
+        public async Task RequestNullData_ShouldReturnNull()
+        {
+            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
+            HttpResponseMessage Callback(HttpRequestMessage request)
+            {
+                Assert.AreEqual("/api/protecteddata/data/AndysPasswords/MailAccount.data", request.RequestUri.LocalPath);
+                Assert.AreEqual(HttpMethod.Get, request.Method);
+                return new HttpResponseMessage(System.Net.HttpStatusCode.NotFound);
+            }
+
+            clientFactory
+                .Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(
+                    new HttpClient(new MockHttpMessageHandler(Callback))
+                    {
+                        BaseAddress = new Uri("http://test.com")
+                    });
+
+            IRestApiClient restClient = new RestApiClient();
+            restClient._provider = clientFactory.Object;
+            DataModel dataModel = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
+
+            Assert.IsNull(dataModel);
         }
 
         [TestMethod]
@@ -159,7 +188,8 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com")
                     });
 
-            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            IRestApiClient restClient = new RestApiClient();
+            restClient._provider = clientFactory.Object;
             int id = await restClient.SendCreateData("AndysPasswords/MailAccount.data", new DataModel
             {
                 Name = "MailAccount.data",
@@ -194,7 +224,8 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com")
                     });
 
-            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            IRestApiClient restClient = new RestApiClient();
+            restClient._provider = clientFactory.Object;
             await restClient.SendUpdateData("AndysPasswords/MailAccount.data", new DataModel
             {
                 Name = "MailAccount.data",
@@ -241,7 +272,8 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com")
                     });
 
-            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            IRestApiClient restClient = new RestApiClient();
+            restClient._provider = clientFactory.Object;
             KeyPairModel[] keyPairModels = await restClient.RequestKeyPairsByFilePath("AndysPasswords/MailAccount.data");
 
             Assert.AreEqual(expectedKeyPairModels.Length, keyPairModels.Length);
@@ -274,7 +306,8 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com")
                     });
 
-            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            IRestApiClient restClient = new RestApiClient();
+            restClient._provider = clientFactory.Object;
             await restClient.SendCreateKeyPairWithFileId(1, new KeyPairModel
             {
                 PublicKey = "publicKey",

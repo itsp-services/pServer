@@ -8,14 +8,9 @@ using ItspServices.pServer.Client.Models;
 
 namespace ItspServices.pServer.Client.RestApi
 {
-    class RestApiClient
+    class RestApiClient : IRestApiClient
     {
-        IHttpClientFactory _provider;
-
-        public RestApiClient(IHttpClientFactory provider)
-        {
-            _provider = provider;
-        }
+        public IHttpClientFactory _provider { get; set; }
 
         public async Task<FolderModel> RequestFolderById(int? id)
         {

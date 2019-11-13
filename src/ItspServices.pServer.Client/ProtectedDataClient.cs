@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.RestApi;
 using ItspServices.pServer.Client.Security;
@@ -9,15 +7,15 @@ namespace ItspServices.pServer.Client
 {
     public class ProtectedDataClient
     {
-        private RestApiClient _restClient;
+        private IRestApiClient _restClient;
         private ILocalKeysController _localKeysController;
         private IDataEncryptor _dataEncryptor;
 
-        public ProtectedDataClient(IHttpClientFactory factory, ILocalKeysController localKeysController, IDataEncryptor encryptor)
+        public ProtectedDataClient(IRestApiClient restClient, ILocalKeysController localKeysController, IDataEncryptor dataEncryptor)
         {
-            _restClient = new RestApiClient(factory);
+            _restClient = restClient;
             _localKeysController = localKeysController;
-            _dataEncryptor = encryptor;
+            _dataEncryptor = dataEncryptor;
         }
 
         public async Task Set(string destination, string data)

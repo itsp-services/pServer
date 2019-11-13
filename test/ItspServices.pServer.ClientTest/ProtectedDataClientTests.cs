@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +8,7 @@ using Moq;
 using ItspServices.pServer.Client;
 using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.Security;
+using ItspServices.pServer.Client.RestApi;
 
 namespace ItspServices.pServer.ClientTest
 {
@@ -33,45 +33,34 @@ namespace ItspServices.pServer.ClientTest
         [TestMethod]
         public async Task CreateProtectedData_ShouldSendEncryptedDataAndKeyPair()
         {
-            List<HttpRequestMessage> requestMessages = new List<HttpRequestMessage>();
+            Mock<IRestApiClient> restClient = new Mock<IRestApiClient>();
             Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
             Mock<ILocalKeysController> localKeysController = new Mock<ILocalKeysController>();
-            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
-            HttpResponseMessage Callback(HttpRequestMessage request)
+            List<bool> wasCalled = new List<bool>();
+            async Task<DataModel> CheckRequestDataByPath()
             {
-                switch (request.RequestUri.AbsolutePath)
-                {
-                    case var s when s == "/api/protecteddata/data/AndysPasswords/MailAccount.data" && request.Method == HttpMethod.Get:
-                        return new HttpResponseMessage(System.Net.HttpStatusCode.NotFound);
-                    case var s when s == "/api/protecteddata/data/" && request.Method == HttpMethod.Post:
-                        requestMessages.Add(request);
-                        return new HttpResponseMessage(System.Net.HttpStatusCode.Created)
-                        {
-                            Content = new StringContent("1")
-                        };
-                    case var s when s == "/api/protecteddata/key/1" && request.Method == HttpMethod.Post:
-                        requestMessages.Add(request);
-                        return new HttpResponseMessage(System.Net.HttpStatusCode.Created);
-                    default:
-                        Assert.Fail("Invalid requested URI");
-                        break;
-                }
-                return new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+                wasCalled.Add(true);
+                return null;
+            }
+            async Task<int> CheckSendCreateData()
+            {
+                wasCalled.Add(true);
+                return 1;
+            }
+            async Task CheckSendCreateKeyPairWithFileId()
+            {
+                wasCalled.Add(true);
+                return;
             }
 
-            clientFactory
-                .Setup(x => x.CreateClient(It.IsAny<string>()))
-                .Returns(() =>
-                    new HttpClient(new MockHttpMessageHandler(Callback))
-                    {
-                        BaseAddress = new Uri("http://test.com")
-                    });
+            restClient.Setup(x => x.RequestDataByPath(It.Is<string>(s => s == "AndysPasswords/MailAccount.data")))
+                .Returns(CheckRequestDataByPath);
 
-            dataEncryptor.Setup(x => x.EncryptData(It.Is<string>(s => s == "symmetricKey"), It.Is<string>(s => s == "publicKey")))
-                .Returns("publicSymmetricKey");
+            restClient.Setup(x => x.SendCreateData(It.Is<string>(s => s == "AndysPasswords/MailAccount.data"), It.Is<DataModel>(s => s.Name == "MailAccount.data" && s.Data == "EncryptedSecretPassword")))
+                .Returns(CheckSendCreateData);
 
-            dataEncryptor.Setup(x => x.EncryptData(It.Is<string>(s => s == "SecretPassword"), It.Is<string>(s => s == "symmetricKey")))
-                .Returns("EncryptedSecretPassword");
+            restClient.Setup(x => x.SendCreateKeyPairWithFileId(It.Is<int>(s => s == 1), It.Is<KeyPairModel>(s => s.PublicKey == "publicKey" && s.SymmetricKey == "publicSymmetricKey")))
+                .Returns(CheckSendCreateKeyPairWithFileId);
 
             localKeysController.Setup(x => x.GetPublicKey())
                 .Returns("publicKey");
@@ -79,86 +68,73 @@ namespace ItspServices.pServer.ClientTest
             localKeysController.Setup(x => x.CreateSymmetricKey())
                 .Returns("symmetricKey");
 
-            ProtectedDataClient client = new ProtectedDataClient(clientFactory.Object, localKeysController.Object, dataEncryptor.Object);
+            dataEncryptor.Setup(x => x.EncryptData(It.Is<string>(s => s == "symmetricKey"), It.Is<string>(s => s == "publicKey")))
+                .Returns("publicSymmetricKey");
+
+            dataEncryptor.Setup(x => x.EncryptData(It.Is<string>(s => s == "SecretPassword"), It.Is<string>(s => s == "symmetricKey")))
+                .Returns("EncryptedSecretPassword");
+
+            ProtectedDataClient client = new ProtectedDataClient(restClient.Object, localKeysController.Object, dataEncryptor.Object);
             await client.Set("AndysPasswords/MailAccount.data", "SecretPassword");
 
-            DataModelWithPath dataModelWithPath = await JsonSerializer.DeserializeAsync<DataModelWithPath>(await requestMessages[0].Content.ReadAsStreamAsync());
-
-            Assert.AreEqual("AndysPasswords/MailAccount.data", dataModelWithPath.Path);
-            Assert.AreEqual("MailAccount.data", dataModelWithPath.DataModel.Name);
-            Assert.AreEqual("EncryptedSecretPassword", dataModelWithPath.DataModel.Data);
-
-            KeyPairModel keyPairModel = await JsonSerializer.DeserializeAsync<KeyPairModel>(await requestMessages[1].Content.ReadAsStreamAsync());
-
-            Assert.AreEqual("publicKey", keyPairModel.PublicKey);
-            Assert.AreEqual("publicSymmetricKey", keyPairModel.SymmetricKey);
+            for (int i = 0; i < 3; i++)
+            {
+                Assert.IsTrue(wasCalled[i]);
+            }
         }
 
         [TestMethod]
         public async Task UpdateProtectedData_ShouldSendEncryptedData()
         {
-            List<HttpRequestMessage> requestMessages = new List<HttpRequestMessage>();
+            Mock<IRestApiClient> restClient = new Mock<IRestApiClient>();
             Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
             Mock<ILocalKeysController> localKeysController = new Mock<ILocalKeysController>();
-            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
-            HttpResponseMessage Callback(HttpRequestMessage request)
+            List<bool> wasCalled = new List<bool>();
+            async Task<DataModel> CheckRequestDataByPath()
             {
-                switch (request.RequestUri.AbsolutePath)
+                wasCalled.Add(true);
+                return new DataModel
                 {
-                    case var s when s == "/api/protecteddata/data/AndysPasswords/MailAccount.data" && request.Method == HttpMethod.Get:
-                        return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
-                        {
-                            Content = new StringContent(JsonSerializer.Serialize(new DataModel
-                            {
-                                Name = "MailAccount.data",
-                                Data = "OldData"
-                            }))
-                        };
-                    case var s when s == "/api/protecteddata/key/AndysPasswords/MailAccount.data" && request.Method == HttpMethod.Get:
-                        return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
-                        {
-                            Content = new StringContent(JsonSerializer.Serialize(new KeyPairModel[]
-                            {
-                                new KeyPairModel()
-                                {
-                                    PublicKey = "publicKey1",
-                                    SymmetricKey = "publicSymmetricKey1"
-                                },
-                                new KeyPairModel()
-                                {
-                                    PublicKey = "publicKey2",
-                                    SymmetricKey = "publicSymmetricKey2"
-                                },
-                                new KeyPairModel()
-                                {
-                                    PublicKey = "publicKey",
-                                    SymmetricKey = "publicSymmetricKey"
-                                }
-                            }))
-                        };
-                    case var s when s == "/api/protecteddata/data/AndysPasswords/MailAccount.data" && request.Method == HttpMethod.Put:
-                        requestMessages.Add(request);
-                        return new HttpResponseMessage(System.Net.HttpStatusCode.Created);
-                    default:
-                        Assert.Fail("Invalid requested URI");
-                        break;
-                }
-                return new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+                    Name = "MailAccount.data",
+                    Data = "OldData"
+                };
+            }
+            async Task<KeyPairModel[]> CheckRequestKeyPairsByFilePath()
+            {
+                wasCalled.Add(true);
+                return new KeyPairModel[]
+                {
+                    new KeyPairModel()
+                    {
+                        PublicKey = "publicKey1",
+                        SymmetricKey = "publicSymmetricKey1"
+                    },
+                    new KeyPairModel()
+                    {
+                        PublicKey = "publicKey2",
+                        SymmetricKey = "publicSymmetricKey2"
+                    },
+                    new KeyPairModel()
+                    {
+                        PublicKey = "publicKey",
+                        SymmetricKey = "publicSymmetricKey"
+                    }
+                };
+            }
+            async Task CheckSendUpdateData()
+            {
+                wasCalled.Add(true);
+                return;
             }
 
-            clientFactory
-                .Setup(x => x.CreateClient(It.IsAny<string>()))
-                .Returns(() =>
-                    new HttpClient(new MockHttpMessageHandler(Callback))
-                    {
-                        BaseAddress = new Uri("http://test.com")
-                    });
+            restClient.Setup(x => x.RequestDataByPath(It.Is<string>(s => s == "AndysPasswords/MailAccount.data")))
+                .Returns(CheckRequestDataByPath);
 
-            dataEncryptor.Setup(x => x.DecryptData(It.Is<string>(s => s == "publicSymmetricKey"), It.Is<string>(s => s == "privateKey")))
-                .Returns("symmetricKey");
+            restClient.Setup(x => x.RequestKeyPairsByFilePath(It.Is<string>(s => s == "AndysPasswords/MailAccount.data")))
+                .Returns(CheckRequestKeyPairsByFilePath);
 
-            dataEncryptor.Setup(x => x.EncryptData(It.Is<string>(s => s == "SecretPassword"), It.Is<string>(s => s == "symmetricKey")))
-                .Returns("EncryptedSecretPassword");
+            restClient.Setup(x => x.SendUpdateData(It.Is<string>(s => s == "AndysPasswords/MailAccount.data"), It.Is<DataModel>(s => s.Name == "MailAccount.data" && s.Data == "EncryptedSecretPassword")))
+                .Returns(CheckSendUpdateData);
 
             localKeysController.Setup(x => x.GetPublicKey())
                 .Returns("publicKey");
@@ -166,13 +142,19 @@ namespace ItspServices.pServer.ClientTest
             localKeysController.Setup(x => x.GetPrivateKey())
                 .Returns("privateKey");
 
-            ProtectedDataClient client = new ProtectedDataClient(clientFactory.Object, localKeysController.Object, dataEncryptor.Object);
+            dataEncryptor.Setup(x => x.DecryptData(It.Is<string>(s => s == "publicSymmetricKey"), It.Is<string>(s => s == "privateKey")))
+                .Returns("symmetricKey");
+
+            dataEncryptor.Setup(x => x.EncryptData(It.Is<string>(s => s == "SecretPassword"), It.Is<string>(s => s == "symmetricKey")))
+                .Returns("EncryptedSecretPassword");
+
+            ProtectedDataClient client = new ProtectedDataClient(restClient.Object, localKeysController.Object, dataEncryptor.Object);
             await client.Set("AndysPasswords/MailAccount.data", "SecretPassword");
 
-            DataModel dataModel = await JsonSerializer.DeserializeAsync<DataModel>(await requestMessages[0].Content.ReadAsStreamAsync());
-
-            Assert.AreEqual("MailAccount.data", dataModel.Name);
-            Assert.AreEqual("EncryptedSecretPassword", dataModel.Data);
+            for (int i = 0; i < 3; i++)
+            {
+                Assert.IsTrue(wasCalled[i]);
+            }
         }
     }
 }
