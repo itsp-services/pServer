@@ -1,8 +1,10 @@
-﻿namespace ItspServices.pServer.Client.Security
+﻿using ItspServices.pServer.Client.Models;
+
+namespace ItspServices.pServer.Client.Security
 {
     public interface IDataEncryptor
     {
-        byte[] EncryptWithSymmetricKey(byte[] data, byte[] keydata);
-        byte[] DecryptWithSymmetricKey(byte[] data, byte[] keydata);
+        string EncryptData(string data, string key);
+        string DecryptData(string data, string key);
     }
 }
