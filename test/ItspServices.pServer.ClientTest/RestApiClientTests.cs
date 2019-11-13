@@ -93,13 +93,197 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com") 
                     });
 
-            RestApiClient restApiClient = new RestApiClient(clientFactory.Object);
-            FolderModel responseFolder = await restApiClient.RequestFolderById(1);
+            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            FolderModel responseFolder = await restClient.RequestFolderById(1);
 
             Assert.AreEqual(fooFolder.ParentId, responseFolder.ParentId);
             Assert.AreEqual(fooFolder.Name, responseFolder.Name);
             CollectionAssert.AreEquivalent(fooFolder.ProtectedDataIds.ToArray(), responseFolder.ProtectedDataIds.ToArray());
             CollectionAssert.AreEquivalent(fooFolder.SubfolderIds.ToArray(), responseFolder.SubfolderIds.ToArray());
+        }
+
+        [TestMethod]
+        public async Task RequestDataByPath_ShouldReturnCorrectDataModel()
+        {
+            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
+            HttpResponseMessage Callback(HttpRequestMessage request)
+            {
+                Assert.AreEqual("/api/protecteddata/data/AndysPasswords/MailAccount.data", request.RequestUri.LocalPath);
+                Assert.AreEqual(HttpMethod.Get, request.Method);
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(new DataModel
+                    {
+                        Name = "MailAccount.data",
+                        Data = "SecretPassword"
+                    }))
+                };
+            }
+
+            clientFactory
+                .Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(
+                    new HttpClient(new MockHttpMessageHandler(Callback))
+                    {
+                        BaseAddress = new Uri("http://test.com")
+                    });
+
+            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            DataModel dataModel = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
+
+            Assert.AreEqual("MailAccount.data", dataModel.Name);
+            Assert.AreEqual("SecretPassword", dataModel.Data);
+        }
+
+        [TestMethod]
+        public async Task SendCreateData_ShouldSendDataAndReturnId()
+        {
+            HttpRequestMessage requestMessage = new HttpRequestMessage();
+            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
+            HttpResponseMessage Callback(HttpRequestMessage request)
+            {
+                Assert.AreEqual("/api/protecteddata/data/", request.RequestUri.LocalPath);
+                Assert.AreEqual(HttpMethod.Post, request.Method);
+                requestMessage = request;
+                return new HttpResponseMessage(System.Net.HttpStatusCode.Created)
+                {
+                    Content = new StringContent("1")
+                };
+            }
+
+            clientFactory
+                .Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(
+                    new HttpClient(new MockHttpMessageHandler(Callback))
+                    {
+                        BaseAddress = new Uri("http://test.com")
+                    });
+
+            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            int id = await restClient.SendCreateData("AndysPasswords/MailAccount.data", new DataModel
+            {
+                Name = "MailAccount.data",
+                Data = "SecretPassword"
+            });
+            DataModelWithPath dataModel = await JsonSerializer.DeserializeAsync<DataModelWithPath>(await requestMessage.Content.ReadAsStreamAsync());
+
+            Assert.AreEqual("MailAccount.data", dataModel.DataModel.Name);
+            Assert.AreEqual("SecretPassword", dataModel.DataModel.Data);
+            Assert.AreEqual("AndysPasswords/MailAccount.data", dataModel.Path);
+            Assert.AreEqual(1, id);
+        }
+
+        [TestMethod]
+        public async Task SendUpdateData_ShouldSendData()
+        {
+            HttpRequestMessage requestMessage = new HttpRequestMessage();
+            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
+            HttpResponseMessage Callback(HttpRequestMessage request)
+            {
+                Assert.AreEqual("/api/protecteddata/data/AndysPasswords/MailAccount.data", request.RequestUri.LocalPath);
+                Assert.AreEqual(HttpMethod.Put, request.Method);
+                requestMessage = request;
+                return new HttpResponseMessage(System.Net.HttpStatusCode.Created);
+            }
+
+            clientFactory
+                .Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(
+                    new HttpClient(new MockHttpMessageHandler(Callback))
+                    {
+                        BaseAddress = new Uri("http://test.com")
+                    });
+
+            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            await restClient.SendUpdateData("AndysPasswords/MailAccount.data", new DataModel
+            {
+                Name = "MailAccount.data",
+                Data = "SecretPassword"
+            });
+            DataModel dataModel = await JsonSerializer.DeserializeAsync<DataModel>(await requestMessage.Content.ReadAsStreamAsync());
+
+            Assert.AreEqual("MailAccount.data", dataModel.Name);
+            Assert.AreEqual("SecretPassword", dataModel.Data);
+        }
+
+        [TestMethod]
+        public async Task RequestKeyPairsByFilePath_ShouldReturnAuthorizedKeyPairs()
+        {
+            KeyPairModel[] expectedKeyPairModels = new KeyPairModel[]
+            {
+                new KeyPairModel()
+                {
+                    PublicKey = "publicKey1",
+                    SymmetricKey = "symmetricKey1"
+                },
+                new KeyPairModel()
+                {
+                    PublicKey = "publicKey2",
+                    SymmetricKey = "symmetricKey2"
+                }
+            };
+            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
+            HttpResponseMessage Callback(HttpRequestMessage request)
+            {
+                Assert.AreEqual("/api/protecteddata/key/AndysPasswords/MailAccount.data", request.RequestUri.LocalPath);
+                Assert.AreEqual(HttpMethod.Get, request.Method);
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(expectedKeyPairModels))
+                };
+            }
+
+            clientFactory
+                .Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(
+                    new HttpClient(new MockHttpMessageHandler(Callback))
+                    {
+                        BaseAddress = new Uri("http://test.com")
+                    });
+
+            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            KeyPairModel[] keyPairModels = await restClient.RequestKeyPairsByFilePath("AndysPasswords/MailAccount.data");
+
+            Assert.AreEqual(expectedKeyPairModels.Length, keyPairModels.Length);
+            for (int i = 0; i < keyPairModels.Length; i++)
+            {
+                Assert.AreEqual(expectedKeyPairModels[i].PublicKey, keyPairModels[i].PublicKey);
+                Assert.AreEqual(expectedKeyPairModels[i].SymmetricKey, keyPairModels[i].SymmetricKey);
+            }
+            // ?? couldnt find an array comparing function
+        }
+
+        [TestMethod]
+        public async Task SendCreateKeyPairWithFileId_ShouldSendKeyPair()
+        {
+            HttpRequestMessage requestMessage = new HttpRequestMessage();
+            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
+            HttpResponseMessage Callback(HttpRequestMessage request)
+            {
+                Assert.AreEqual("/api/protecteddata/key/1", request.RequestUri.LocalPath);
+                Assert.AreEqual(HttpMethod.Post, request.Method);
+                requestMessage = request;
+                return new HttpResponseMessage(System.Net.HttpStatusCode.Created);
+            }
+
+            clientFactory
+                .Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(
+                    new HttpClient(new MockHttpMessageHandler(Callback))
+                    {
+                        BaseAddress = new Uri("http://test.com")
+                    });
+
+            RestApiClient restClient = new RestApiClient(clientFactory.Object);
+            await restClient.SendCreateKeyPairWithFileId(1, new KeyPairModel
+            {
+                PublicKey = "publicKey",
+                SymmetricKey = "symmetricKey"
+            });
+            KeyPairModel keyPairModel = await JsonSerializer.DeserializeAsync<KeyPairModel>(await requestMessage.Content.ReadAsStreamAsync());
+
+            Assert.AreEqual("publicKey", keyPairModel.PublicKey);
+            Assert.AreEqual("symmetricKey", keyPairModel.SymmetricKey);
         }
     }
 }
