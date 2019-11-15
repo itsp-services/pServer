@@ -13,16 +13,25 @@
             </ul>
         </div>
     </nav>
-    <div class="col">
-        <form method="post">
+    <div class="col user-view-body">
+        <h1>
+            Public Keys:
+            <button class="add-key-btn float-right" type="submit" asp-controller="User" asp-action="Index">Add Key</button>
+            <!--<div class="input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-success" type="submit" asp-controller="User" asp-action="Index">Add</button>
+                </div>
+                    <input type="text" class="form-control" name="newKey" />
+            </div>-->
+        </h1>
+        <div class="popup">
             <div class="input-group">
                 <div class="input-group-prepend">
                     <button class="btn btn-success" type="submit" asp-controller="User" asp-action="Index">Add</button>
                 </div>
                 <input type="text" class="form-control" name="newKey" />
             </div>
-        </form>
-
+        </div>
         <table class="table table-striped">
             <thead>
                 <tr>

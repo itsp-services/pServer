@@ -45,6 +45,7 @@ body {
   /* Margin bottom by footer height */
   margin-bottom: 60px;
 }
+
 .footer {
   position: absolute;
   bottom: 0;
@@ -62,4 +63,22 @@ img {
 .container.navbar-container {
     max-width: none;
     padding-left: 0;
+    margin-bottom: 0;
+}
+
+.col.user-view-body {
+    overflow: hidden;
+    margin-top: 15px;
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.add-key-btn {
+    border: 0px;
+    font-weight: bold;
+    font-size: 20pt;
+    text-align: center;
+    background-color: #4287f5;
+    color: #fff;
+    padding: 5px;
 }

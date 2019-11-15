@@ -22,7 +22,7 @@
     @inject SignInManager<ItspServices.pServer.Abstraction.Models.User> SignInManager
 
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
 
             <div class="container navbar-container">
                 <img src="logo_placeholder.png" alt="Logo" />
@@ -39,7 +39,7 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">@User.Identity.Name</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="PublicKeys">@User.Identity.Name</a>
                             </li>
                         }
                         <partial name="_LoginPartial" />
