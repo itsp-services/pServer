@@ -7,8 +7,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ItspServices.pServer.Client;
 using ItspServices.pServer.Client.Models;
-using ItspServices.pServer.Client.Security;
 using ItspServices.pServer.Client.RestApi;
+using ItspServices.pServer.Client.Security;
 
 namespace ItspServices.pServer.ClientTest
 {
@@ -33,9 +33,9 @@ namespace ItspServices.pServer.ClientTest
         [TestMethod]
         public async Task CreateProtectedData_ShouldSendEncryptedDataAndKeyPair()
         {
-            Mock<IRestApiClient> restClient = new Mock<IRestApiClient>();
-            Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
+            Mock<IApiClient> restClient = new Mock<IApiClient>();
             Mock<ILocalKeysController> localKeysController = new Mock<ILocalKeysController>();
+            Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
             List<bool> wasCalled = new List<bool>();
             async Task<DataModel> CheckRequestDataByPath()
             {
@@ -86,9 +86,9 @@ namespace ItspServices.pServer.ClientTest
         [TestMethod]
         public async Task UpdateProtectedData_ShouldSendEncryptedData()
         {
-            Mock<IRestApiClient> restClient = new Mock<IRestApiClient>();
-            Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
+            Mock<IApiClient> restClient = new Mock<IApiClient>();
             Mock<ILocalKeysController> localKeysController = new Mock<ILocalKeysController>();
+            Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
             List<bool> wasCalled = new List<bool>();
             async Task<DataModel> CheckRequestDataByPath()
             {

@@ -57,7 +57,7 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com") 
                     });
 
-            IRestApiClient restClient = new RestApiClient();
+            IApiClient restClient = new RestApiClient();
             restClient._provider = clientFactory.Object;
             FolderModel responseFolder = await restClient.RequestFolderById(null);
 
@@ -93,7 +93,7 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com") 
                     });
 
-            IRestApiClient restClient = new RestApiClient();
+            IApiClient restClient = new RestApiClient();
             restClient._provider = clientFactory.Object;
             FolderModel responseFolder = await restClient.RequestFolderById(1);
 
@@ -129,7 +129,7 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com")
                     });
 
-            IRestApiClient restClient = new RestApiClient();
+            IApiClient restClient = new RestApiClient();
             restClient._provider = clientFactory.Object;
             DataModel dataModel = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
 
@@ -157,7 +157,7 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com")
                     });
 
-            IRestApiClient restClient = new RestApiClient();
+            IApiClient restClient = new RestApiClient();
             restClient._provider = clientFactory.Object;
             DataModel dataModel = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
 
@@ -188,7 +188,7 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com")
                     });
 
-            IRestApiClient restClient = new RestApiClient();
+            IApiClient restClient = new RestApiClient();
             restClient._provider = clientFactory.Object;
             int id = await restClient.SendCreateData("AndysPasswords/MailAccount.data", new DataModel
             {
@@ -224,7 +224,7 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com")
                     });
 
-            IRestApiClient restClient = new RestApiClient();
+            IApiClient restClient = new RestApiClient();
             restClient._provider = clientFactory.Object;
             await restClient.SendUpdateData("AndysPasswords/MailAccount.data", new DataModel
             {
@@ -272,7 +272,7 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com")
                     });
 
-            IRestApiClient restClient = new RestApiClient();
+            IApiClient restClient = new RestApiClient();
             restClient._provider = clientFactory.Object;
             KeyPairModel[] keyPairModels = await restClient.RequestKeyPairsByFilePath("AndysPasswords/MailAccount.data");
 
@@ -306,7 +306,7 @@ namespace ItspServices.pServer.ClientTest
                         BaseAddress = new Uri("http://test.com")
                     });
 
-            IRestApiClient restClient = new RestApiClient();
+            IApiClient restClient = new RestApiClient();
             restClient._provider = clientFactory.Object;
             await restClient.SendCreateKeyPairWithFileId(1, new KeyPairModel
             {

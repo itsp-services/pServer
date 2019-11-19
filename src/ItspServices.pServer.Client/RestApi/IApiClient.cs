@@ -4,7 +4,7 @@ using ItspServices.pServer.Client.Models;
 
 namespace ItspServices.pServer.Client.RestApi
 {
-    public interface IRestApiClient
+    public interface IApiClient
     {
         IHttpClientFactory _provider { get; set; }
         Task<FolderModel> RequestFolderById(int? id);

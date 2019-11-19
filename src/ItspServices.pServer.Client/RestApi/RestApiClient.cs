@@ -8,7 +8,7 @@ using ItspServices.pServer.Client.Models;
 
 namespace ItspServices.pServer.Client.RestApi
 {
-    class RestApiClient : IRestApiClient
+    class RestApiClient : IApiClient
     {
         public IHttpClientFactory _provider { get; set; }
 

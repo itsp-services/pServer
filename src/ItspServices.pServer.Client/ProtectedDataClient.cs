@@ -7,11 +7,11 @@ namespace ItspServices.pServer.Client
 {
     public class ProtectedDataClient
     {
-        private IRestApiClient _restClient;
+        private IApiClient _restClient;
         private ILocalKeysController _localKeysController;
         private IDataEncryptor _dataEncryptor;
 
-        public ProtectedDataClient(IRestApiClient restClient, ILocalKeysController localKeysController, IDataEncryptor dataEncryptor)
+        public ProtectedDataClient(IApiClient restClient, ILocalKeysController localKeysController, IDataEncryptor dataEncryptor)
         {
             _restClient = restClient;
             _localKeysController = localKeysController;
