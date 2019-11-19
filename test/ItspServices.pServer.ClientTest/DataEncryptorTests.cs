@@ -10,6 +10,13 @@ namespace ItspServices.pServer.ClientTest
     public class DataEncryptorTests
     {
         [TestMethod]
+        public void CreateSymmetricKey_ShouldReturnValidKey()
+        {
+
+        }
+
+
+        [TestMethod]
         public void SymmetricEncryptAndDecryptData_ShouldReturnCorrectData()
         {
             string expectedData = Convert.ToBase64String(Encoding.Default.GetBytes("SecretPassword"));

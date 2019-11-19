@@ -9,6 +9,11 @@ namespace ItspServices.pServer.Client.Security
 
         public DataEncryptor(){ }
 
+        public string CreateSymmetricKey()
+        {
+            throw new NotImplementedException();
+        }
+
         public string SymmetricEncryptData(string data, string key)
         {
             AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider();
