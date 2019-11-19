@@ -5,15 +5,26 @@ namespace ItspServices.pServer.Client.Security
     class DataEncryptor : IDataEncryptor
     {
 
-        public DataEncryptor(){}
+        public DataEncryptor(){ }
 
-        public string EncryptData(string data, string key)
+        public string SymmetricallyEncryptData(string data, string key)
         {
-            throw new NotImplementedException();
+            return "";
         }
-        public string DecryptData(string data, string key)
+        public string SymmetricallyDecryptData(string data, string key)
         {
-            throw new NotImplementedException();
+
+            return "";
+        }
+
+        public string AsymmetricallyEncryptData(string data, string key)
+        {
+            return "";
+        }
+        public string AsymmetricallyDecryptData(string data, string key)
+        {
+
+            return "";
         }
     }
 }
