@@ -1,4 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Text;
+using System.Security.Cryptography;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ItspServices.pServer.Client.Security;
 
 namespace ItspServices.pServer.ClientTest
@@ -7,75 +10,29 @@ namespace ItspServices.pServer.ClientTest
     public class DataEncryptorTests
     {
         [TestMethod]
-        public void SymmetricEncryptData_ShouldReturnEncryptedData()
-        {
-            DataEncryptor dataEncryptor = new DataEncryptor();
-            string encrypedData = dataEncryptor.SymmetricEncryptData("SecretPassword", "symmetricKey");
-            Assert.AreNotEqual("SecretPassword", encrypedData);
-        }
-
-        [TestMethod]
-        public void SymmetricDecryptData_ShouldReturnDecryptedData()
-        {
-            DataEncryptor dataEncryptor = new DataEncryptor();
-            string decrypedData = dataEncryptor.SymmetricDecryptData("EncrypedSecretPassword", "symmetricKey");
-            Assert.AreNotEqual("EncrypedSecretPassword", decrypedData);
-        }
-
-        [TestMethod]
         public void SymmetricEncryptAndDecryptData_ShouldReturnCorrectData()
         {
+            string expectedData = Convert.ToBase64String(Encoding.Default.GetBytes("SecretPassword"));
             DataEncryptor dataEncryptor = new DataEncryptor();
-            string data = "SecretPassword";
-            data = dataEncryptor.SymmetricEncryptData(data, "symmetricKey");
-            data = dataEncryptor.SymmetricDecryptData(data, "symmetricKey");
-            Assert.AreEqual("SecretPassword", data);
-        }
-
-        [TestMethod]
-        public void SymmetricEncryptAndDecryptData_ShouldReturnFalseData()
-        {
-            DataEncryptor dataEncryptor = new DataEncryptor();
-            string data = "SecretPassword";
-            data = dataEncryptor.SymmetricEncryptData(data, "symmetricKey1");
-            data = dataEncryptor.SymmetricDecryptData(data, "symmetricKey2");
-            Assert.AreNotEqual("SecretPassword", data);
-        }
-
-        [TestMethod]
-        public void AsymmetricEncryptData_ShouldReturnEncryptedData()
-        {
-            DataEncryptor dataEncryptor = new DataEncryptor();
-            string encrypedData = dataEncryptor.AsymmetricEncryptData("SecretPassword", "publicKey");
-            Assert.AreNotEqual("SecretPassword", encrypedData);
-        }
-
-        [TestMethod]
-        public void AsymmetricDecryptData_ShouldReturnDecryptedData()
-        {
-            DataEncryptor dataEncryptor = new DataEncryptor();
-            string decrypedData = dataEncryptor.AsymmetricDecryptData("EncrypedSecretPassword", "privatecKey");
-            Assert.AreNotEqual("EncrypedSecretPassword", decrypedData);
+            AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider();
+            aesProvider.GenerateKey();
+            aesProvider.GenerateIV();
+            string encrypedData = dataEncryptor.SymmetricEncryptData(expectedData, $"{Convert.ToBase64String(aesProvider.Key)},{Convert.ToBase64String(aesProvider.IV)}");
+            string decrypedData = dataEncryptor.SymmetricDecryptData(encrypedData, $"{Convert.ToBase64String(aesProvider.Key)},{Convert.ToBase64String(aesProvider.IV)}");
+            Assert.AreEqual(expectedData, decrypedData);
         }
 
         [TestMethod]
         public void AsymmetricEncryptAndDecryptData_ShouldReturnCorrectData()
         {
+            string expectedData = Convert.ToBase64String(Encoding.Default.GetBytes("SecretPassword"));
             DataEncryptor dataEncryptor = new DataEncryptor();
-            string data = "SecretPassword";
-            data = dataEncryptor.AsymmetricEncryptData(data, "publicKey");
-            data = dataEncryptor.AsymmetricDecryptData(data, "privateKey");
-            Assert.AreEqual("SecretPassword", data);
-        }
-
-        [TestMethod]
-        public void AsymmetricEncryptAndDecryptData_ShouldReturnFalseData()
-        {
-            DataEncryptor dataEncryptor = new DataEncryptor();
-            string data = "SecretPassword";
-            data = dataEncryptor.AsymmetricEncryptData(data, "publicKey");
-            data = dataEncryptor.AsymmetricDecryptData(data, "publicKey");
-            Assert.AreNotEqual("SecretPassword", data);
+            RSACryptoServiceProvider rsaProvider = new RSACryptoServiceProvider();
+            string publicKey = Convert.ToBase64String(rsaProvider.ExportCspBlob(false));
+            string privateKey = Convert.ToBase64String(rsaProvider.ExportCspBlob(true));
+            string encrypedData = dataEncryptor.AsymmetricEncryptData(expectedData, publicKey);
+            string decrypedData = dataEncryptor.AsymmetricDecryptData(encrypedData, privateKey);
+            Assert.AreEqual(expectedData, decrypedData);
         }
     }
 }
