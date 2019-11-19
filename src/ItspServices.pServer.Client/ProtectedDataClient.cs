@@ -28,12 +28,12 @@ namespace ItspServices.pServer.Client
                 int fileId = await _restClient.SendCreateData(destination, new DataModel
                 {
                     Name = destination.Substring(destination.LastIndexOf('/') + 1),
-                    Data = _dataEncryptor.EncryptData(data, symmetricKey)
+                    Data = _dataEncryptor.SymmetricEncryptData(data, symmetricKey)
                 });
                 await _restClient.SendCreateKeyPairWithFileId(fileId, new KeyPairModel
                 {
                     PublicKey = publicKey,
-                    SymmetricKey = _dataEncryptor.EncryptData(symmetricKey, publicKey)
+                    SymmetricKey = _dataEncryptor.AsymmetricEncryptData(symmetricKey, publicKey)
                 });
             }
             else
@@ -45,12 +45,12 @@ namespace ItspServices.pServer.Client
                 {
                     if (keyPairModel.PublicKey == publicKey)
                     {
-                        symmetricKey = _dataEncryptor.DecryptData(keyPairModel.SymmetricKey, privateKey);
+                        symmetricKey = _dataEncryptor.AsymmetricDecryptData(keyPairModel.SymmetricKey, privateKey);
                         break;
                     }
                 }
                 // TODO: case no symKey
-                dataModel.Data = _dataEncryptor.EncryptData(data, symmetricKey);
+                dataModel.Data = _dataEncryptor.SymmetricEncryptData(data, symmetricKey);
                 await _restClient.SendUpdateData(destination, dataModel);
             }
         }

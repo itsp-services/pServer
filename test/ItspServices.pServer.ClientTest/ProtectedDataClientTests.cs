@@ -68,10 +68,10 @@ namespace ItspServices.pServer.ClientTest
             localKeysController.Setup(x => x.CreateSymmetricKey())
                 .Returns("symmetricKey");
 
-            dataEncryptor.Setup(x => x.EncryptData(It.Is<string>(s => s == "symmetricKey"), It.Is<string>(s => s == "publicKey")))
+            dataEncryptor.Setup(x => x.AsymmetricEncryptData(It.Is<string>(s => s == "symmetricKey"), It.Is<string>(s => s == "publicKey")))
                 .Returns("publicSymmetricKey");
 
-            dataEncryptor.Setup(x => x.EncryptData(It.Is<string>(s => s == "SecretPassword"), It.Is<string>(s => s == "symmetricKey")))
+            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<string>(s => s == "SecretPassword"), It.Is<string>(s => s == "symmetricKey")))
                 .Returns("EncryptedSecretPassword");
 
             ProtectedDataClient client = new ProtectedDataClient(restClient.Object, localKeysController.Object, dataEncryptor.Object);
@@ -142,10 +142,10 @@ namespace ItspServices.pServer.ClientTest
             localKeysController.Setup(x => x.GetPrivateKey())
                 .Returns("privateKey");
 
-            dataEncryptor.Setup(x => x.DecryptData(It.Is<string>(s => s == "publicSymmetricKey"), It.Is<string>(s => s == "privateKey")))
+            dataEncryptor.Setup(x => x.AsymmetricDecryptData(It.Is<string>(s => s == "publicSymmetricKey"), It.Is<string>(s => s == "privateKey")))
                 .Returns("symmetricKey");
 
-            dataEncryptor.Setup(x => x.EncryptData(It.Is<string>(s => s == "SecretPassword"), It.Is<string>(s => s == "symmetricKey")))
+            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<string>(s => s == "SecretPassword"), It.Is<string>(s => s == "symmetricKey")))
                 .Returns("EncryptedSecretPassword");
 
             ProtectedDataClient client = new ProtectedDataClient(restClient.Object, localKeysController.Object, dataEncryptor.Object);

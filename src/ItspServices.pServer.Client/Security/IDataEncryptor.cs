@@ -4,7 +4,9 @@ namespace ItspServices.pServer.Client.Security
 {
     public interface IDataEncryptor
     {
-        string EncryptData(string data, string key);
-        string DecryptData(string data, string key);
+        string SymmetricEncryptData(string data, string key);
+        string SymmetricDecryptData(string data, string key);
+        string AsymmetricEncryptData(string data, string key);
+        string AsymmetricDecryptData(string data, string key);
     }
 }
