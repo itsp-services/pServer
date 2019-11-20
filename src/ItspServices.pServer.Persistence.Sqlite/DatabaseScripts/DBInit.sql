@@ -96,3 +96,11 @@ CREATE TABLE IF NOT EXISTS SymmetricKeys (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
+
+-- -----------------------------------------------------
+-- View [Users Keys]
+-- -----------------------------------------------------
+CREATE VIEW [Users Keys] AS
+SELECT Users.ID, Users.Username, Users.PasswordHash, Roles.Name As Role, PublicKeyNumber, KeyData, Active FROM Users
+JOIN Roles ON Roles.ID=Users.RoleID
+LEFT JOIN PublicKeys ON PublicKeys.UserID=Users.ID;
