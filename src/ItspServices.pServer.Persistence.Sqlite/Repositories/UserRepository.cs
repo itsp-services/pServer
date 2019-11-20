@@ -23,7 +23,47 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 
         public User GetUserByNormalizedName(string name)
         {
-            throw new System.NotImplementedException();
+            User user = new User();
+            using (DbConnection con = _dbFactory.CreateConnection())
+            {
+                con.ConnectionString = _connectionString;
+                con.Open();
+                using (DbCommand query = con.CreateCommand())
+                {
+                    query.AddParameterWithValue("searchedUsername", name);
+                    query.CommandText = "SELECT * FROM [Users Keys] WHERE Username=@searchedUsername;";
+                    using (IDataReader reader = query.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            user.Id = reader.GetInt32(0);
+                            user.UserName = reader.GetString(1);
+                            user.NormalizedUserName = user.UserName.Normalize();
+                            user.PasswordHash = reader.GetString(2);
+                            user.Role = reader.GetString(3);
+                            if (!reader.IsDBNull(4))
+                            {
+                                user.PublicKeys.Add(new Key()
+                                {
+                                    Id = reader.GetInt32(4),
+                                    KeyData = Convert.FromBase64String(reader.GetString(5)),
+                                    Flag = reader.GetBoolean(6) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET
+                                });
+                            }
+                        }
+                        while(reader.Read())
+                        {
+                            user.PublicKeys.Add(new Key()
+                            {
+                                Id = reader.GetInt32(4),
+                                KeyData = Convert.FromBase64String(reader.GetString(5)),
+                                Flag = reader.GetBoolean(6) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET
+                            });
+                        }
+                    }
+                }
+            }
+            return user;
         }
 
         public User GetById(int id)

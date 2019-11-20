@@ -31,7 +31,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
         {
             using (DbCommand query = con.CreateCommand())
             {
-                query.AddParameterWithValue("username", Entity.UserName);
+                query.AddParameterWithValue("username", Entity.NormalizedUserName);
                 query.CommandText = "SELECT Username FROM Users " +
                                     "WHERE Users.Username=@username;";
                 using (IDataReader reader = query.ExecuteReader())
@@ -45,7 +45,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
         {
             using (DbCommand insert = con.CreateCommand())
             {
-                insert.AddParameterWithValue("username", Entity.UserName);
+                insert.AddParameterWithValue("username", Entity.NormalizedUserName);
                 insert.AddParameterWithValue("password", Entity.PasswordHash);
                 insert.AddParameterWithValue("role", Entity.Role);
 

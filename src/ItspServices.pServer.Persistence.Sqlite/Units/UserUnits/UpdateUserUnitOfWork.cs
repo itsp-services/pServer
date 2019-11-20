@@ -23,7 +23,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
             using (DbCommand update = con.CreateCommand())
             {
                 update.AddParameterWithValue("id", Id);
-                update.AddParameterWithValue("username", Entity.UserName);
+                update.AddParameterWithValue("username", Entity.NormalizedUserName);
                 update.AddParameterWithValue("pw", Entity.PasswordHash);
                 update.AddParameterWithValue("role", Entity.Role);
                 update.CommandText = "UPDATE Users " +

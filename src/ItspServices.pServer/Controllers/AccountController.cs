@@ -52,7 +52,7 @@ namespace ItspServices.pServer.Controllers
             User user = new User()
             {
                 UserName = registerModel.Username,
-                NormalizedUserName = registerModel.Username.ToUpper(),
+                NormalizedUserName = registerModel.Username.Normalize(),
             };
 
             IdentityResult result = await _signInManager.UserManager.CreateAsync(user, registerModel.Password);
