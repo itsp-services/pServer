@@ -29,18 +29,11 @@ namespace ItspServices.pServer.Controllers
             return View(user);
         }
 
-        public IActionResult Profile()
-        {
-            User user = _userRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
-            return View(user);
-        }
-
         [HttpPost]
         public void Index([FromForm]string newKey)
         {
             if (newKey == null)
                 return;
-
 
             User user = _userRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
 

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.Units;
@@ -20,14 +21,8 @@ namespace ItspServices.pServer.Controllers
             _repository = repository;
         }
 
-        [HttpPost("addNewKey")] //WIP
-        public IActionResult AddNewPublicKey([FromBody]PublicKeyModel model, int id)
-        {
-            return Ok();
-        }
-
         [HttpPut("edit/{id:int}")]
-        public IActionResult EditKey([FromBody]PublicKeyModel model, int id)
+        public IActionResult EditKey([FromBody]PublicKeyModel model)
         {
             User sessionUser = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name);
             using (IUpdateUnitOfWork<User, int> uow = _repository.UserRepository.Update(sessionUser.Id))
@@ -38,6 +33,25 @@ namespace ItspServices.pServer.Controllers
                 else
                     uow.Entity.PublicKeys.Find((k) => k.Id == model.KeyNumber).Flag = Key.KeyFlag.OBSOLET;
 
+                uow.Complete();
+            }
+
+            return Ok();
+        }
+
+        [HttpPost("add")]
+        public IActionResult AddNewKey([FromBody]PublicKeyModel model)
+        {
+            Console.Write("Model: " + model.KeyData);
+            
+            if (model.KeyData == null)
+                return Ok();
+
+            User sessionUser = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
+
+            using (IUpdateUnitOfWork<User, int> uow = _repository.UserRepository.Update(sessionUser.Id))
+            {
+                uow.Entity.PublicKeys.Add(new Key() { KeyData = Encoding.UTF8.GetBytes(model.KeyData) });
                 uow.Complete();
             }
 
