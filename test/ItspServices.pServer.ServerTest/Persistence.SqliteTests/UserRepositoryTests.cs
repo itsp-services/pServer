@@ -89,7 +89,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             User u = repository.GetUserByNormalizedName("Foo");
 
             Assert.AreEqual(1, u.Id);
-            Assert.AreEqual("Foo".Normalize(), u.NormalizedUserName);
+            Assert.AreEqual("Foo".ToUpper(), u.NormalizedUserName);
             Assert.AreEqual("Foo", u.UserName);
             Assert.AreEqual("SecretPassword", u.PasswordHash);
             Assert.AreEqual("User", u.Role);
@@ -101,7 +101,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             u = repository.GetUserByNormalizedName("Bar");
 
             Assert.AreEqual(2, u.Id);
-            Assert.AreEqual("Bar".Normalize(), u.NormalizedUserName);
+            Assert.AreEqual("Bar".ToUpper(), u.NormalizedUserName);
             Assert.AreEqual("Bar", u.UserName);
             Assert.AreEqual("OtherPassword", u.PasswordHash);
             Assert.AreEqual("Admin", u.Role);
@@ -127,7 +127,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 
             Assert.AreEqual(1, fooUser.Id);
             Assert.AreEqual("FooUser", fooUser.UserName);
-            Assert.AreEqual("FooUser".Normalize(), fooUser.NormalizedUserName);
+            Assert.AreEqual("FooUser".ToUpper(), fooUser.NormalizedUserName);
             Assert.AreEqual("SecretPassword", fooUser.PasswordHash);
             Assert.AreEqual("User", fooUser.Role);
             Assert.AreEqual(1, fooUser.PublicKeys.Count);
@@ -139,7 +139,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 
             Assert.AreEqual(2, barUser.Id);
             Assert.AreEqual("BarUser", barUser.UserName);
-            Assert.AreEqual("BarUser".Normalize(), barUser.NormalizedUserName);
+            Assert.AreEqual("BarUser".ToUpper(), barUser.NormalizedUserName);
             Assert.AreEqual("OtherPassword", barUser.PasswordHash);
             Assert.AreEqual("Admin", barUser.Role);
             Assert.AreEqual(0, barUser.PublicKeys.Count);
@@ -166,7 +166,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             {
                 uow.Entity.UserName = "FooUser";
                 uow.Entity.NormalizedUserName = uow.Entity.UserName.Normalize();
-                uow.Entity.PasswordHash = "pw";
+                uow.Entity.PasswordHash = "SecretPassword";
                 uow.Entity.Role = "User";
                 uow.Entity.PublicKeys.Add(new Key() { 
                     KeyData = Encoding.Default.GetBytes("keydata1"),
@@ -181,34 +181,20 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                 uow.Complete();
             }
 
-            using (DbCommand queryData = memoryDbConnection.CreateCommand())
-            {
-                queryData.CommandText = "SELECT * FROM Users WHERE Users.Username='FooUser';";
-                using (IDataReader reader = queryData.ExecuteReader())
-                {
-                    Assert.IsTrue(reader.Read());
-                    Assert.AreEqual(2, reader.GetInt32(0));
-                    Assert.AreEqual("FooUser", reader.GetString(1));
-                    Assert.AreEqual("pw", reader.GetString(2));
-                    Assert.AreEqual(1, reader.GetInt32(3));
-                    Assert.IsFalse(reader.Read());
-                }
-                queryData.CommandText = "SELECT * FROM PublicKeys;";
-                using (IDataReader reader = queryData.ExecuteReader())
-                {
-                    Assert.IsTrue(reader.Read());
-                    Assert.AreEqual(2, reader.GetInt32(0));
-                    Assert.AreEqual(1, reader.GetInt32(1));
-                    Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("keydata1")), reader.GetString(2));
-                    Assert.IsTrue(reader.GetBoolean(3));
-                    Assert.IsTrue(reader.Read());
-                    Assert.AreEqual(2, reader.GetInt32(0));
-                    Assert.AreEqual(2, reader.GetInt32(1));
-                    Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("keydata2")), reader.GetString(2));
-                    Assert.IsFalse(reader.GetBoolean(3));
-                    Assert.IsFalse(reader.Read());
-                }
-            }
+            User fooUser = repository.GetById(2);
+
+            Assert.AreEqual(2, fooUser.Id);
+            Assert.AreEqual("FooUser", fooUser.UserName);
+            Assert.AreEqual("FooUser".ToUpper(), fooUser.NormalizedUserName);
+            Assert.AreEqual("SecretPassword", fooUser.PasswordHash);
+            Assert.AreEqual("User", fooUser.Role);
+            Assert.AreEqual(2, fooUser.PublicKeys.Count);
+            Assert.AreEqual(1, fooUser.PublicKeys[0].Id);
+            Assert.AreEqual(Key.KeyFlag.ACTIVE, fooUser.PublicKeys[0].Flag);
+            Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("keydata1")), Convert.ToBase64String(fooUser.PublicKeys[0].KeyData));
+            Assert.AreEqual(2, fooUser.PublicKeys[1].Id);
+            Assert.AreEqual(Key.KeyFlag.OBSOLET, fooUser.PublicKeys[1].Flag);
+            Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("keydata2")), Convert.ToBase64String(fooUser.PublicKeys[1].KeyData));
         }
 
         [TestMethod]
@@ -286,7 +272,6 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             using (IUpdateUnitOfWork<User, int> uow = repository.Update(1))
             {
                 uow.Entity.UserName = "FooUser";
-                uow.Entity.NormalizedUserName = "FooUser".Normalize();
                 uow.Entity.PasswordHash = "newPassword";
                 uow.Entity.PublicKeys[0].Flag = Key.KeyFlag.OBSOLET;
                 uow.Entity.PublicKeys[0].KeyData = Encoding.Default.GetBytes("ChangedKeyData");
@@ -296,7 +281,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 
             User u = repository.GetById(1);
             Assert.AreEqual("FooUser", u.UserName);
-            Assert.AreEqual("FooUser".Normalize(), u.NormalizedUserName);
+            Assert.AreEqual("FooUser".ToUpper(), u.NormalizedUserName);
             Assert.AreEqual("newPassword", u.PasswordHash);
             Assert.AreEqual("Admin", u.Role);
             Assert.AreEqual(Key.KeyFlag.OBSOLET, u.PublicKeys[0].Flag);

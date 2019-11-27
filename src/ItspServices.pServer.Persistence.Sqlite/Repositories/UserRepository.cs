@@ -38,16 +38,16 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                         {
                             user.Id = reader.GetInt32(0);
                             user.UserName = reader.GetString(1);
-                            user.NormalizedUserName = user.UserName.Normalize();
-                            user.PasswordHash = reader.GetString(2);
-                            user.Role = reader.GetString(3);
-                            if (!reader.IsDBNull(4))
+                            user.NormalizedUserName = reader.GetString(2);
+                            user.PasswordHash = reader.GetString(3);
+                            user.Role = reader.GetString(4);
+                            if (!reader.IsDBNull(5))
                             {
                                 user.PublicKeys.Add(new Key()
                                 {
-                                    Id = reader.GetInt32(4),
-                                    KeyData = Convert.FromBase64String(reader.GetString(5)),
-                                    Flag = reader.GetBoolean(6) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET
+                                    Id = reader.GetInt32(5),
+                                    KeyData = Convert.FromBase64String(reader.GetString(6)),
+                                    Flag = reader.GetBoolean(7) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET
                                 });
                             }
                         }
@@ -55,9 +55,9 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                         {
                             user.PublicKeys.Add(new Key()
                             {
-                                Id = reader.GetInt32(4),
-                                KeyData = Convert.FromBase64String(reader.GetString(5)),
-                                Flag = reader.GetBoolean(6) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET
+                                Id = reader.GetInt32(5),
+                                KeyData = Convert.FromBase64String(reader.GetString(6)),
+                                Flag = reader.GetBoolean(7) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET
                             });
                         }
                     }
@@ -90,7 +90,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 
                 using (DbCommand selectUser = con.CreateCommand())
                 {
-                    selectUser.CommandText = "SELECT Users.ID, Users.Username, Users.PasswordHash, Roles.Name AS Role FROM Users " +
+                    selectUser.CommandText = "SELECT Users.ID, Users.Username, Users.NormalizedUsername, Users.PasswordHash, Roles.Name AS Role FROM Users " +
                                              "INNER JOIN Roles ON Users.RoleID=Roles.ID " +
                                             $"WHERE Users.ID={id};";
                     using (IDataReader reader = selectUser.ExecuteReader())
@@ -100,9 +100,9 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                             user = new User();
                             user.Id = reader.GetInt32(0);
                             user.UserName = reader.GetString(1);
-                            user.NormalizedUserName = user.UserName.Normalize();
-                            user.PasswordHash = reader.GetString(2);
-                            user.Role = reader.GetString(3);
+                            user.NormalizedUserName = reader.GetString(2);
+                            user.PasswordHash = reader.GetString(3);
+                            user.Role = reader.GetString(4);
                         }
                     }
                 }
