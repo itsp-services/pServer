@@ -23,7 +23,47 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 
         public User GetUserByNormalizedName(string name)
         {
-            throw new System.NotImplementedException();
+            User user = new User();
+            using (DbConnection con = _dbFactory.CreateConnection())
+            {
+                con.ConnectionString = _connectionString;
+                con.Open();
+                using (DbCommand query = con.CreateCommand())
+                {
+                    query.AddParameterWithValue("searchedUsername", name);
+                    query.CommandText = "SELECT * FROM [Users Keys] WHERE Username=@searchedUsername;";
+                    using (IDataReader reader = query.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            user.Id = reader.GetInt32(0);
+                            user.UserName = reader.GetString(1);
+                            user.NormalizedUserName = reader.GetString(2);
+                            user.PasswordHash = reader.GetString(3);
+                            user.Role = reader.GetString(4);
+                            if (!reader.IsDBNull(5))
+                            {
+                                user.PublicKeys.Add(new Key()
+                                {
+                                    Id = reader.GetInt32(5),
+                                    KeyData = Convert.FromBase64String(reader.GetString(6)),
+                                    Flag = reader.GetBoolean(7) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET
+                                });
+                            }
+                        }
+                        while(reader.Read())
+                        {
+                            user.PublicKeys.Add(new Key()
+                            {
+                                Id = reader.GetInt32(5),
+                                KeyData = Convert.FromBase64String(reader.GetString(6)),
+                                Flag = reader.GetBoolean(7) ? Key.KeyFlag.ACTIVE : Key.KeyFlag.OBSOLET
+                            });
+                        }
+                    }
+                }
+            }
+            return user;
         }
 
         public User GetById(int id)
@@ -50,7 +90,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 
                 using (DbCommand selectUser = con.CreateCommand())
                 {
-                    selectUser.CommandText = "SELECT Users.ID, Users.Username, Users.PasswordHash, Roles.Name AS Role FROM Users " +
+                    selectUser.CommandText = "SELECT Users.ID, Users.Username, Users.NormalizedUsername, Users.PasswordHash, Roles.Name AS Role FROM Users " +
                                              "INNER JOIN Roles ON Users.RoleID=Roles.ID " +
                                             $"WHERE Users.ID={id};";
                     using (IDataReader reader = selectUser.ExecuteReader())
@@ -60,9 +100,9 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                             user = new User();
                             user.Id = reader.GetInt32(0);
                             user.UserName = reader.GetString(1);
-                            user.NormalizedUserName = user.UserName.Normalize();
-                            user.PasswordHash = reader.GetString(2);
-                            user.Role = reader.GetString(3);
+                            user.NormalizedUserName = reader.GetString(2);
+                            user.PasswordHash = reader.GetString(3);
+                            user.Role = reader.GetString(4);
                         }
                     }
                 }
