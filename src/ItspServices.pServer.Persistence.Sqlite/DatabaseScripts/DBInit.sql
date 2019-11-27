@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS Roles (
 CREATE TABLE IF NOT EXISTS Users (
   ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   Username VARCHAR(45) NOT NULL UNIQUE,
+  NormalizedUsername VARCHAR(45) UNIQUE,
   PasswordHash VARCHAR(45) NULL,
   RoleID NOT NULL,
   CONSTRAINT fk_User_Roles
@@ -100,7 +101,29 @@ CREATE TABLE IF NOT EXISTS SymmetricKeys (
 -- -----------------------------------------------------
 -- View [Users Keys]
 -- -----------------------------------------------------
-CREATE VIEW [Users Keys] AS
-SELECT Users.ID, Users.Username, Users.PasswordHash, Roles.Name As Role, PublicKeyNumber, KeyData, Active FROM Users
+CREATE VIEW IF NOT EXISTS [Users Keys] AS
+SELECT Users.ID, Users.Username, Users.NormalizedUsername, Users.PasswordHash, Roles.Name As Role, PublicKeyNumber, KeyData, Active FROM Users
 JOIN Roles ON Roles.ID=Users.RoleID
 LEFT JOIN PublicKeys ON PublicKeys.UserID=Users.ID;
+
+-- -----------------------------------------------------
+-- Trigger add_normalized_username_after_insert
+-- -----------------------------------------------------
+CREATE TRIGGER IF NOT EXISTS add_normalized_username_after_insert
+	AFTER INSERT ON Users
+BEGIN
+	UPDATE Users
+	SET NormalizedUsername=upper(Username)
+	WHERE Users.ID = NEW.ID;
+END;
+
+-- -----------------------------------------------------
+-- Trigger set_normalized_username_after_update
+-- -----------------------------------------------------
+CREATE TRIGGER IF NOT EXISTS set_normalized_username_after_update
+	AFTER UPDATE ON Users
+BEGIN
+	UPDATE Users
+	SET NormalizedUsername=upper(Username)
+	WHERE Users.ID = NEW.ID;
+END;
