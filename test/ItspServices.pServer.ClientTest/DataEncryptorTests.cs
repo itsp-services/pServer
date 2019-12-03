@@ -22,11 +22,16 @@ namespace ItspServices.pServer.ClientTest
             string expectedData = Convert.ToBase64String(Encoding.Default.GetBytes("SecretPassword"));
             DataEncryptor dataEncryptor = new DataEncryptor();
             AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider();
+            aesProvider.KeySize = 128;
             aesProvider.GenerateKey();
             aesProvider.GenerateIV();
-            string encrypedData = dataEncryptor.SymmetricEncryptData(expectedData, $"{Convert.ToBase64String(aesProvider.Key)},{Convert.ToBase64String(aesProvider.IV)}");
-            string decrypedData = dataEncryptor.SymmetricDecryptData(encrypedData, $"{Convert.ToBase64String(aesProvider.Key)},{Convert.ToBase64String(aesProvider.IV)}");
-            Assert.AreEqual(expectedData, decrypedData);
+            int keyByteLength = aesProvider.KeySize / 8;
+            byte[] combinedKey = new byte[keyByteLength * 2];
+            aesProvider.Key.CopyTo(combinedKey, 0);
+            aesProvider.IV.CopyTo(combinedKey, keyByteLength);
+            byte[] encrypedData = dataEncryptor.SymmetricEncryptData(Convert.FromBase64String(expectedData), combinedKey);
+            string decrypedData = Encoding.Default.GetString(dataEncryptor.SymmetricDecryptData(encrypedData, combinedKey));
+            Assert.AreEqual(Encoding.Default.GetString(Convert.FromBase64String(expectedData)), decrypedData);
         }
 
         [TestMethod]
@@ -35,10 +40,10 @@ namespace ItspServices.pServer.ClientTest
             string expectedData = Convert.ToBase64String(Encoding.Default.GetBytes("SecretPassword"));
             DataEncryptor dataEncryptor = new DataEncryptor();
             RSACryptoServiceProvider rsaProvider = new RSACryptoServiceProvider();
-            string publicKey = Convert.ToBase64String(rsaProvider.ExportCspBlob(false));
-            string privateKey = Convert.ToBase64String(rsaProvider.ExportCspBlob(true));
-            string encrypedData = dataEncryptor.AsymmetricEncryptData(expectedData, publicKey);
-            string decrypedData = dataEncryptor.AsymmetricDecryptData(encrypedData, privateKey);
+            byte[] publicKey = rsaProvider.ExportCspBlob(false);
+            byte[] privateKey = rsaProvider.ExportCspBlob(true);
+            string encrypedData = Convert.ToBase64String(dataEncryptor.AsymmetricEncryptData(Convert.FromBase64String(expectedData), publicKey));
+            string decrypedData = Convert.ToBase64String(dataEncryptor.AsymmetricDecryptData(Convert.FromBase64String(encrypedData), privateKey));
             Assert.AreEqual(expectedData, decrypedData);
         }
     }

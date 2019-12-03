@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.RestApi;
 using ItspServices.pServer.Client.Security;
@@ -7,13 +8,12 @@ namespace ItspServices.pServer.Client
 {
     public class ProtectedDataClient
     {
-        private IApiClient _restClient;
+        private IApiClient _apiClient = new RestApiClient();
         private ILocalKeysController _localKeysController;
         private IDataEncryptor _dataEncryptor;
 
-        public ProtectedDataClient(IApiClient restClient, ILocalKeysController localKeysController, IDataEncryptor dataEncryptor)
+        public ProtectedDataClient(ILocalKeysController localKeysController, IDataEncryptor dataEncryptor)
         {
-            _restClient = restClient;
             _localKeysController = localKeysController;
             _dataEncryptor = dataEncryptor;
         }
@@ -21,38 +21,43 @@ namespace ItspServices.pServer.Client
         public async Task Set(string destination, string data)
         {
             string publicKey = _localKeysController.GetPublicKey();
-            DataModel dataModel = await _restClient.RequestDataByPath(destination);
+            DataModel dataModel = await _apiClient.RequestDataByPath(destination);
             if (dataModel == null)
             {
-                string symmetricKey = _localKeysController.CreateSymmetricKey();
-                int fileId = await _restClient.SendCreateData(destination, new DataModel
+                string symmetricKey = Convert.ToBase64String(_dataEncryptor.CreateSymmetricKey());
+                int fileId = await _apiClient.SendCreateData(destination, new DataModel
                 {
                     Name = destination.Substring(destination.LastIndexOf('/') + 1),
-                    Data = _dataEncryptor.SymmetricEncryptData(data, symmetricKey)
+                    Data = Convert.ToBase64String(_dataEncryptor.SymmetricEncryptData(Convert.FromBase64String(data), Convert.FromBase64String(symmetricKey)))
                 });
-                await _restClient.SendCreateKeyPairWithFileId(fileId, new KeyPairModel
+                await _apiClient.SendCreateKeyPairWithFileId(fileId, new KeyPairModel
                 {
                     PublicKey = publicKey,
-                    SymmetricKey = _dataEncryptor.AsymmetricEncryptData(symmetricKey, publicKey)
+                    SymmetricKey = Convert.ToBase64String(_dataEncryptor.AsymmetricEncryptData(Convert.FromBase64String(symmetricKey), Convert.FromBase64String(publicKey)))
                 });
             }
             else
             {
                 string privateKey = _localKeysController.GetPrivateKey();
                 string symmetricKey = null;
-                KeyPairModel[] keyPairModels = await _restClient.RequestKeyPairsByFilePath(destination);
+                KeyPairModel[] keyPairModels = await _apiClient.RequestKeyPairsByFilePath(destination);
                 foreach (KeyPairModel keyPairModel in keyPairModels)
                 {
                     if (keyPairModel.PublicKey == publicKey)
                     {
-                        symmetricKey = _dataEncryptor.AsymmetricDecryptData(keyPairModel.SymmetricKey, privateKey);
+                        symmetricKey = Convert.ToBase64String(_dataEncryptor.AsymmetricDecryptData(Convert.FromBase64String(keyPairModel.SymmetricKey), Convert.FromBase64String(privateKey)));
                         break;
                     }
                 }
                 // TODO: case no symKey
-                dataModel.Data = _dataEncryptor.SymmetricEncryptData(data, symmetricKey);
-                await _restClient.SendUpdateData(destination, dataModel);
+                dataModel.Data = Convert.ToBase64String(_dataEncryptor.SymmetricEncryptData(Convert.FromBase64String(data), Convert.FromBase64String(symmetricKey)));
+                await _apiClient.SendUpdateData(destination, dataModel);
             }
+        }
+
+        internal void SetClient(IApiClient client)
+        {
+            _apiClient = client;
         }
     }
 }

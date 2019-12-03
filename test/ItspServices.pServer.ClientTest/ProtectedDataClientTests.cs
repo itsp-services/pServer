@@ -9,6 +9,7 @@ using ItspServices.pServer.Client;
 using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.RestApi;
 using ItspServices.pServer.Client.Security;
+using System.Text;
 
 namespace ItspServices.pServer.ClientTest
 {
@@ -65,16 +66,17 @@ namespace ItspServices.pServer.ClientTest
             localKeysController.Setup(x => x.GetPublicKey())
                 .Returns("publicKey");
 
-            localKeysController.Setup(x => x.CreateSymmetricKey())
-                .Returns("symmetricKey");
+            dataEncryptor.Setup(x => x.CreateSymmetricKey())
+                .Returns(Encoding.Default.GetBytes("symmetricKey"));
 
-            dataEncryptor.Setup(x => x.AsymmetricEncryptData(It.Is<string>(s => s == "symmetricKey"), It.Is<string>(s => s == "publicKey")))
-                .Returns("publicSymmetricKey");
+            dataEncryptor.Setup(x => x.AsymmetricEncryptData(It.Is<byte[]>(s => s == Encoding.Default.GetBytes("symmetricKey")), It.Is<byte[]>(s => s == Encoding.Default.GetBytes("publicKey"))))
+                .Returns(Encoding.Default.GetBytes("publicSymmetricKey"));
 
-            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<string>(s => s == "SecretPassword"), It.Is<string>(s => s == "symmetricKey")))
-                .Returns("EncryptedSecretPassword");
+            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<byte[]>(s => s == Encoding.Default.GetBytes("SecretPassword")), It.Is<byte[]>(s => s == Encoding.Default.GetBytes("symmetricKey"))))
+                .Returns(Encoding.Default.GetBytes("EncryptedSecretPassword"));
 
-            ProtectedDataClient client = new ProtectedDataClient(restClient.Object, localKeysController.Object, dataEncryptor.Object);
+            ProtectedDataClient client = new ProtectedDataClient(localKeysController.Object, dataEncryptor.Object);
+            client.SetClient(restClient.Object);
             await client.Set("AndysPasswords/MailAccount.data", "SecretPassword");
 
             for (int i = 0; i < 3; i++)
@@ -142,13 +144,14 @@ namespace ItspServices.pServer.ClientTest
             localKeysController.Setup(x => x.GetPrivateKey())
                 .Returns("privateKey");
 
-            dataEncryptor.Setup(x => x.AsymmetricDecryptData(It.Is<string>(s => s == "publicSymmetricKey"), It.Is<string>(s => s == "privateKey")))
-                .Returns("symmetricKey");
+            dataEncryptor.Setup(x => x.AsymmetricDecryptData(It.Is<byte[]>(s => s == Encoding.Default.GetBytes("publicSymmetricKey")), It.Is<byte[]>(s => s == Encoding.Default.GetBytes("privateKey"))))
+                .Returns(Encoding.Default.GetBytes("symmetricKey"));
 
-            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<string>(s => s == "SecretPassword"), It.Is<string>(s => s == "symmetricKey")))
-                .Returns("EncryptedSecretPassword");
+            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<byte[]>(s => s == Encoding.Default.GetBytes("SecretPassword")), It.Is<byte[]>(s => s == Encoding.Default.GetBytes("symmetricKey"))))
+                .Returns(Encoding.Default.GetBytes("EncryptedSecretPassword"));
 
-            ProtectedDataClient client = new ProtectedDataClient(restClient.Object, localKeysController.Object, dataEncryptor.Object);
+            ProtectedDataClient client = new ProtectedDataClient(localKeysController.Object, dataEncryptor.Object);
+            client.SetClient(restClient.Object);
             await client.Set("AndysPasswords/MailAccount.data", "SecretPassword");
 
             for (int i = 0; i < 3; i++)
