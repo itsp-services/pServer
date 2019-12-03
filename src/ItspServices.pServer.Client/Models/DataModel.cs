@@ -2,7 +2,7 @@
 
 namespace ItspServices.pServer.Client.Models
 {
-    public class DataModel
+    class DataModel
     {
         public string Name { get; set; }
         public string Data { get; set; }

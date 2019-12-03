@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks; 
+﻿using System.Threading.Tasks;
 using System.Net.Http;
 using ItspServices.pServer.Client.Models;
 
 namespace ItspServices.pServer.Client.RestApi
 {
-    public interface IApiClient
+    interface IApiClient
     {
         IHttpClientFactory _provider { get; set; }
         Task<FolderModel> RequestFolderById(int? id);

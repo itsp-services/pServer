@@ -2,7 +2,7 @@
 
 namespace ItspServices.pServer.Client.Models
 {
-    public class FolderModel
+    class FolderModel
     {
         public int? ParentId { get; set; }
         public string Name { get; set; }
