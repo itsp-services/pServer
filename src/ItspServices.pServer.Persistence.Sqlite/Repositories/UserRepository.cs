@@ -25,11 +25,8 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 
         private void InitRoles(ICollection<string> serverRoles)
         {
-            using (DbConnection con = _dbFactory.CreateConnection())
+            using (DbConnection con = _dbFactory.CreateAndOpenConnection(_connectionString))
             {
-                con.ConnectionString = _connectionString;
-                con.Open();
-
                 using (DbCommand insert = con.CreateCommand())
                 {
                     int i = 0;
@@ -48,10 +45,8 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
         public User GetUserByNormalizedName(string name)
         {
             User user = new User();
-            using (DbConnection con = _dbFactory.CreateConnection())
+            using (DbConnection con = _dbFactory.CreateAndOpenConnection(_connectionString))
             {
-                con.ConnectionString = _connectionString;
-                con.Open();
                 using (DbCommand query = con.CreateCommand())
                 {
                     query.AddParameterWithValue("searchedUsername", name);
@@ -107,11 +102,8 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
         private User ReadUserData(int id)
         {
             User user = null;
-            using (DbConnection con = _dbFactory.CreateConnection())
+            using (DbConnection con = _dbFactory.CreateAndOpenConnection(_connectionString))
             {
-                con.ConnectionString = _connectionString;
-                con.Open();
-
                 using (DbCommand selectUser = con.CreateCommand())
                 {
                     selectUser.CommandText = "SELECT Users.ID, Users.Username, Users.NormalizedUsername, Users.PasswordHash, Roles.Name AS Role FROM Users " +
@@ -136,11 +128,8 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 
         private void AddPublicKeys(User user)
         {
-            using (DbConnection con = _dbFactory.CreateConnection())
+            using (DbConnection con = _dbFactory.CreateAndOpenConnection(_connectionString))
             {
-                con.ConnectionString = _connectionString;
-                con.Open();
-
                 using (DbCommand queryKeys = con.CreateCommand())
                 {
                     queryKeys.CommandText = "SELECT PublicKeys.PublicKeyNumber, PublicKeys.KeyData, PublicKeys.Active FROM PublicKeys " +

@@ -11,5 +11,13 @@ namespace ItspServices.pServer.Persistence.Sqlite
             param.Value = value;
             cmd.Parameters.Add(param);
         }
+
+        public static DbConnection CreateAndOpenConnection(this DbProviderFactory provider, string connectionString)
+        {
+            DbConnection con = provider.CreateConnection();
+            con.ConnectionString = connectionString;
+            con.Open();
+            return con;
+        }
     }
 }
