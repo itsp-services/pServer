@@ -15,10 +15,34 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
         private DbProviderFactory _dbFactory;
         private readonly string _connectionString;
 
-        public UserRepository(DbProviderFactory dbFactory, string connectionString)
+        public UserRepository(DbProviderFactory dbFactory, string connectionString, ICollection<string> serverRoles)
         {
             _dbFactory = dbFactory;
             _connectionString = connectionString;
+
+            InitRoles(serverRoles);
+        }
+
+        private void InitRoles(ICollection<string> serverRoles)
+        {
+            using (DbConnection con = _dbFactory.CreateConnection())
+            {
+                con.ConnectionString = _connectionString;
+                con.Open();
+
+                using (DbCommand insert = con.CreateCommand())
+                {
+                    int i = 0;
+                    insert.CommandText = "INSERT OR IGNORE INTO Roles(name) VALUES";
+                    foreach (string role in serverRoles)
+                    {
+                        insert.AddParameterWithValue($"role{i}", role);
+                        insert.CommandText += (i < serverRoles.Count - 1) ? $"(@role{i})," : $"(@role{i})";
+                        i++;
+                    }
+                    insert.ExecuteNonQuery();
+                }
+            }
         }
 
         public User GetUserByNormalizedName(string name)
@@ -31,7 +55,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                 using (DbCommand query = con.CreateCommand())
                 {
                     query.AddParameterWithValue("searchedUsername", name);
-                    query.CommandText = "SELECT * FROM [Users Keys] WHERE Username=@searchedUsername;";
+                    query.CommandText = "SELECT * FROM [Users Keys] WHERE NormalizedUsername=@searchedUsername;";
                     using (IDataReader reader = query.ExecuteReader())
                     {
                         if (reader.Read())

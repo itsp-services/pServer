@@ -3,7 +3,7 @@
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS Roles (
   ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  Name VARCHAR(20) NOT NULL
+  Name VARCHAR(20) NOT NULL UNIQUE
 );
 
 -- -----------------------------------------------------

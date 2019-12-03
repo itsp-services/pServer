@@ -8,7 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Stores;
-using ItspServices.pServer.Persistence;
+using ItspServices.pServer.Persistence.Sqlite;
+using Microsoft.Data.Sqlite;
+using System.Collections.Generic;
 
 namespace ItspServices.pServer
 {
@@ -35,7 +37,10 @@ namespace ItspServices.pServer
 
             services.Configure<PersistenceOption>(o =>
             {
-                o.Path = @"..\..\data\UserData.xml";
+                o.ConnectionString = "DataSource=pServer.db;Mode=ReadWriteCreate;Cache=Default";
+                o.ProviderFactory = SqliteFactory.Instance;
+                o.ServerRoles = new List<string>();
+                o.ServerRoles.Add("User");
             });
             services.AddPersistence();
 

@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Xml.Linq;
-using System.Xml.Serialization;
-using ItspServices.pServer.Abstraction.Repository;
-using ItspServices.pServer.Persistence.Repository;
+﻿using ItspServices.pServer.Abstraction.Repository;
+using ItspServices.pServer.Persistence.Sqlite.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ItspServices.pServer.Persistence
+namespace ItspServices.pServer.Persistence.Sqlite
 {
     public static class PersistenceExtensions
     {

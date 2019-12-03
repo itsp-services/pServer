@@ -45,7 +45,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
         {
             using (DbCommand insert = con.CreateCommand())
             {
-                insert.AddParameterWithValue("username", Entity.NormalizedUserName);
+                insert.AddParameterWithValue("username", Entity.UserName);
                 insert.AddParameterWithValue("password", Entity.PasswordHash);
                 insert.AddParameterWithValue("role", Entity.Role);
 

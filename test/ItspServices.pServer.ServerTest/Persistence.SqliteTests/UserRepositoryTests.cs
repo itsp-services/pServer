@@ -9,6 +9,7 @@ using ItspServices.pServer.Abstraction.Units;
 using System.Text;
 using System.Data;
 using System;
+using System.Collections.Generic;
 
 namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 {
@@ -59,7 +60,10 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                 init.ExecuteNonQuery();
             }
 
-            repository = new UserRepository(SqliteFactory.Instance, testConnectionString);
+            List<string> roles = new List<string>();
+            roles.Add("User");
+            roles.Add("Admin");
+            repository = new UserRepository(SqliteFactory.Instance, testConnectionString, roles);
         }
 
         [TestCleanup]
@@ -77,8 +81,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             string keydata = Convert.ToBase64String(Encoding.Default.GetBytes("data"));
             using (DbCommand insertTestData = memoryDbConnection.CreateCommand())
             {
-                insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User'), ('Admin');" +
-                                             "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES " +
+                insertTestData.CommandText = "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES " +
                                              "('Foo', 'SecretPassword', 1)," +
                                              "('Bar', 'OtherPassword', 2);" +
                                              "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES " +
@@ -86,7 +89,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                 insertTestData.ExecuteNonQuery();
             }
 
-            User u = repository.GetUserByNormalizedName("Foo");
+            User u = repository.GetUserByNormalizedName("FOO");
 
             Assert.AreEqual(1, u.Id);
             Assert.AreEqual("Foo".ToUpper(), u.NormalizedUserName);
@@ -98,7 +101,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             Assert.AreEqual(keydata, Convert.ToBase64String(u.PublicKeys[0].KeyData));
             Assert.AreEqual(Key.KeyFlag.ACTIVE, u.PublicKeys[0].Flag);
 
-            u = repository.GetUserByNormalizedName("Bar");
+            u = repository.GetUserByNormalizedName("BAR");
 
             Assert.AreEqual(2, u.Id);
             Assert.AreEqual("Bar".ToUpper(), u.NormalizedUserName);
@@ -114,8 +117,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             using (DbCommand insertTestData = memoryDbConnection.CreateCommand())
             {
                 string keydata = Convert.ToBase64String(Encoding.Default.GetBytes("data"));
-                insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User'), ('Admin');" +
-                                             "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES " +
+                insertTestData.CommandText = "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES " +
                                              "('FooUser', 'SecretPassword', 1)," +
                                              "('BarUser', 'OtherPassword', 2);" +
                                              "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES " +
@@ -157,8 +159,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         {
             using (DbCommand insertTestData = memoryDbConnection.CreateCommand())
             {
-                insertTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');" +
-                                             "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);";
+                insertTestData.CommandText = "INSERT INTO Users ('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);";
                 insertTestData.ExecuteNonQuery();
             }
 
@@ -202,8 +203,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         {
             using (DbCommand inserTestData = memoryDbConnection.CreateCommand())
             {
-                inserTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');" +
-                                            "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);";
+                inserTestData.CommandText = "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);";
                 inserTestData.ExecuteNonQuery();
             }
 
@@ -223,8 +223,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         {
             using (DbCommand inserTestData = memoryDbConnection.CreateCommand())
             {
-                inserTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');" +
-                                            "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);" +
+                inserTestData.CommandText = "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);" +
                                             "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES (1, 1, 'base64string', 1);";
                 inserTestData.ExecuteNonQuery();
             }
@@ -263,8 +262,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         {
             using (DbCommand inserTestData = memoryDbConnection.CreateCommand())
             {
-                inserTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User'), ('Admin');" +
-                                            "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);" +
+                inserTestData.CommandText = "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);" +
                                             "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES (1, 1, 'base64string', 1);";
                 inserTestData.ExecuteNonQuery();
             }
@@ -293,8 +291,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         {
             using (DbCommand inserTestData = memoryDbConnection.CreateCommand())
             {
-                inserTestData.CommandText = "INSERT INTO Roles ('Name') VALUES ('User');" +
-                                            "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);" +
+                inserTestData.CommandText = "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);" +
                                             "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES (1, 1, 'base64string', 1);";
                 inserTestData.ExecuteNonQuery();
             }
