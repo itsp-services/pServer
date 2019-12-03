@@ -1,8 +1,8 @@
 ﻿using System.Data.Common;
 using System.IO;
 using System.Reflection;
-using ItspServices.pServer.Abstraction.Repository;
 using Microsoft.Extensions.Options;
+using ItspServices.pServer.Abstraction.Repository;
 
 namespace ItspServices.pServer.Persistence.Sqlite.Repositories
 {

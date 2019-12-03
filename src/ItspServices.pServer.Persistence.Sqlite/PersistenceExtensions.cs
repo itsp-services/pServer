@@ -1,6 +1,6 @@
-﻿using ItspServices.pServer.Abstraction.Repository;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Persistence.Sqlite.Repositories;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ItspServices.pServer.Persistence.Sqlite
 {

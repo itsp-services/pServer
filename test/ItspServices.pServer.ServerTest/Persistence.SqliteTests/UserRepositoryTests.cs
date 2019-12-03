@@ -1,15 +1,15 @@
-﻿using System.Data.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
+using System.IO;
+using System.Reflection;
+using System.Text;
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ItspServices.pServer.Persistence.Sqlite.Repositories;
-using System.Reflection;
-using System.IO;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Units;
-using System.Text;
-using System.Data;
-using System;
-using System.Collections.Generic;
+using ItspServices.pServer.Persistence.Sqlite.Repositories;
 
 namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
 {
@@ -19,9 +19,10 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
         static string InitSQLScript;
 
         private TestContext _testContext;
-        public TestContext TestContext { 
-            get { return _testContext; } 
-            set { _testContext = value; } 
+        public TestContext TestContext
+        {
+            get { return _testContext; }
+            set { _testContext = value; }
         }
 
         DbConnection memoryDbConnection;
@@ -169,7 +170,8 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                 uow.Entity.NormalizedUserName = uow.Entity.UserName.Normalize();
                 uow.Entity.PasswordHash = "SecretPassword";
                 uow.Entity.Role = "User";
-                uow.Entity.PublicKeys.Add(new Key() { 
+                uow.Entity.PublicKeys.Add(new Key()
+                {
                     KeyData = Encoding.Default.GetBytes("keydata1"),
                     Flag = Key.KeyFlag.ACTIVE
                 });
