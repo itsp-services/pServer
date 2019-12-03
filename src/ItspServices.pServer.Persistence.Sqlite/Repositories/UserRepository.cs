@@ -174,5 +174,10 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                 Id = key
             };
         }
+
+        public IUnitOfWork<Key> AddPublicKey(User user, Key key)
+        {
+            return new AddPublicKeyUnitOfWork(_dbFactory, _connectionString, user.Id, key);
+        }
     }
 }

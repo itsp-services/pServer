@@ -86,7 +86,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                                              "('Foo', 'SecretPassword', 1)," +
                                              "('Bar', 'OtherPassword', 2);" +
                                              "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES " +
-                                            $"(1, 1, '{keydata}', 1);";
+                                            $"(1, -1, '{keydata}', 1);";
                 insertTestData.ExecuteNonQuery();
             }
 
@@ -98,7 +98,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             Assert.AreEqual("SecretPassword", u.PasswordHash);
             Assert.AreEqual("User", u.Role);
             Assert.AreEqual(1, u.PublicKeys.Count);
-            Assert.AreEqual(1, u.PublicKeys[0].Id);
+            Assert.AreEqual(0, u.PublicKeys[0].Id);
             Assert.AreEqual(keydata, Convert.ToBase64String(u.PublicKeys[0].KeyData));
             Assert.AreEqual(Key.KeyFlag.ACTIVE, u.PublicKeys[0].Flag);
 
@@ -122,7 +122,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
                                              "('FooUser', 'SecretPassword', 1)," +
                                              "('BarUser', 'OtherPassword', 2);" +
                                              "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES " +
-                                            $"(1, 1, '{keydata}', 1);";
+                                            $"(1, -1, '{keydata}', 1);";
                 insertTestData.ExecuteNonQuery();
             }
 
@@ -134,7 +134,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             Assert.AreEqual("SecretPassword", fooUser.PasswordHash);
             Assert.AreEqual("User", fooUser.Role);
             Assert.AreEqual(1, fooUser.PublicKeys.Count);
-            Assert.AreEqual(1, fooUser.PublicKeys[0].Id);
+            Assert.AreEqual(0, fooUser.PublicKeys[0].Id);
             Assert.AreEqual(Key.KeyFlag.ACTIVE, fooUser.PublicKeys[0].Flag);
             Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("data")), Convert.ToBase64String(fooUser.PublicKeys[0].KeyData));
 
@@ -192,10 +192,10 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             Assert.AreEqual("SecretPassword", fooUser.PasswordHash);
             Assert.AreEqual("User", fooUser.Role);
             Assert.AreEqual(2, fooUser.PublicKeys.Count);
-            Assert.AreEqual(1, fooUser.PublicKeys[0].Id);
+            Assert.AreEqual(0, fooUser.PublicKeys[0].Id);
             Assert.AreEqual(Key.KeyFlag.ACTIVE, fooUser.PublicKeys[0].Flag);
             Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("keydata1")), Convert.ToBase64String(fooUser.PublicKeys[0].KeyData));
-            Assert.AreEqual(2, fooUser.PublicKeys[1].Id);
+            Assert.AreEqual(1, fooUser.PublicKeys[1].Id);
             Assert.AreEqual(Key.KeyFlag.OBSOLET, fooUser.PublicKeys[1].Flag);
             Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("keydata2")), Convert.ToBase64String(fooUser.PublicKeys[1].KeyData));
         }
@@ -294,7 +294,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             using (DbCommand inserTestData = memoryDbConnection.CreateCommand())
             {
                 inserTestData.CommandText = "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);" +
-                                            "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES (1, 1, 'base64string', 1);";
+                                            "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES (1, -1, 'base64string', 1);";
                 inserTestData.ExecuteNonQuery();
             }
 
@@ -320,6 +320,28 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             {
                 uow.Complete();
             }
+        }
+
+        [TestMethod]
+        public void AddNewPublicKey_ShouldSucceed()
+        {
+            using (DbCommand inserTestData = memoryDbConnection.CreateCommand())
+            {
+                inserTestData.CommandText = "INSERT INTO Users('Username', 'PasswordHash', 'RoleID') VALUES ('BarUser', 'pw', 1);" +
+                                            "INSERT INTO PublicKeys ('UserID', 'PublicKeyNumber', 'KeyData', 'Active') VALUES (1, -1, 'base64string', 1);";
+                inserTestData.ExecuteNonQuery();
+            }
+
+            User user = repository.GetById(1);
+            Assert.AreEqual(1, user.PublicKeys.Count);
+
+            using (IUnitOfWork<Key> uow = repository.AddPublicKey(user, new Key() { KeyData = Encoding.Default.GetBytes("keydata") }))
+            {
+                uow.Complete();
+            }
+
+            user = repository.GetById(1);
+            Assert.AreEqual(2, user.PublicKeys.Count);
         }
     }
 }
