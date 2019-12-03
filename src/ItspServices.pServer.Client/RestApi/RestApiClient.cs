@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using ItspServices.pServer.Client.Models;
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.ClientTest")]
-
 namespace ItspServices.pServer.Client.RestApi
 {
     class RestApiClient : IApiClient

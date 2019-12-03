@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.RestApi;
@@ -8,14 +9,13 @@ namespace ItspServices.pServer.Client
 {
     public class ProtectedDataClient
     {
-        private IApiClient _apiClient = new RestApiClient();
+        private IApiClient _apiClient = null;
+        private IDataEncryptor _dataEncryptor = null;
         private ILocalKeysController _localKeysController;
-        private IDataEncryptor _dataEncryptor;
 
-        public ProtectedDataClient(ILocalKeysController localKeysController, IDataEncryptor dataEncryptor)
+        public ProtectedDataClient(ILocalKeysController localKeysController)
         {
             _localKeysController = localKeysController;
-            _dataEncryptor = dataEncryptor;
         }
 
         public async Task Set(string destination, string data)
@@ -28,7 +28,7 @@ namespace ItspServices.pServer.Client
                 int fileId = await _apiClient.SendCreateData(destination, new DataModel
                 {
                     Name = destination.Substring(destination.LastIndexOf('/') + 1),
-                    Data = Convert.ToBase64String(_dataEncryptor.SymmetricEncryptData(Convert.FromBase64String(data), Convert.FromBase64String(symmetricKey)))
+                    Data = Convert.ToBase64String(_dataEncryptor.SymmetricEncryptData(Encoding.Default.GetBytes(data), Convert.FromBase64String(symmetricKey)))
                 });
                 await _apiClient.SendCreateKeyPairWithFileId(fileId, new KeyPairModel
                 {
@@ -50,7 +50,7 @@ namespace ItspServices.pServer.Client
                     }
                 }
                 // TODO: case no symKey
-                dataModel.Data = Convert.ToBase64String(_dataEncryptor.SymmetricEncryptData(Convert.FromBase64String(data), Convert.FromBase64String(symmetricKey)));
+                dataModel.Data = Convert.ToBase64String(_dataEncryptor.SymmetricEncryptData(Encoding.Default.GetBytes(data), Convert.FromBase64String(symmetricKey)));
                 await _apiClient.SendUpdateData(destination, dataModel);
             }
         }
@@ -58,6 +58,11 @@ namespace ItspServices.pServer.Client
         internal void SetClient(IApiClient client)
         {
             _apiClient = client;
+        }
+
+        internal void SetEncryptor(IDataEncryptor encryptor)
+        {
+            _dataEncryptor = encryptor;
         }
     }
 }
