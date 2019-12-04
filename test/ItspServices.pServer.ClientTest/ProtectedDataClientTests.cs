@@ -67,7 +67,7 @@ namespace ItspServices.pServer.ClientTest
             localKeysController.Setup(x => x.GetPublicKey())
                 .Returns(Convert.ToBase64String(Encoding.Default.GetBytes("publicKey")));
 
-            dataEncryptor.Setup(x => x.CreateSymmetricKey())
+            dataEncryptor.Setup(x => x.CreateSymmetricKey(It.IsAny<int>()))
                 .Returns(Encoding.Default.GetBytes("symmetricKey"));
 
             dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("SecretPassword"))), It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("symmetricKey")))))
