@@ -6,6 +6,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
 {
     class UpdateUserUnitOfWork : SqliteUnitOfWork<User>, IUpdateUnitOfWork<User, int>
     {
+        private int _numberOfKeys;
         public int Id { get; internal set; }
         public User Entity { get; private set; }
 
@@ -13,11 +14,12 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
             : base(dbFactory, connectionString)
         {
             Entity = userToUpdate;
+            _numberOfKeys = Entity?.PublicKeys.Count ?? 0;
         }
 
         protected override void Complete(DbConnection con)
         {
-            if(Entity == null)
+            if (Entity == null)
                 return;
 
             using (DbCommand update = con.CreateCommand())
@@ -29,15 +31,15 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
                 update.CommandText = "UPDATE Users " +
                                      "SET Username=@username, PasswordHash=@pw, RoleID=(SELECT ID FROM Roles WHERE Roles.Name=@role) " +
                                      "WHERE Users.ID=@id;";
-                if (Entity.HasKeys())
+                for (int i = 0; i < _numberOfKeys && i < Entity.PublicKeys.Count; i++)
                 {
-                    foreach (Key key in Entity.PublicKeys)
-                    {
-                        int active = (key.Flag == Key.KeyFlag.ACTIVE) ? 1 : 0;
-                        update.AddParameterWithValue($"keydata{key.Id}", key.AsBase64String());
-                        update.AddParameterWithValue($"keyID{key.Id}", key.Id);
-                        update.CommandText += $"UPDATE PublicKeys SET KeyData=@keydata{key.Id}, Active={active} WHERE PublicKeyNumber=@keyID{key.Id} AND UserID=@id;";
-                    }
+                    int active = (Entity.PublicKeys[i].Flag == Key.KeyFlag.ACTIVE) ? 1 : 0;
+                    update.AddParameterWithValue($"keydata{Entity.PublicKeys[i].Id}", Entity.PublicKeys[i].AsBase64String());
+                    update.AddParameterWithValue($"keyID{Entity.PublicKeys[i].Id}", Entity.PublicKeys[i].Id);
+                    update.CommandText += $"UPDATE PublicKeys SET " +
+                                          $"KeyData=@keydata{Entity.PublicKeys[i].Id}, " +
+                                          $"Active={active} " +
+                                          $"WHERE PublicKeyNumber=@keyID{Entity.PublicKeys[i].Id} AND UserID=@id;";
                 }
                 update.ExecuteNonQuery();
             }

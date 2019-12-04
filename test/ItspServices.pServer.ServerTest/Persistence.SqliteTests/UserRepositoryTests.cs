@@ -302,9 +302,7 @@ namespace ItspServices.pServer.ServerTest.Persistence.SqliteTests
             {
                 uow.Entity.PublicKeys.Add(new Key()
                 {
-                    Id = 2,
-                    KeyData = Encoding.Default.GetBytes("NewKeyData"),
-                    Flag = Key.KeyFlag.ACTIVE
+                    KeyData = Encoding.Default.GetBytes("NewKeyData")
                 });
                 uow.Complete();
             }
