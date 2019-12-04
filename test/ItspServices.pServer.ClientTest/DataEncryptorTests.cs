@@ -52,6 +52,19 @@ namespace ItspServices.pServer.ClientTest
         }
 
         [TestMethod]
+        public void SymmetricEncryptAndDecryptDataWithDifferentKeySize_ShouldReturnCorrectData()
+        {
+            string expectedData = "SecretPassword";
+            DataEncryptor dataEncryptor = new DataEncryptor();
+            byte[] key = dataEncryptor.CreateSymmetricKey(256);
+
+            byte[] encrypedData = dataEncryptor.SymmetricEncryptData(Encoding.Default.GetBytes(expectedData), key);
+            byte[] decrypedData = dataEncryptor.SymmetricDecryptData(encrypedData, key);
+
+            Assert.AreEqual(expectedData, Encoding.Default.GetString(decrypedData));
+        }
+
+        [TestMethod]
         public void SymmetricEncryptAndDecryptDataWithWrongKey_ShouldThrowException()
         {
             string expectedData = "SecretPassword";
