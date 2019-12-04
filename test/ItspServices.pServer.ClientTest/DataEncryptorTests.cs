@@ -14,15 +14,15 @@ namespace ItspServices.pServer.ClientTest
         {
             DataEncryptor dataEncryptor = new DataEncryptor();
             byte[] symmetricKey;
-            int ivLength = 128;
+            int aesIdentifikationVectorLength = 128;
 
             symmetricKey = dataEncryptor.CreateSymmetricKey();
             Assert.IsNotNull(symmetricKey);
-            Assert.AreEqual(ivLength / 8 + 128 / 8, symmetricKey.Length);
+            Assert.AreEqual(aesIdentifikationVectorLength / 8 + 128 / 8, symmetricKey.Length);
 
             symmetricKey = dataEncryptor.CreateSymmetricKey(256);
             Assert.IsNotNull(symmetricKey);
-            Assert.AreEqual(ivLength / 8 + 256 / 8, symmetricKey.Length);
+            Assert.AreEqual(aesIdentifikationVectorLength / 8 + 256 / 8, symmetricKey.Length);
 
             Assert.ThrowsException<ArgumentException>(() => symmetricKey = dataEncryptor.CreateSymmetricKey(333));
         }

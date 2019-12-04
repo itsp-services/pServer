@@ -7,6 +7,8 @@ namespace ItspServices.pServer.Client.Security
 {
     class DataEncryptor : IDataEncryptor
     {
+        private readonly int _aesIdentifikationVectorLength = 128;
+
         public DataEncryptor() { }
 
         public byte[] CreateSymmetricKey(int keySize = 128)
@@ -28,14 +30,17 @@ namespace ItspServices.pServer.Client.Security
 
         public byte[] SymmetricEncryptData(byte[] data, byte[] key)
         {
-            int keyByteLength = key.Length / 2;
+            int keyByteLength = key.Length - _aesIdentifikationVectorLength / 8;
             int keyLength = keyByteLength * 8;
             byte[] symmetricKey = new byte[keyByteLength];
-            byte[] symmetricIV = new byte[keyByteLength];
+            byte[] symmetricIV = new byte[_aesIdentifikationVectorLength / 8];
 
             for (int i = 0; i < keyByteLength; i++)
             {
                 symmetricKey[i] = key[i];
+            }
+            for (int i = 0; i < _aesIdentifikationVectorLength / 8; i++)
+            {
                 symmetricIV[i] = key[i + keyByteLength];
             }
 
@@ -63,14 +68,17 @@ namespace ItspServices.pServer.Client.Security
 
         public byte[] SymmetricDecryptData(byte[] data, byte[] key)
         {
-            int keyByteLength = key.Length / 2;
+            int keyByteLength = key.Length - _aesIdentifikationVectorLength / 8;
             int keyLength = keyByteLength * 8;
             byte[] symmetricKey = new byte[keyByteLength];
-            byte[] symmetricIV = new byte[keyByteLength];
+            byte[] symmetricIV = new byte[_aesIdentifikationVectorLength / 8];
 
             for (int i = 0; i < keyByteLength; i++)
             {
                 symmetricKey[i] = key[i];
+            }
+            for (int i = 0; i < _aesIdentifikationVectorLength / 8; i++)
+            {
                 symmetricIV[i] = key[i + keyByteLength];
             }
 
