@@ -8,11 +8,16 @@ namespace ItspServices.pServer.Client.RestApi
 {
     class RestApiClient : IApiClient
     {
-        public IHttpClientFactory Provider { get; set; }
+        private IHttpClientFactory _provider;
+
+        public RestApiClient(IHttpClientFactory provider)
+        {
+            _provider = provider;
+        }
 
         public async Task<FolderModel> RequestFolderById(int? id)
         {
-            using (HttpClient client = Provider.CreateClient())
+            using (HttpClient client = _provider.CreateClient())
             {
                 using (HttpResponseMessage response = await client.GetAsync($"/api/protecteddata/folder/{id}"))
                     return await JsonSerializer.DeserializeAsync<FolderModel>(await response.Content.ReadAsStreamAsync());
@@ -21,7 +26,7 @@ namespace ItspServices.pServer.Client.RestApi
 
         public async Task<DataModel> RequestDataByPath(string path)
         {
-            using (HttpClient client = Provider.CreateClient())
+            using (HttpClient client = _provider.CreateClient())
             {
                 using (HttpResponseMessage response = await client.GetAsync($"/api/protecteddata/data/{path}"))
                 {
@@ -39,7 +44,7 @@ namespace ItspServices.pServer.Client.RestApi
                 DataModel = dataModel,
                 Path = path
             };
-            using (HttpClient client = Provider.CreateClient())
+            using (HttpClient client = _provider.CreateClient())
             {
                 string serializedModel = JsonSerializer.Serialize(dataModelWithPath);
                 HttpContent content = new StringContent(serializedModel);
@@ -52,7 +57,7 @@ namespace ItspServices.pServer.Client.RestApi
 
         public async Task SendUpdateData(string path, DataModel dataModel)
         {
-            using (HttpClient client = Provider.CreateClient())
+            using (HttpClient client = _provider.CreateClient())
             {
                 string serializedModel = JsonSerializer.Serialize(dataModel);
                 HttpContent content = new StringContent(serializedModel);
@@ -64,7 +69,7 @@ namespace ItspServices.pServer.Client.RestApi
 
         public async Task<KeyPairModel[]> RequestKeyPairsByFilePath(string path)
         {
-            using (HttpClient client = Provider.CreateClient())
+            using (HttpClient client = _provider.CreateClient())
             {
                 using (HttpResponseMessage response = await client.GetAsync($"/api/protecteddata/key/{path}"))
                 {
@@ -75,7 +80,7 @@ namespace ItspServices.pServer.Client.RestApi
 
         public async Task SendCreateKeyPairWithFileId(int fileId, KeyPairModel keyPairModel)
         {
-            using (HttpClient client = Provider.CreateClient())
+            using (HttpClient client = _provider.CreateClient())
             {
                 string serializedModel = JsonSerializer.Serialize(keyPairModel);
                 HttpContent content = new StringContent(serializedModel);

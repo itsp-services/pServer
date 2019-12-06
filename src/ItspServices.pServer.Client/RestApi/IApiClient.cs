@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using System.Net.Http;
 using ItspServices.pServer.Client.Models;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.ClientTest")]
@@ -9,7 +8,6 @@ namespace ItspServices.pServer.Client.RestApi
 {
     interface IApiClient
     {
-        IHttpClientFactory Provider { get; set; }
         Task<FolderModel> RequestFolderById(int? id);
         Task<DataModel> RequestDataByPath(string path);
         Task<int> SendCreateData(string path, DataModel dataModel);
