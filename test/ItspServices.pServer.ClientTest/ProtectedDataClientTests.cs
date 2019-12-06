@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ItspServices.pServer.Client;
+using ItspServices.pServer.Client.Models;
+using ItspServices.pServer.Client.RestApi;
+using ItspServices.pServer.Client.Security;
 
 namespace ItspServices.pServer.ClientTest
 {
@@ -28,122 +33,134 @@ namespace ItspServices.pServer.ClientTest
         #endregion
 
         [TestMethod]
-        public async Task CreateProtectedData_ShouldSucceed()
+        public async Task CreateProtectedData_ShouldSendEncryptedDataAndKeyPair()
         {
-            bool setHasBeenCalled = false;
-
-            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
-            HttpResponseMessage Callback(HttpRequestMessage request)
+            Mock<IApiClient> restClient = new Mock<IApiClient>();
+            Mock<ILocalKeysController> localKeysController = new Mock<ILocalKeysController>();
+            Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
+            List<bool> wasCalled = new List<bool>();
+            Task<DataModel> CheckRequestDataByPath()
             {
-                string content = null;
-                switch (request.RequestUri.AbsolutePath)
-                {
-                    case "/api/protecteddata/folder/":
-                        content = "{\"ParentId\":null,\"Name\":\"root\",\"ProtectedDataIds\":[],\"SubfolderIds\":[1,2,3]}";
-                        break;
-                    case "/api/protecteddata/folder/1":
-                        content = "{\"ParentId\":null,\"Name\":\"FirstFolder\",\"ProtectedDataIds\":[],\"SubfolderIds\":[]}";
-                        break;
-                    case "/api/protecteddata/folder/2":
-                        content = "{\"ParentId\":null,\"Name\":\"Andys Passwords\",\"ProtectedDataIds\":[],\"SubfolderIds\":[4,5,6]}";
-                        break;
-                    case "/api/protecteddata/folder/3":
-                    case "/api/protecteddata/folder/4":
-                    case "/api/protecteddata/folder/5":
-                    case "/api/protecteddata/folder/6":
-                        Assert.Fail($"Client doesn't need to ask for this folder: {request.RequestUri.AbsolutePath}");
-                        break;
-                    case var s when s == "/api/protecteddata/data/1" && request.Method == HttpMethod.Get:
-                        content = "{\"Name\":\"MailAccount\",\"Data\":\"SecretPassword\"}";
-                        break;
-                    case var s when s == "/api/protecteddata/data/2" && request.Method == HttpMethod.Post:
-                        setHasBeenCalled = true;
-                        return new HttpResponseMessage(System.Net.HttpStatusCode.Created);
-                    default:
-                        Assert.Fail("Invalid requested URI");
-                        break;
-                }
-
-                return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
-                {
-                    Content = new StringContent(content)
-                };
+                wasCalled.Add(true);
+                return Task.FromResult(default(DataModel));
+            }
+            Task<int> CheckSendCreateData()
+            {
+                wasCalled.Add(true);
+                return Task.FromResult(1);
+            }
+            Task CheckSendCreateKeyPairWithFileId()
+            {
+                wasCalled.Add(true);
+                return Task.CompletedTask;
             }
 
-            clientFactory
-                .Setup(x => x.CreateClient(It.IsAny<string>()))
-                .Returns(() =>
-                    new HttpClient(new MockHttpMessageHandler(Callback))
-                    {
-                        BaseAddress = new Uri("http://test.com")
-                    });
+            restClient.Setup(x => x.RequestDataByPath(It.Is<string>(s => s == "AndysPasswords/MailAccount.data")))
+                .Returns(CheckRequestDataByPath);
 
-            ProtectedDataClient client = new ProtectedDataClient(clientFactory.Object);
-            await client.Set("/Andys Passwords/MailAccount", "SecretPassword");
+            restClient.Setup(x => x.SendCreateData(It.Is<string>(s => s == "AndysPasswords/MailAccount.data"), It.Is<DataModel>(s => s.Name == "MailAccount.data" && s.Data == Convert.ToBase64String(Encoding.Default.GetBytes("EncryptedSecretPassword")))))
+                .Returns(CheckSendCreateData);
 
-            Assert.IsTrue(setHasBeenCalled);
+            restClient.Setup(x => x.SendCreateKeyPairWithFileId(It.Is<int>(s => s == 1), It.Is<KeyPairModel>(s => s.PublicKey == Convert.ToBase64String(Encoding.Default.GetBytes("publicKey")) && s.SymmetricKey == Convert.ToBase64String(Encoding.Default.GetBytes("publicSymmetricKey")))))
+                .Returns(CheckSendCreateKeyPairWithFileId);
+
+            localKeysController.Setup(x => x.GetPublicKey())
+                .Returns(Convert.ToBase64String(Encoding.Default.GetBytes("publicKey")));
+
+            dataEncryptor.Setup(x => x.CreateSymmetricKey(It.IsAny<int>()))
+                .Returns(Encoding.Default.GetBytes("symmetricKey"));
+
+            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("SecretPassword"))), It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("symmetricKey")))))
+                .Returns(Encoding.Default.GetBytes("EncryptedSecretPassword"));
+
+            dataEncryptor.Setup(x => x.AsymmetricEncryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("symmetricKey"))), It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("publicKey")))))
+                .Returns(Encoding.Default.GetBytes("publicSymmetricKey"));
+
+            ProtectedDataClient client = new ProtectedDataClient(localKeysController.Object);
+            client.SetClient(restClient.Object);
+            client.SetEncryptor(dataEncryptor.Object);
+            await client.Set("AndysPasswords/MailAccount.data", "SecretPassword");
+
+            for (int i = 0; i < 3; i++)
+            {
+                Assert.IsTrue(wasCalled[i]);
+            }
         }
 
         [TestMethod]
-        public async Task UpdateProtectedData_ShouldSucceed()
+        public async Task UpdateProtectedData_ShouldSendEncryptedData()
         {
-            bool setHasBeenCalled = false;
-
-            using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
+            Mock<IApiClient> restClient = new Mock<IApiClient>();
+            Mock<ILocalKeysController> localKeysController = new Mock<ILocalKeysController>();
+            Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
+            List<bool> wasCalled = new List<bool>();
+            Task<DataModel> CheckRequestDataByPath()
             {
-                // TODO
+                wasCalled.Add(true);
+                return Task.FromResult(new DataModel
+                {
+                    Name = "MailAccount.data",
+                    Data = "OldData"
+                });
             }
-
-            Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
-            HttpResponseMessage Callback(HttpRequestMessage request)
+            Task<KeyPairModel[]> CheckRequestKeyPairsByFilePath()
             {
-                string content = null;
-                switch (request.RequestUri.AbsolutePath)
+                wasCalled.Add(true);
+                return Task.FromResult(new KeyPairModel[]
                 {
-                    case "/api/protecteddata/folder/":
-                        content = "{\"ParentId\":null,\"Name\":\"root\",\"ProtectedDataIds\":[],\"SubfolderIds\":[1,2,3]}";
-                        break;
-                    case "/api/protecteddata/folder/1":
-                        content = "{\"ParentId\":null,\"Name\":\"FirstFolder\",\"ProtectedDataIds\":[],\"SubfolderIds\":[]}";
-                        break;
-                    case "/api/protecteddata/folder/2":
-                        content = "{\"ParentId\":null,\"Name\":\"Andys Passwords\",\"ProtectedDataIds\":[1],\"SubfolderIds\":[4,5,6]}";
-                        break;
-                    case "/api/protecteddata/folder/3":
-                    case "/api/protecteddata/folder/4":
-                    case "/api/protecteddata/folder/5":
-                    case "/api/protecteddata/folder/6":
-                        Assert.Fail($"Client doesn't need to ask for this folder: {request.RequestUri.AbsolutePath}");
-                        break;
-                    case var s when s == "/api/protecteddata/data/1" && request.Method == HttpMethod.Get:
-                        content = "{\"Name\":\"MailAccount\",\"Data\":\"SecretPassword\"}";
-                        break;
-                    case var s when s == "/api/protecteddata/data/1" && request.Method == HttpMethod.Put:
-                        setHasBeenCalled = true;
-                        return new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-                    default:
-                        Assert.Fail("Invalid requested URI");
-                        break;
-                }
-
-                return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
-                {
-                    Content = new StringContent(content)
-                };
-            }
-
-            clientFactory
-                .Setup(x => x.CreateClient(It.IsAny<string>()))
-                .Returns(() =>
-                    new HttpClient(new MockHttpMessageHandler(Callback))
+                    new KeyPairModel()
                     {
-                        BaseAddress = new Uri("http://test.com")
-                    });
+                        PublicKey = "publicKey",
+                        SymmetricKey = "publicSymmetricKey"
+                    },
+                    new KeyPairModel()
+                    {
+                        PublicKey = Convert.ToBase64String(Encoding.Default.GetBytes("wrongPublicKey")),
+                        SymmetricKey = Convert.ToBase64String(Encoding.Default.GetBytes("wrongPublicSymmetricKey"))
+                    },
+                    new KeyPairModel()
+                    {
+                        PublicKey = Convert.ToBase64String(Encoding.Default.GetBytes("publicKey")),
+                        SymmetricKey = Convert.ToBase64String(Encoding.Default.GetBytes("publicSymmetricKey"))
+                    }
+                });
+            }
+            Task CheckSendUpdateData()
+            {
+                wasCalled.Add(true);
+                return Task.CompletedTask;
+            }
 
-            ProtectedDataClient client = new ProtectedDataClient(clientFactory.Object);
-            await client.Set("/Andys Passwords/MailAccount", "SecretPassword");
+            restClient.Setup(x => x.RequestDataByPath(It.Is<string>(s => s == "AndysPasswords/MailAccount.data")))
+                .Returns(CheckRequestDataByPath);
 
-            Assert.IsTrue(setHasBeenCalled);
+            restClient.Setup(x => x.RequestKeyPairsByFilePath(It.Is<string>(s => s == "AndysPasswords/MailAccount.data")))
+                .Returns(CheckRequestKeyPairsByFilePath);
+
+            restClient.Setup(x => x.SendUpdateData(It.Is<string>(s => s == "AndysPasswords/MailAccount.data"), It.Is<DataModel>(s => s.Name == "MailAccount.data" && s.Data == Convert.ToBase64String(Encoding.Default.GetBytes("EncryptedSecretPassword")))))
+                .Returns(CheckSendUpdateData);
+
+            localKeysController.Setup(x => x.GetPublicKey())
+                .Returns(Convert.ToBase64String(Encoding.Default.GetBytes("publicKey")));
+
+            localKeysController.Setup(x => x.GetPrivateKey())
+                .Returns(Convert.ToBase64String(Encoding.Default.GetBytes("privateKey")));
+
+            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("SecretPassword"))), It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("symmetricKey")))))
+                .Returns(Encoding.Default.GetBytes("EncryptedSecretPassword"));
+
+            dataEncryptor.Setup(x => x.AsymmetricDecryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("publicSymmetricKey"))), It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("privateKey")))))
+                .Returns(Encoding.Default.GetBytes("symmetricKey"));
+
+            ProtectedDataClient client = new ProtectedDataClient(localKeysController.Object);
+            client.SetClient(restClient.Object);
+            client.SetEncryptor(dataEncryptor.Object);
+            await client.Set("AndysPasswords/MailAccount.data", "SecretPassword");
+
+            for (int i = 0; i < 3; i++)
+            {
+                Assert.IsTrue(wasCalled[i]);
+            }
         }
     }
 }

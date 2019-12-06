@@ -2,7 +2,7 @@
 {
     class KeyPairModel
     {
-        public byte[] PublicKey { get; set; }
-        public byte[] SymmetricKey { get; set; }
+        public string PublicKey { get; set; }
+        public string SymmetricKey { get; set; }
     }
 }

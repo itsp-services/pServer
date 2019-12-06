@@ -1,84 +1,68 @@
 ﻿using System;
-using System.Linq;
-using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.RestApi;
+using ItspServices.pServer.Client.Security;
 
 namespace ItspServices.pServer.Client
 {
     public class ProtectedDataClient
     {
-        private RestApiClient _restClient;
+        private IApiClient _apiClient = null;
+        private IDataEncryptor _dataEncryptor = null;
+        private ILocalKeysController _localKeysController;
 
-        public ProtectedDataClient(IHttpClientFactory factory)
+        public ProtectedDataClient(ILocalKeysController localKeysController)
         {
-            _restClient = new RestApiClient(factory);
+            _localKeysController = localKeysController;
         }
 
-        public async Task Set(string destination, string protectedData)
+        public async Task Set(string destination, string data)
         {
-            FolderModel rootFolder = await _restClient.RequestFolderById(null);
-            if (rootFolder is null)
-                throw new InvalidOperationException();
-
-            FolderModel folder = await FindFolder(destination, rootFolder);
-
-            int? dataId = null;
-            DataModel dataModel = null;
-            foreach (int protectedDataId in folder.ProtectedDataIds)
+            string publicKey = _localKeysController.GetPublicKey();
+            DataModel dataModel = await _apiClient.RequestDataByPath(destination);
+            if (dataModel == null)
             {
-                dataModel = await _restClient.RequestProtectedDataById(protectedDataId);
-                if (destination.EndsWith(dataModel.Name))
+                string symmetricKey = Convert.ToBase64String(_dataEncryptor.CreateSymmetricKey());
+                int fileId = await _apiClient.SendCreateData(destination, new DataModel
                 {
-                    dataId = protectedDataId;
-                    break;
-                }
+                    Name = destination.Substring(destination.LastIndexOf('/') + 1),
+                    Data = Convert.ToBase64String(_dataEncryptor.SymmetricEncryptData(Encoding.Default.GetBytes(data), Convert.FromBase64String(symmetricKey)))
+                });
+                await _apiClient.SendCreateKeyPairWithFileId(fileId, new KeyPairModel
+                {
+                    PublicKey = publicKey,
+                    SymmetricKey = Convert.ToBase64String(_dataEncryptor.AsymmetricEncryptData(Convert.FromBase64String(symmetricKey), Convert.FromBase64String(publicKey)))
+                });
             }
-            if (dataId != null)
-            {
-                // TODO: Encrypt data with symmetric key of requested datamodel
-                dataModel.Data = protectedData;
-                await _restClient.SendUpdateData((int) dataId, dataModel);
-            } 
             else
             {
-                // TODO: Create new datamodel and encrypt data with new symmetric key and send create request
-                int newId;
-                for (newId = 1; true; newId++)
+                string privateKey = _localKeysController.GetPrivateKey();
+                string symmetricKey = null;
+                KeyPairModel[] keyPairModels = await _apiClient.RequestKeyPairsByFilePath(destination);
+                foreach (KeyPairModel keyPairModel in keyPairModels)
                 {
-                    try
+                    if (keyPairModel.PublicKey == publicKey)
                     {
-                        DataModel data = await _restClient.RequestProtectedDataById(newId);
-                    }
-                    catch (Exception)
-                    {
+                        symmetricKey = Convert.ToBase64String(_dataEncryptor.AsymmetricDecryptData(Convert.FromBase64String(keyPairModel.SymmetricKey), Convert.FromBase64String(privateKey)));
                         break;
                     }
                 }
-                DataModel newDataModel = new DataModel()
-                {
-                    Name = destination.Substring(destination.LastIndexOf('/') + 1),
-                    Data = protectedData
-                    // TODO: New Keypair ??
-                };
-                await _restClient.SendCreateData(newId, newDataModel);
+                // TODO: case no symKey
+                dataModel.Data = Convert.ToBase64String(_dataEncryptor.SymmetricEncryptData(Encoding.Default.GetBytes(data), Convert.FromBase64String(symmetricKey)));
+                await _apiClient.SendUpdateData(destination, dataModel);
             }
         }
 
-        private async Task<FolderModel> FindFolder(string destination, FolderModel currentFolder, string path = "")
+        internal void SetClient(IApiClient client)
         {
-            if (destination.IndexOf('/', path.Length + 1) == -1)
-                return currentFolder;
+            _apiClient = client;
+        }
 
-            FolderModel subFolder = null;
-            foreach (int subFolderId in currentFolder.SubfolderIds)
-            {
-                subFolder = await _restClient.RequestFolderById(subFolderId);
-                if (destination.StartsWith(path + '/' + subFolder.Name))
-                    return await FindFolder(destination, subFolder, path + '/' + subFolder.Name);
-            }
-            return null;
+        internal void SetEncryptor(IDataEncryptor encryptor)
+        {
+            _dataEncryptor = encryptor;
         }
     }
 }
