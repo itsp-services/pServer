@@ -13,19 +13,20 @@ namespace ItspServices.pServer.Client.Security
 
         public byte[] CreateSymmetricKey(int keySize = 128)
         {
-            AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider();
+            using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
+            {
+                if (!aesProvider.ValidKeySize(keySize))
+                    throw new ArgumentException("Invalid key size.");
 
-            if (!aesProvider.ValidKeySize(keySize))
-                throw new ArgumentException("Invalid key size.");
-
-            aesProvider.KeySize = keySize;
-            aesProvider.GenerateKey();
-            aesProvider.GenerateIV();
-            int keyByteLength = aesProvider.KeySize / 8;
-            byte[] combinedKey = new byte[keyByteLength + aesProvider.IV.Length];
-            aesProvider.Key.CopyTo(combinedKey, 0);
-            aesProvider.IV.CopyTo(combinedKey, keyByteLength);
-            return combinedKey;
+                aesProvider.KeySize = keySize;
+                aesProvider.GenerateKey();
+                aesProvider.GenerateIV();
+                int keyByteLength = aesProvider.KeySize / 8;
+                byte[] combinedKey = new byte[keyByteLength + aesProvider.IV.Length];
+                aesProvider.Key.CopyTo(combinedKey, 0);
+                aesProvider.IV.CopyTo(combinedKey, keyByteLength);
+                return combinedKey;
+            }
         }
 
         public byte[] SymmetricEncryptData(byte[] data, byte[] key)

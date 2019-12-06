@@ -58,7 +58,7 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient();
-            restClient._provider = clientFactory.Object;
+            restClient.Provider = clientFactory.Object;
             FolderModel responseFolder = await restClient.RequestFolderById(null);
 
             Assert.AreEqual(rootFolder.ParentId, responseFolder.ParentId);
@@ -94,7 +94,7 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient();
-            restClient._provider = clientFactory.Object;
+            restClient.Provider = clientFactory.Object;
             FolderModel responseFolder = await restClient.RequestFolderById(1);
 
             Assert.AreEqual(fooFolder.ParentId, responseFolder.ParentId);
@@ -130,7 +130,7 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient();
-            restClient._provider = clientFactory.Object;
+            restClient.Provider = clientFactory.Object;
             DataModel dataModel = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
 
             Assert.AreEqual("MailAccount.data", dataModel.Name);
@@ -158,7 +158,7 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient();
-            restClient._provider = clientFactory.Object;
+            restClient.Provider = clientFactory.Object;
             DataModel dataModel = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
 
             Assert.IsNull(dataModel);
@@ -189,7 +189,7 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient();
-            restClient._provider = clientFactory.Object;
+            restClient.Provider = clientFactory.Object;
             int id = await restClient.SendCreateData("AndysPasswords/MailAccount.data", new DataModel
             {
                 Name = "MailAccount.data",
@@ -225,7 +225,7 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient();
-            restClient._provider = clientFactory.Object;
+            restClient.Provider = clientFactory.Object;
             await restClient.SendUpdateData("AndysPasswords/MailAccount.data", new DataModel
             {
                 Name = "MailAccount.data",
@@ -273,7 +273,7 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient();
-            restClient._provider = clientFactory.Object;
+            restClient.Provider = clientFactory.Object;
             KeyPairModel[] keyPairModels = await restClient.RequestKeyPairsByFilePath("AndysPasswords/MailAccount.data");
 
             Assert.AreEqual(expectedKeyPairModels.Length, keyPairModels.Length);
@@ -307,7 +307,7 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient();
-            restClient._provider = clientFactory.Object;
+            restClient.Provider = clientFactory.Object;
             await restClient.SendCreateKeyPairWithFileId(1, new KeyPairModel
             {
                 PublicKey = "publicKey",

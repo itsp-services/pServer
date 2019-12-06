@@ -9,7 +9,7 @@ namespace ItspServices.pServer.Client.RestApi
 {
     interface IApiClient
     {
-        IHttpClientFactory _provider { get; set; }
+        IHttpClientFactory Provider { get; set; }
         Task<FolderModel> RequestFolderById(int? id);
         Task<DataModel> RequestDataByPath(string path);
         Task<int> SendCreateData(string path, DataModel dataModel);

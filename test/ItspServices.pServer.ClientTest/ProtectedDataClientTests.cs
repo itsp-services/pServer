@@ -39,20 +39,20 @@ namespace ItspServices.pServer.ClientTest
             Mock<ILocalKeysController> localKeysController = new Mock<ILocalKeysController>();
             Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
             List<bool> wasCalled = new List<bool>();
-            async Task<DataModel> CheckRequestDataByPath()
+            Task<DataModel> CheckRequestDataByPath()
             {
                 wasCalled.Add(true);
-                return null;
+                return Task.FromResult(default(DataModel));
             }
-            async Task<int> CheckSendCreateData()
+            Task<int> CheckSendCreateData()
             {
                 wasCalled.Add(true);
-                return 1;
+                return Task.FromResult(1);
             }
-            async Task CheckSendCreateKeyPairWithFileId()
+            Task CheckSendCreateKeyPairWithFileId()
             {
                 wasCalled.Add(true);
-                return;
+                return Task.CompletedTask;
             }
 
             restClient.Setup(x => x.RequestDataByPath(It.Is<string>(s => s == "AndysPasswords/MailAccount.data")))
@@ -94,19 +94,19 @@ namespace ItspServices.pServer.ClientTest
             Mock<ILocalKeysController> localKeysController = new Mock<ILocalKeysController>();
             Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
             List<bool> wasCalled = new List<bool>();
-            async Task<DataModel> CheckRequestDataByPath()
+            Task<DataModel> CheckRequestDataByPath()
             {
                 wasCalled.Add(true);
-                return new DataModel
+                return Task.FromResult(new DataModel
                 {
                     Name = "MailAccount.data",
                     Data = "OldData"
-                };
+                });
             }
-            async Task<KeyPairModel[]> CheckRequestKeyPairsByFilePath()
+            Task<KeyPairModel[]> CheckRequestKeyPairsByFilePath()
             {
                 wasCalled.Add(true);
-                return new KeyPairModel[]
+                return Task.FromResult(new KeyPairModel[]
                 {
                     new KeyPairModel()
                     {
@@ -123,12 +123,12 @@ namespace ItspServices.pServer.ClientTest
                         PublicKey = Convert.ToBase64String(Encoding.Default.GetBytes("publicKey")),
                         SymmetricKey = Convert.ToBase64String(Encoding.Default.GetBytes("publicSymmetricKey"))
                     }
-                };
+                });
             }
-            async Task CheckSendUpdateData()
+            Task CheckSendUpdateData()
             {
                 wasCalled.Add(true);
-                return;
+                return Task.CompletedTask;
             }
 
             restClient.Setup(x => x.RequestDataByPath(It.Is<string>(s => s == "AndysPasswords/MailAccount.data")))
@@ -151,9 +151,6 @@ namespace ItspServices.pServer.ClientTest
 
             dataEncryptor.Setup(x => x.AsymmetricDecryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("publicSymmetricKey"))), It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("privateKey")))))
                 .Returns(Encoding.Default.GetBytes("symmetricKey"));
-
-
-
 
             ProtectedDataClient client = new ProtectedDataClient(localKeysController.Object);
             client.SetClient(restClient.Object);
