@@ -82,7 +82,7 @@ img {
     padding: 5px;
 }
 
-.key-edit-popup {
+.publickey-popup {
     visibility: hidden;
     position: absolute;
     top: 0;
@@ -95,13 +95,9 @@ img {
     padding: 15px;
     border-radius: 8px;
     width: 40%;
-    height: 80%;
+    height: 20%;
     z-index: 1;
     -webkit-box-shadow: 0px 5px 20px rgba(0,0,0,0.1);
     -moz-box-shadow: 0px 5px 20px rgba(0,0,0,0.1);
     box-shadow: 0px 5px 20px rgba(0,0,0,0.1);
-}
-
-.key-edit-popup .popup-content{
-
 }

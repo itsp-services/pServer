@@ -2,6 +2,7 @@
 using System.Text;
 using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Abstraction.Repository;
+
 using ItspServices.pServer.Abstraction.Units;
 using ItspServices.pServer.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -21,10 +22,10 @@ namespace ItspServices.pServer.Controllers
             _repository = repository;
         }
 
-        [HttpPut("edit/{id:int}")]
+        [HttpPost("edit/{id:int}")]
         public IActionResult EditKey([FromBody]PublicKeyModel model)
         {
-            User sessionUser = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name);
+            User sessionUser = _repository.UserRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
             using (IUpdateUnitOfWork<User, int> uow = _repository.UserRepository.Update(sessionUser.Id))
             {
                 uow.Entity.PublicKeys.Find((k) => k.Id == model.KeyNumber).KeyData = Encoding.Default.GetBytes(model.KeyData);
