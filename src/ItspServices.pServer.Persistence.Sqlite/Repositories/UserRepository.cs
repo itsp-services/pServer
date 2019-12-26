@@ -65,7 +65,9 @@ namespace ItspServices.pServer.Persistence.Sqlite.Repositories
                 using (DbCommand query = con.CreateCommand())
                 {
                     query.AddParameterWithValue("id", id);
-                    query.CommandText = "SELECT * FROM [Users Keys] WHERE ID=@id;";
+                    query.CommandText = "SELECT " +
+                                        "ID, Username, NormalizedUsername, PasswordHash, Role, PublicKeyNumber, KeyData, Active " +
+                                        "FROM [Users Keys] WHERE ID=@id;";
                     user = ReadUserFromUsersKeysTable(query);
                 }
             }
