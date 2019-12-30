@@ -3,7 +3,7 @@
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS Roles (
   ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  Name VARCHAR(20) NOT NULL
+  Name VARCHAR(20) NOT NULL UNIQUE
 );
 
 -- -----------------------------------------------------
@@ -126,4 +126,15 @@ BEGIN
 	UPDATE Users
 	SET NormalizedUsername=upper(Username)
 	WHERE Users.ID = NEW.ID;
+END;
+
+-- -----------------------------------------------------
+-- Trigger assign_public_key_number_after_insert
+-- -----------------------------------------------------
+CREATE TRIGGER IF NOT EXISTS assign_public_key_number_after_insert
+	AFTER INSERT ON PublicKeys
+BEGIN
+	UPDATE PublicKeys
+	SET PublicKeyNumber = ((SELECT max(PublicKeyNumber) FROM PublicKeys WHERE PublicKeys.UserID = NEW.UserID) + 1)
+	WHERE PublicKeys.UserID = NEW.UserID AND PublicKeyNumber = NEW.PublicKeyNumber;
 END;

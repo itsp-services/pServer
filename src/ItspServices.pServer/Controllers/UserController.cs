@@ -31,10 +31,9 @@ namespace ItspServices.pServer.Controllers
 
 
             User user = _userRepository.GetUserByNormalizedName(User.Identity.Name.ToUpper());
-
-            using (IUpdateUnitOfWork<User, int> unitOfWork = _userRepository.Update(user.Id))
+            Key key = new Key() { KeyData = Encoding.Default.GetBytes(newKey) };
+            using (IUnitOfWork<Key> unitOfWork = _userRepository.AddPublicKey(user, key))
             {
-                unitOfWork.Entity.PublicKeys.Add(new Key() { KeyData = Encoding.UTF8.GetBytes(newKey) });
                 unitOfWork.Complete();
             }
         }

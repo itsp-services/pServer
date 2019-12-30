@@ -45,7 +45,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
         {
             using (DbCommand insert = con.CreateCommand())
             {
-                insert.AddParameterWithValue("username", Entity.NormalizedUserName);
+                insert.AddParameterWithValue("username", Entity.UserName);
                 insert.AddParameterWithValue("password", Entity.PasswordHash);
                 insert.AddParameterWithValue("role", Entity.Role);
 
@@ -67,7 +67,7 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units.UserUnits
                     insert.AddParameterWithValue($"keydata{i}", Entity.PublicKeys[i].AsBase64String());
                     int active = (Entity.PublicKeys[i].Flag == Key.KeyFlag.ACTIVE) ? 1 : 0;
 
-                    insert.CommandText += $"({userID}, {i + 1}, @keydata{i}, {active})";
+                    insert.CommandText += $"({userID}, -1, @keydata{i}, {active})";
                     if (i >= Entity.PublicKeys.Count - 1)
                     {
                         insert.CommandText += ';';

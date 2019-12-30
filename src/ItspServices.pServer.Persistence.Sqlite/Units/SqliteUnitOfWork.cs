@@ -16,10 +16,8 @@ namespace ItspServices.pServer.Persistence.Sqlite.Units
 
         void IUnitOfWork<T>.Complete()
         {
-            using (DbConnection con = DbFactory.CreateConnection())
+            using (DbConnection con = DbFactory.CreateAndOpenConnection(_connectionString))
             {
-                con.ConnectionString = _connectionString;
-                con.Open();
                 this.Complete(con);
             }
         }
