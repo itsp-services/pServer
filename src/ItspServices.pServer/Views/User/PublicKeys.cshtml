@@ -1,0 +1,53 @@
+﻿@using System.Text
+@model ItspServices.pServer.Abstraction.Models.User
+
+<div id="add-key-popup" class="publickey-popup">
+    <h3>Input new key</h3>
+    <br />
+    <input type="text" class="form-control" id="new-key" />
+    <button class="btn btn-success" id="submit-new-key-button">Add</button>
+</div>
+<div id="edit-key-popup" class="publickey-popup">
+    <input type="text" id="edit-key-id" style="visibility:hidden" />
+    <label for="new-key-input">Edit Key</label>
+    <br />
+    <input type="text" class="form-control" id="edit-key-value" />
+    <button class="btn btn-success" id="submit-edit-key-button">Add</button>
+
+</div>
+<div class="row">
+    <div class="col user-view-body">
+        <h1>
+            Public Keys:
+            <button class="add-key-btn float-right" onclick="openAddKeyPopup()">Add Key</button>
+        </h1>
+        <br />
+        <div class="popup">
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Key</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.PublicKeys.Count; i++)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@Encoding.UTF8.GetString(Model.PublicKeys[i].KeyData)</td>
+                        <td>@Model.PublicKeys[i].Flag</td>
+                        <td>
+                            <asp:button id="deactivate-key-button" onclick="deactivateKey('@i', '@Encoding.UTF8.GetString(Model.PublicKeys[i].KeyData)')" class="btn btn-outline-info">
+                                Deactivate
+                            </asp:button>
+                            <button class="btn btn-outline-primary" onclick="openEditKeyPopup('@i', '@Encoding.UTF8.GetString(Model.PublicKeys[i].KeyData)')">Edit</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -45,6 +45,7 @@ body {
   /* Margin bottom by footer height */
   margin-bottom: 60px;
 }
+
 .footer {
   position: absolute;
   bottom: 0;
@@ -62,4 +63,41 @@ img {
 .container.navbar-container {
     max-width: none;
     padding-left: 0;
+    margin-bottom: 0;
+}
+
+.col.user-view-body {
+    overflow: hidden;
+    margin: 15px;
+    z-index: 0;
+}
+
+.add-key-btn {
+    border: 0px;
+    font-weight: bold;
+    font-size: 20pt;
+    text-align: center;
+    background-color: #3FBF3F;
+    color: #fff;
+    padding: 5px;
+}
+
+.publickey-popup {
+    visibility: hidden;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    background-color: #fff;
+    border: 1px solid #d3d3d3;
+    padding: 15px;
+    border-radius: 8px;
+    width: 40%;
+    height: 20%;
+    z-index: 1;
+    -webkit-box-shadow: 0px 5px 20px rgba(0,0,0,0.1);
+    -moz-box-shadow: 0px 5px 20px rgba(0,0,0,0.1);
+    box-shadow: 0px 5px 20px rgba(0,0,0,0.1);
 }
