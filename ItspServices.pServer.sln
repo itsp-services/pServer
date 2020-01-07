@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28729.10
@@ -23,6 +23,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer.Server
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItspServices.pServer.Persistence.Sqlite", "src\ItspServices.pServer.Persistence.Sqlite\ItspServices.pServer.Persistence.Sqlite.csproj", "{43E122D4-D477-4C99-93A3-4E265B7CEBC0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItspServices.pServer.Client", "src\ItspServices.pServer.Client\ItspServices.pServer.Client.csproj", "{9017E79F-DE9B-46EA-8DD8-F618E7B5837C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItspServices.pServer.ClientTest", "test\ItspServices.pServer.ClientTest\ItspServices.pServer.ClientTest.csproj", "{3B9D704E-9079-405C-A9DB-08856A9A5E11}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +45,14 @@ Global
 		{1F29A51A-8B74-4522-9352-9E4A65F2BE39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F29A51A-8B74-4522-9352-9E4A65F2BE39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F29A51A-8B74-4522-9352-9E4A65F2BE39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9017E79F-DE9B-46EA-8DD8-F618E7B5837C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9017E79F-DE9B-46EA-8DD8-F618E7B5837C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9017E79F-DE9B-46EA-8DD8-F618E7B5837C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9017E79F-DE9B-46EA-8DD8-F618E7B5837C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B9D704E-9079-405C-A9DB-08856A9A5E11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B9D704E-9079-405C-A9DB-08856A9A5E11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B9D704E-9079-405C-A9DB-08856A9A5E11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B9D704E-9079-405C-A9DB-08856A9A5E11}.Release|Any CPU.Build.0 = Release|Any CPU
 		{43E122D4-D477-4C99-93A3-4E265B7CEBC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{43E122D4-D477-4C99-93A3-4E265B7CEBC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43E122D4-D477-4C99-93A3-4E265B7CEBC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -53,6 +65,8 @@ Global
 		{FF712B27-B695-4A9C-BCE6-6677D6391C6C} = {2947A69F-1788-4262-9056-DAA917479403}
 		{DC421953-B5A8-4754-85CD-687796DE435B} = {2947A69F-1788-4262-9056-DAA917479403}
 		{1F29A51A-8B74-4522-9352-9E4A65F2BE39} = {8F4A9774-BDFD-4039-960D-D750115E290C}
+		{9017E79F-DE9B-46EA-8DD8-F618E7B5837C} = {2947A69F-1788-4262-9056-DAA917479403}
+		{3B9D704E-9079-405C-A9DB-08856A9A5E11} = {8F4A9774-BDFD-4039-960D-D750115E290C}
 		{43E122D4-D477-4C99-93A3-4E265B7CEBC0} = {2947A69F-1788-4262-9056-DAA917479403}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

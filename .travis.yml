@@ -21,3 +21,5 @@ script:
   - dotnet build
   # dotnet test
   - dotnet test test/ItspServices.pServer.ServerTest/ItspServices.pServer.ServerTest.csproj
+  - dotnet test test/ItspServices.pServer.ClientTest/ItspServices.pServer.ClientTest.csproj
+  
