@@ -21,6 +21,14 @@ function closeAddKeyPopup() {
     $("#add-key-popup")[0].setAttribute("style", "visibility: none");
 }
 
+function openManagePopup() {
+    $("#manage-popup")[0].setAttribute("style", "visibility: visible");
+}
+
+function closeManagePopup() {
+    $("#manage-popup")[0].setAttribute("style", "visibility: none");
+}
+
 $("#submit-new-key-button").click(function () {
     $.ajax({
         type: "POST",

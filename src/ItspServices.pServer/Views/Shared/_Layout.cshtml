@@ -43,7 +43,7 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="PublicKeys">Public Keys</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="PublicKeys">Secrets</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Secret" asp-action="Index">Secrets</a>
                             </li>
 
                         }
@@ -54,10 +54,10 @@
         </nav>
     </header>
 
-        <partial name="_CookieConsentPartial" />
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    <partial name="_CookieConsentPartial" />
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
 
     <footer class="border-top footer text-muted">
         <div class="container">

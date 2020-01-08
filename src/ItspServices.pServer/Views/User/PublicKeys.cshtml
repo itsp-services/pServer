@@ -1,13 +1,13 @@
 ﻿@using System.Text
 @model ItspServices.pServer.Abstraction.Models.User
 
-<div id="add-key-popup" class="publickey-popup">
+<div id="add-key-popup" class="popup publickey-popup">
     <h3>Input new key</h3>
     <br />
     <input type="text" class="form-control" id="new-key" />
     <button class="btn btn-success" id="submit-new-key-button">Add</button>
 </div>
-<div id="edit-key-popup" class="publickey-popup">
+<div id="edit-key-popup" class="popup publickey-popup">
     <input type="text" id="edit-key-id" style="visibility:hidden" />
     <label for="new-key-input">Edit Key</label>
     <br />
@@ -18,7 +18,6 @@
 <div class="row">
     <div class="col user-view-body">
         <h1>
-            Public Keys:
             <button class="add-key-btn float-right" onclick="openAddKeyPopup()">Add Key</button>
         </h1>
         <br />
