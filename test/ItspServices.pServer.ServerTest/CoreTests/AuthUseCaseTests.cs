@@ -1,7 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ItspServices.pServer.Abstraction.Models.UseCase.Request.Account;
 using ItspServices.pServer.Abstraction.Models.UseCase.Response;
-using ItspServices.pServer.Abstraction.Repository;
 using ItspServices.pServer.Abstraction.UseCase;
 using ItspServices.pServer.Abstraction.UseCase.Account;
 using ItspServices.pServer.Core.Account;
@@ -28,17 +28,33 @@ namespace ItspServices.pServer.ServerTest.CoreTests
         #endregion
 
         [TestMethod]
-        public void UserCanLogin_ShouldSucceed()
+        public async Task UserCanLogin_ShouldSucceed()
         {
-            var userRepository = new Mock<IUserRepository>();
-
-            ILoginUserUseCase loginUseCase = new LoginUserUseCase(userRepository.Object);
-
+            var signInManager = new Mock<ISignInManager>();
+            signInManager.Setup(x => x.PasswordSignInAsync(It.Is<string>(s => s == "fooUser"),
+                                                           It.Is<string>(s => s == "barPassword")))
+                .Returns(Task.FromResult(true));
             MockOutputPort mockOutputPort = new MockOutputPort();
 
-            loginUseCase.Handle(new LoginRequest("fooUser", "barPassword"), mockOutputPort);
+            ILoginUserUseCase loginUseCase = new LoginUserUseCase(signInManager.Object);
+            await loginUseCase.Handle(new LoginRequest("fooUser", "barPassword"), mockOutputPort);
 
             Assert.IsTrue(mockOutputPort.Success);
+        }
+
+        [TestMethod]
+        public async Task UserCannotLogin_WrongPassword_ShouldFail()
+        {
+            var signInManager = new Mock<ISignInManager>();
+            signInManager.Setup(x => x.PasswordSignInAsync(It.IsAny<string>(),
+                                                           It.IsAny<string>()))
+                .Returns(Task.FromResult(false));
+            MockOutputPort mockOutputPort = new MockOutputPort();
+
+            ILoginUserUseCase loginUseCase = new LoginUserUseCase(signInManager.Object);
+            await loginUseCase.Handle(new LoginRequest("fooUser", "barPassword"), mockOutputPort);
+
+            Assert.IsFalse(mockOutputPort.Success);
         }
     }
 }
