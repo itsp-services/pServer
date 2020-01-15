@@ -12,6 +12,7 @@ using ItspServices.pServer.Persistence.Sqlite;
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
 using ItspServices.pServer.Core;
+using ItspServices.pServer.Abstraction.UseCase.Account;
 
 namespace ItspServices.pServer
 {
@@ -49,6 +50,8 @@ namespace ItspServices.pServer
             services.AddTransient(typeof(IRoleStore<IdentityRole>), typeof(RoleStore));
 
             services.AddIdentity<User, IdentityRole>();
+            services.AddScoped(typeof(ISignInManager), typeof(SignInManagerAdapter));
+            services.AddScoped(typeof(IUserManager), typeof(UserManagerAdapter));
             services.AddAuthUseCases();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
