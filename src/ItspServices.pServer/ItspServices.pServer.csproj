@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ItspServices.pServer.Abstraction\ItspServices.pServer.Abstraction.csproj" />
+    <ProjectReference Include="..\ItspServices.pServer.Core\ItspServices.pServer.Core.csproj" />
     <ProjectReference Include="..\ItspServices.pServer.Persistence.Sqlite\ItspServices.pServer.Persistence.Sqlite.csproj" />
   </ItemGroup>
 

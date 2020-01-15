@@ -1,18 +1,25 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using ItspServices.pServer.Abstraction.Models;
 using ItspServices.pServer.Models;
+using ItspServices.pServer.Presenter;
+using ItspServices.pServer.Abstraction.UseCase.Account;
+using ItspServices.pServer.Abstraction.Models.UseCase.Request.Account;
 
 namespace ItspServices.pServer.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly SignInManager<User> _signInManager;
+        private readonly DefaultPresenter _useCaseOutputPort;
+        private readonly ILoginUserUseCase _loginUserUseCase;
+        private readonly ILogoutUserUseCase _logoutUserUseCase;
+        private readonly IRegisterUserUseCase _registerUserUseCase;
 
-        public AccountController(SignInManager<User> signInManager)
+        public AccountController(ILoginUserUseCase loginUserUseCase, ILogoutUserUseCase logoutUserUseCase, IRegisterUserUseCase registerUserUseCase)
         {
-            _signInManager = signInManager;
+            _useCaseOutputPort = new DefaultPresenter();
+            _loginUserUseCase = loginUserUseCase;
+            _logoutUserUseCase = logoutUserUseCase;
+            _registerUserUseCase = registerUserUseCase;
         }
 
         [HttpGet]
@@ -25,17 +32,17 @@ namespace ItspServices.pServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Login([FromForm]LoginModel loginModel, [FromQuery]string returnUrl = null)
         {
-            Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(loginModel.Username, loginModel.Password, false, false);
+            await _loginUserUseCase.Handle(new LoginRequest(loginModel.Username, loginModel.Password), _useCaseOutputPort);
 
             loginModel.Password = null;
             ViewData["ReturnUrl"] = returnUrl;
 
-            if (result.Succeeded)
+            if (_useCaseOutputPort.Success)
             {
                 return Redirect(returnUrl ?? "/");
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            ModelState.AddModelError(string.Empty, _useCaseOutputPort.Message);
             return View(loginModel);
         }
 
@@ -49,37 +56,28 @@ namespace ItspServices.pServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Register([FromForm]RegisterModel registerModel, [FromQuery]string returnUrl = null)
         {
-            User user = new User()
+            await _registerUserUseCase.Handle(new RegisterRequest(registerModel.Username, registerModel.Password), _useCaseOutputPort);
+            if(!_useCaseOutputPort.Success)
             {
-                UserName = registerModel.Username,
-                NormalizedUserName = registerModel.Username.ToUpper(),
-            };
-
-            IdentityResult result = await _signInManager.UserManager.CreateAsync(user, registerModel.Password);
-            if(!result.Succeeded)
-            {
-                ModelState.AddModelError(string.Empty, "Could not create new user");
+                ModelState.AddModelError(string.Empty, _useCaseOutputPort.Message);
                 return View(registerModel);
             }
 
-            Microsoft.AspNetCore.Identity.SignInResult signInResult 
-                = await _signInManager.PasswordSignInAsync(registerModel.Username, registerModel.Password, false, false);
-
-            if (signInResult.Succeeded)
+            await _loginUserUseCase.Handle(new LoginRequest(registerModel.Username, registerModel.Password), _useCaseOutputPort);
+            if (_useCaseOutputPort.Success)
             {
                 return Redirect(returnUrl ?? "/");
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid register attempt.");
+            ModelState.AddModelError(string.Empty, _useCaseOutputPort.Message);
             return View(registerModel);
         }
 
         [HttpPost]
         public async Task<IActionResult> Logout([FromQuery]string returnUrl = null)
         {
-            await _signInManager.SignOutAsync();
+            await _logoutUserUseCase.Handle(new LogoutRequest(), _useCaseOutputPort);
             return Redirect(returnUrl ?? "/");
-
         }
     }
 }
