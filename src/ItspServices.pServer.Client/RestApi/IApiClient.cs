@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using ItspServices.pServer.Client.Datatypes;
 using ItspServices.pServer.Client.Models;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.ClientTest")]
@@ -12,7 +13,7 @@ namespace ItspServices.pServer.Client.RestApi
         Task<DataModel> RequestDataByPath(string path);
         Task<int> SendCreateData(string path, DataModel dataModel);
         Task SendUpdateData(string path, DataModel dataModel);
-        Task<KeyPairModel[]> RequestKeyPairsByFilePath(string path);
-        Task SendCreateKeyPairWithFileId(int fileId, KeyPairModel keyPairModel);
+        Task<KeyPair[]> RequestKeyPairsByFilePath(string path);
+        Task SendCreateKeyPairWithFileId(int fileId, KeyPair keyPair);
     }
 }
