@@ -77,5 +77,35 @@ namespace ItspServices.pServer.ServerTest.CoreTests
             await logoutUseCase.Handle(new LogoutRequest(), mockOutputPort);
             Assert.IsTrue(mockOutputPort.Success);
         }
+
+        [TestMethod]
+        public async Task RegisterNewUser_ShouldSucceed()
+        {
+            var userManager = new Mock<IUserManager>();
+            userManager.Setup(x => x.CreateUserAsync(It.Is<string>(s => s == "fooUser"),
+                                                     It.Is<string>(s => s == "barPassword")))
+                .Returns(Task.FromResult(true));
+            MockOutputPort mockOutputPort = new MockOutputPort();
+
+            IRegisterUserUseCase registerUseCase = new RegisterUserUseCase(userManager.Object);
+            await registerUseCase.Handle(new RegisterRequest("fooUser", "barPassword"), mockOutputPort);
+
+            Assert.IsTrue(mockOutputPort.Success);
+        }
+
+        [TestMethod]
+        public async Task RegisterNewUser_UserAlreadyExists_ShouldFail()
+        {
+            var userManager = new Mock<IUserManager>();
+            userManager.Setup(x => x.CreateUserAsync(It.IsAny<string>(),
+                                                     It.IsAny<string>()))
+                .Returns(Task.FromResult(false));
+            MockOutputPort mockOutputPort = new MockOutputPort();
+
+            IRegisterUserUseCase registerUseCase = new RegisterUserUseCase(userManager.Object);
+            await registerUseCase.Handle(new RegisterRequest("fooUser", "barPassword"), mockOutputPort);
+
+            Assert.IsFalse(mockOutputPort.Success);
+        }
     }
 }
