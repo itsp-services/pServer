@@ -11,6 +11,7 @@ using ItspServices.pServer.Stores;
 using ItspServices.pServer.Persistence.Sqlite;
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
+using ItspServices.pServer.Core;
 
 namespace ItspServices.pServer
 {
@@ -48,6 +49,7 @@ namespace ItspServices.pServer
             services.AddTransient(typeof(IRoleStore<IdentityRole>), typeof(RoleStore));
 
             services.AddIdentity<User, IdentityRole>();
+            services.AddAuthUseCases();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
