@@ -56,5 +56,26 @@ namespace ItspServices.pServer.ServerTest.CoreTests
 
             Assert.IsFalse(mockOutputPort.Success);
         }
+
+        [TestMethod]
+        public async Task UserCanLogout_ShouldSucceed()
+        {
+            var signInManager = new Mock<ISignInManager>();
+            signInManager.Setup(x => x.PasswordSignInAsync(It.IsAny<string>(),
+                                                           It.IsAny<string>()))
+                .Returns(Task.FromResult(true));
+            signInManager.Setup(x => x.SignOutAsync())
+                .Returns(Task.FromResult(true));
+            MockOutputPort mockOutputPort = new MockOutputPort();
+
+            ILoginUserUseCase loginUseCase = new LoginUserUseCase(signInManager.Object);
+            ILogoutUserUseCase logoutUseCase = new LogoutUserUseCase(signInManager.Object);
+
+            await loginUseCase.Handle(new LoginRequest("fooUser", "barPassword"), mockOutputPort);
+            Assert.IsTrue(mockOutputPort.Success);
+
+            await logoutUseCase.Handle(new LogoutRequest(), mockOutputPort);
+            Assert.IsTrue(mockOutputPort.Success);
+        }
     }
 }
