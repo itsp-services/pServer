@@ -90,9 +90,9 @@ namespace ItspServices.pServer.ClientTest
             var asymmetricKeyPair = keyFactory.CreateAsymmetricKeyPair();
             Assert.IsNotNull(asymmetricKeyPair);
 
-            asymmetricKeyPair = keyFactory.CreateAsymmetricKeyPair(512);
+            asymmetricKeyPair = keyFactory.CreateAsymmetricKeyPair(1024);
             Assert.IsNotNull(asymmetricKeyPair);
-            Assert.AreNotEqual(asymmetricKeyPair.PrivateKey.GetBytes().Length, keyFactory.CreateAsymmetricKeyPair(1024).PrivateKey.GetBytes().Length);
+            Assert.AreNotEqual(asymmetricKeyPair.PrivateKey.GetBytes().Length, keyFactory.CreateAsymmetricKeyPair(2048).PrivateKey.GetBytes().Length);
 
             Assert.ThrowsException<ArgumentException>(() => asymmetricKeyPair = keyFactory.CreateAsymmetricKeyPair(256));
 
