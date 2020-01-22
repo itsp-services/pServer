@@ -78,7 +78,7 @@ namespace ItspServices.pServer.Client.RestApi
                     KeyPair[] keyPairs = new KeyPair[keyPairModels.Length];
                     for (int i = 0; i < keyPairModels.Length; i++)
                     {
-                        keyPairs[i] = new KeyPair(keyPairModels[i]);
+                        keyPairs[i] = keyPairModels[i].ToKeyPair();
                     }
                     return keyPairs;
                 }
