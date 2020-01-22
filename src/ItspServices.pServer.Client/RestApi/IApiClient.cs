@@ -2,9 +2,6 @@
 using ItspServices.pServer.Client.Datatypes;
 using ItspServices.pServer.Client.Models;
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ItspServices.pServer.ClientTest")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("DynamicProxyGenAssembly2")]
-
 namespace ItspServices.pServer.Client.RestApi
 {
     interface IApiClient
