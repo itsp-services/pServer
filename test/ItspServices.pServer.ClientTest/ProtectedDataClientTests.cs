@@ -12,6 +12,7 @@ using ItspServices.pServer.Client.Datatypes;
 using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.RestApi;
 using ItspServices.pServer.Client.Security;
+using ItspServices.pServer.Client.Security.Keys;
 
 namespace ItspServices.pServer.ClientTest
 {
@@ -39,6 +40,7 @@ namespace ItspServices.pServer.ClientTest
             Mock<IApiClient> restClient = new Mock<IApiClient>();
             Mock<ILocalKeysController> localKeysController = new Mock<ILocalKeysController>();
             Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
+            Mock<IKeyFactory> keyFactory = new Mock<IKeyFactory>();
             List<bool> wasCalled = new List<bool>();
             Task<DataModel> CheckRequestDataByPath()
             {
@@ -62,24 +64,25 @@ namespace ItspServices.pServer.ClientTest
             restClient.Setup(x => x.SendCreateData(It.Is<string>(s => s == "AndysPasswords/MailAccount.data"), It.Is<DataModel>(s => s.Name == "MailAccount.data" && s.Data == Convert.ToBase64String(Encoding.Default.GetBytes("EncryptedSecretPassword")))))
                 .Returns(CheckSendCreateData);
 
-            restClient.Setup(x => x.SendCreateKeyPairWithFileId(It.Is<int>(s => s == 1), It.Is<KeyPair>(s => s.PublicKey.GetBase64() == new Key(Encoding.Default.GetBytes("publicKey")).GetBase64() && s.SymmetricKey.GetBase64() == new Key(Encoding.Default.GetBytes("publicSymmetricKey")).GetBase64())))
+            restClient.Setup(x => x.SendCreateKeyPairWithFileId(It.Is<int>(s => s == 1), It.Is<KeyPair>(s => s.PublicKey.GetBytes().SequenceEqual(Encoding.Default.GetBytes("publicKey")) && s.SymmetricKey.GetBytes().SequenceEqual(Encoding.Default.GetBytes("publicSymmetricKey")))))
                 .Returns(CheckSendCreateKeyPairWithFileId);
 
-            localKeysController.Setup(x => x.GetPublicKey(It.IsAny<string>()))
+            localKeysController.Setup(x => x.GetPublicKey())
                 .Returns(Convert.ToBase64String(Encoding.Default.GetBytes("publicKey")));
 
-            dataEncryptor.Setup(x => x.CreateSymmetricKey(It.IsAny<int>()))
-                .Returns(Encoding.Default.GetBytes("symmetricKey"));
+            keyFactory.Setup(x => x.CreateSymmetricKey(It.IsAny<int>()))
+                .Returns(new Key(Encoding.Default.GetBytes("symmetricKey")));
 
-            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("SecretPassword"))), It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("symmetricKey")))))
+            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("SecretPassword"))), It.Is<Key>(s => s.GetBytes().SequenceEqual(Encoding.Default.GetBytes("symmetricKey")))))
                 .Returns(Encoding.Default.GetBytes("EncryptedSecretPassword"));
 
-            dataEncryptor.Setup(x => x.AsymmetricEncryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("symmetricKey"))), It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("publicKey")))))
+            dataEncryptor.Setup(x => x.AsymmetricEncryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("symmetricKey"))), It.Is<Key>(s => s.GetBytes().SequenceEqual(Encoding.Default.GetBytes("publicKey")))))
                 .Returns(Encoding.Default.GetBytes("publicSymmetricKey"));
 
             ProtectedDataClient client = new ProtectedDataClient(localKeysController.Object);
             client.SetClient(restClient.Object);
             client.SetEncryptor(dataEncryptor.Object);
+            client.SetKeyFactory(keyFactory.Object);
             await client.Set("AndysPasswords/MailAccount.data", "SecretPassword");
 
             for (int i = 0; i < 3; i++)
@@ -136,16 +139,16 @@ namespace ItspServices.pServer.ClientTest
             restClient.Setup(x => x.SendUpdateData(It.Is<string>(s => s == "AndysPasswords/MailAccount.data"), It.Is<DataModel>(s => s.Name == "MailAccount.data" && s.Data == Convert.ToBase64String(Encoding.Default.GetBytes("EncryptedSecretPassword")))))
                 .Returns(CheckSendUpdateData);
 
-            localKeysController.Setup(x => x.GetPublicKey(It.IsAny<string>()))
+            localKeysController.Setup(x => x.GetPublicKey())
                 .Returns(Convert.ToBase64String(Encoding.Default.GetBytes("publicKey")));
 
-            localKeysController.Setup(x => x.GetPrivateKey(It.IsAny<string>()))
+            localKeysController.Setup(x => x.GetPrivateKey())
                 .Returns(Convert.ToBase64String(Encoding.Default.GetBytes("privateKey")));
 
-            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("SecretPassword"))), It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("symmetricKey")))))
+            dataEncryptor.Setup(x => x.SymmetricEncryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("SecretPassword"))), It.Is<Key>(s => s.GetBytes().SequenceEqual(Encoding.Default.GetBytes("symmetricKey")))))
                 .Returns(Encoding.Default.GetBytes("EncryptedSecretPassword"));
 
-            dataEncryptor.Setup(x => x.AsymmetricDecryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("publicSymmetricKey"))), It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("privateKey")))))
+            dataEncryptor.Setup(x => x.AsymmetricDecryptData(It.Is<byte[]>(s => s.SequenceEqual(Encoding.Default.GetBytes("publicSymmetricKey"))), It.Is<Key>(s => s.GetBytes().SequenceEqual(Encoding.Default.GetBytes("privateKey")))))
                 .Returns(Encoding.Default.GetBytes("symmetricKey"));
 
             ProtectedDataClient client = new ProtectedDataClient(localKeysController.Object);

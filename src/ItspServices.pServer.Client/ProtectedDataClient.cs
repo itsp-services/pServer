@@ -5,6 +5,7 @@ using ItspServices.pServer.Client.Datatypes;
 using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.RestApi;
 using ItspServices.pServer.Client.Security;
+using ItspServices.pServer.Client.Security.Keys;
 
 namespace ItspServices.pServer.Client
 {
@@ -13,6 +14,7 @@ namespace ItspServices.pServer.Client
         private IApiClient _apiClient = null;
         private IDataEncryptor _dataEncryptor = null;
         private ILocalKeysController _localKeysController;
+        private IKeyFactory _keyFactory = null;
 
         public ProtectedDataClient(ILocalKeysController localKeysController)
         {
@@ -21,7 +23,8 @@ namespace ItspServices.pServer.Client
 
         public async Task Set(string destination, string data)
         {
-            Key publicKey = new Key(_localKeysController.GetPublicKey(@"C:\temp\publicKey.txt"));
+            
+            Key publicKey = new Key(_localKeysController.GetPublicKey());
             DataModel dataModel = await _apiClient.RequestDataByPath(destination);
             if (dataModel == null)
             {
@@ -35,7 +38,7 @@ namespace ItspServices.pServer.Client
 
         private async Task UpdateExistingData(string destination, string data, Key publicKey, DataModel dataModel)
         {
-            Key privateKey = new Key(_localKeysController.GetPrivateKey(@"C:\temp\publicKey.txt"));
+            Key privateKey = new Key(_localKeysController.GetPrivateKey());
             Key symmetricKey = null;
             KeyPair[] keyPairs = await _apiClient.RequestKeyPairsByFilePath(destination);
             foreach (KeyPair keyPair in keyPairs)
@@ -53,7 +56,7 @@ namespace ItspServices.pServer.Client
 
         private async Task PostNewData(string destination, string data, Key publicKey)
         {
-            Key symmetricKey = _dataEncryptor.CreateSymmetricKey();
+            Key symmetricKey = _keyFactory.CreateSymmetricKey();
             int fileId = await _apiClient.SendCreateData(destination, new DataModel
             {
                 Name = destination.Substring(destination.LastIndexOf('/') + 1),
@@ -74,6 +77,11 @@ namespace ItspServices.pServer.Client
         internal void SetEncryptor(IDataEncryptor encryptor)
         {
             _dataEncryptor = encryptor;
+        }
+
+        internal void SetKeyFactory(IKeyFactory keyFactory)
+        {
+            _keyFactory = keyFactory;
         }
     }
 }
