@@ -116,7 +116,7 @@ namespace ItspServices.pServer.ClientTest
                     Content = new StringContent(JsonSerializer.Serialize(new DataModel
                     {
                         Name = "MailAccount.data",
-                        Data = "SecretPassword"
+                        Data = Convert.ToBase64String(Encoding.Default.GetBytes("SecretPassword"))
                     }))
                 };
             }
@@ -133,7 +133,7 @@ namespace ItspServices.pServer.ClientTest
             ProtectedData protectedData = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
 
             Assert.AreEqual("MailAccount.data", protectedData.Name);
-            Assert.AreEqual(Encoding.Default.GetBytes("SecretPassword"), protectedData.Data);
+            Assert.IsTrue(Encoding.Default.GetBytes("SecretPassword").SequenceEqual(protectedData.Data));
         }
 
 
@@ -195,7 +195,7 @@ namespace ItspServices.pServer.ClientTest
             DataModelWithPath dataModel = await JsonSerializer.DeserializeAsync<DataModelWithPath>(await requestMessage.Content.ReadAsStreamAsync());
 
             Assert.AreEqual("MailAccount.data", dataModel.DataModel.Name);
-            Assert.AreEqual("SecretPassword", dataModel.DataModel.Data);
+            Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("SecretPassword")), dataModel.DataModel.Data);
             Assert.AreEqual("AndysPasswords/MailAccount.data", dataModel.Path);
             Assert.AreEqual(1, id);
         }
@@ -230,7 +230,7 @@ namespace ItspServices.pServer.ClientTest
             DataModel dataModel = await JsonSerializer.DeserializeAsync<DataModel>(await requestMessage.Content.ReadAsStreamAsync());
 
             Assert.AreEqual("MailAccount.data", dataModel.Name);
-            Assert.AreEqual("SecretPassword", dataModel.Data);
+            Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("SecretPassword")), dataModel.Data);
         }
 
         [TestMethod]
