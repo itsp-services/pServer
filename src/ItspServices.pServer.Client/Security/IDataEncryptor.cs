@@ -1,13 +1,12 @@
-﻿using ItspServices.pServer.Client.Models;
+﻿using ItspServices.pServer.Client.Datatypes;
 
 namespace ItspServices.pServer.Client.Security
 {
     interface IDataEncryptor
     {
-        byte[] CreateSymmetricKey(int keySize = 128);
-        byte[] SymmetricEncryptData(byte[] data, byte[] key);
-        byte[] SymmetricDecryptData(byte[] data, byte[] key);
-        byte[] AsymmetricEncryptData(byte[] data, byte[] key);
-        byte[] AsymmetricDecryptData(byte[] data, byte[] key);
+        byte[] SymmetricEncryptData(byte[] data, Key key);
+        byte[] SymmetricDecryptData(byte[] data, Key key);
+        byte[] AsymmetricEncryptData(byte[] data, Key key);
+        byte[] AsymmetricDecryptData(byte[] data, Key key);
     }
 }

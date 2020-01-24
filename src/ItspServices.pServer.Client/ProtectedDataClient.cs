@@ -1,9 +1,9 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using System.Threading.Tasks;
-using ItspServices.pServer.Client.Models;
+using ItspServices.pServer.Client.Datatypes;
 using ItspServices.pServer.Client.RestApi;
 using ItspServices.pServer.Client.Security;
+using ItspServices.pServer.Client.Security.Keys;
 
 namespace ItspServices.pServer.Client
 {
@@ -12,6 +12,7 @@ namespace ItspServices.pServer.Client
         private IApiClient _apiClient = null;
         private IDataEncryptor _dataEncryptor = null;
         private ILocalKeysController _localKeysController;
+        private IKeyFactory _keyFactory = null;
 
         public ProtectedDataClient(ILocalKeysController localKeysController)
         {
@@ -20,39 +21,50 @@ namespace ItspServices.pServer.Client
 
         public async Task Set(string destination, string data)
         {
-            string publicKey = _localKeysController.GetPublicKey();
-            DataModel dataModel = await _apiClient.RequestDataByPath(destination);
-            if (dataModel == null)
+            
+            Key publicKey = new Key(_localKeysController.GetPublicKey());
+            ProtectedData protectedData = await _apiClient.RequestDataByPath(destination);
+            if (protectedData == null)
             {
-                string symmetricKey = Convert.ToBase64String(_dataEncryptor.CreateSymmetricKey());
-                int fileId = await _apiClient.SendCreateData(destination, new DataModel
-                {
-                    Name = destination.Substring(destination.LastIndexOf('/') + 1),
-                    Data = Convert.ToBase64String(_dataEncryptor.SymmetricEncryptData(Encoding.Default.GetBytes(data), Convert.FromBase64String(symmetricKey)))
-                });
-                await _apiClient.SendCreateKeyPairWithFileId(fileId, new KeyPairModel
-                {
-                    PublicKey = publicKey,
-                    SymmetricKey = Convert.ToBase64String(_dataEncryptor.AsymmetricEncryptData(Convert.FromBase64String(symmetricKey), Convert.FromBase64String(publicKey)))
-                });
+                await PostNewData(destination, data, publicKey);
             }
             else
             {
-                string privateKey = _localKeysController.GetPrivateKey();
-                string symmetricKey = null;
-                KeyPairModel[] keyPairModels = await _apiClient.RequestKeyPairsByFilePath(destination);
-                foreach (KeyPairModel keyPairModel in keyPairModels)
-                {
-                    if (keyPairModel.PublicKey == publicKey)
-                    {
-                        symmetricKey = Convert.ToBase64String(_dataEncryptor.AsymmetricDecryptData(Convert.FromBase64String(keyPairModel.SymmetricKey), Convert.FromBase64String(privateKey)));
-                        break;
-                    }
-                }
-                // TODO: case no symKey
-                dataModel.Data = Convert.ToBase64String(_dataEncryptor.SymmetricEncryptData(Encoding.Default.GetBytes(data), Convert.FromBase64String(symmetricKey)));
-                await _apiClient.SendUpdateData(destination, dataModel);
+                await UpdateExistingData(destination, data, publicKey, protectedData);
             }
+        }
+
+        private async Task UpdateExistingData(string destination, string data, Key publicKey, ProtectedData protectedData)
+        {
+            Key privateKey = new Key(_localKeysController.GetPrivateKey());
+            Key symmetricKey = null;
+            KeyPair[] keyPairs = await _apiClient.RequestKeyPairsByFilePath(destination);
+            foreach (KeyPair keyPair in keyPairs)
+            {
+                if (keyPair.PublicKey.GetBase64() == publicKey.GetBase64())
+                {
+                    symmetricKey = _dataEncryptor.AsymmetricDecryptData(new Key(keyPair.SymmetricKey), privateKey);
+                    break;
+                }
+            }
+            // TODO: case no symKey
+            protectedData.Data = _dataEncryptor.SymmetricEncryptData(Encoding.Default.GetBytes(data), symmetricKey);
+            await _apiClient.SendUpdateData(destination, protectedData);
+        }
+
+        private async Task PostNewData(string destination, string data, Key publicKey)
+        {
+            Key symmetricKey = _keyFactory.CreateSymmetricKey();
+            int fileId = await _apiClient.SendCreateData(destination, new ProtectedData
+            {
+                Name = destination.Substring(destination.LastIndexOf('/') + 1),
+                Data = _dataEncryptor.SymmetricEncryptData(Encoding.Default.GetBytes(data), symmetricKey)
+            });
+            await _apiClient.SendCreateKeyPairWithFileId(fileId, new KeyPair
+            {
+                PublicKey = publicKey,
+                SymmetricKey = _dataEncryptor.AsymmetricEncryptData(symmetricKey, publicKey)
+            });
         }
 
         internal void SetClient(IApiClient client)
@@ -63,6 +75,11 @@ namespace ItspServices.pServer.Client
         internal void SetEncryptor(IDataEncryptor encryptor)
         {
             _dataEncryptor = encryptor;
+        }
+
+        internal void SetKeyFactory(IKeyFactory keyFactory)
+        {
+            _keyFactory = keyFactory;
         }
     }
 }

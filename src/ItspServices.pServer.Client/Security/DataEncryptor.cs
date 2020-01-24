@@ -2,6 +2,7 @@
 using System.Text;
 using System.IO;
 using System.Security.Cryptography;
+using ItspServices.pServer.Client.Datatypes;
 
 namespace ItspServices.pServer.Client.Security
 {
@@ -9,40 +10,20 @@ namespace ItspServices.pServer.Client.Security
     {
         private readonly int _aesIdentifikationVectorLength = 128;
 
-        public DataEncryptor() { }
-
-        public byte[] CreateSymmetricKey(int keySize = 128)
+        public byte[] SymmetricEncryptData(byte[] data, Key key)
         {
-            using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
-            {
-                if (!aesProvider.ValidKeySize(keySize))
-                    throw new ArgumentException("Invalid key size.");
-
-                aesProvider.KeySize = keySize;
-                aesProvider.GenerateKey();
-                aesProvider.GenerateIV();
-                int keyByteLength = aesProvider.KeySize / 8;
-                byte[] combinedKey = new byte[keyByteLength + aesProvider.IV.Length];
-                aesProvider.Key.CopyTo(combinedKey, 0);
-                aesProvider.IV.CopyTo(combinedKey, keyByteLength);
-                return combinedKey;
-            }
-        }
-
-        public byte[] SymmetricEncryptData(byte[] data, byte[] key)
-        {
-            int keyByteLength = key.Length - _aesIdentifikationVectorLength / 8;
+            int keyByteLength = key.GetBytes().Length - _aesIdentifikationVectorLength / 8;
             int keyLength = keyByteLength * 8;
-            byte[] symmetricKey = new byte[keyByteLength];
-            byte[] symmetricIV = new byte[_aesIdentifikationVectorLength / 8];
+            Key symmetricKey = new byte[keyByteLength];
+            Key symmetricIV = new byte[_aesIdentifikationVectorLength / 8];
 
             for (int i = 0; i < keyByteLength; i++)
             {
-                symmetricKey[i] = key[i];
+                symmetricKey.GetBytes()[i] = key.GetBytes()[i];
             }
             for (int i = 0; i < _aesIdentifikationVectorLength / 8; i++)
             {
-                symmetricIV[i] = key[i + keyByteLength];
+                symmetricIV.GetBytes()[i] = key.GetBytes()[i + keyByteLength];
             }
 
             using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
@@ -66,21 +47,20 @@ namespace ItspServices.pServer.Client.Security
             }
         }
 
-
-        public byte[] SymmetricDecryptData(byte[] data, byte[] key)
+        public byte[] SymmetricDecryptData(byte[] data, Key key)
         {
-            int keyByteLength = key.Length - _aesIdentifikationVectorLength / 8;
+            int keyByteLength = key.GetBytes().Length - _aesIdentifikationVectorLength / 8;
             int keyLength = keyByteLength * 8;
-            byte[] symmetricKey = new byte[keyByteLength];
-            byte[] symmetricIV = new byte[_aesIdentifikationVectorLength / 8];
+            Key symmetricKey = new byte[keyByteLength];
+            Key symmetricIV = new byte[_aesIdentifikationVectorLength / 8];
 
             for (int i = 0; i < keyByteLength; i++)
             {
-                symmetricKey[i] = key[i];
+                symmetricKey.GetBytes()[i] = key.GetBytes()[i];
             }
             for (int i = 0; i < _aesIdentifikationVectorLength / 8; i++)
             {
-                symmetricIV[i] = key[i + keyByteLength];
+                symmetricIV.GetBytes()[i] = key.GetBytes()[i + keyByteLength];
             }
 
             using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
@@ -110,18 +90,18 @@ namespace ItspServices.pServer.Client.Security
             }
         }
 
-        public byte[] AsymmetricEncryptData(byte[] data, byte[] key)
+        public byte[] AsymmetricEncryptData(byte[] data, Key key)
         {
-            using (RSACryptoServiceProvider rsaProvider = new RSACryptoServiceProvider(2048))
+            using (RSACryptoServiceProvider rsaProvider = new RSACryptoServiceProvider())
             {
                 rsaProvider.ImportCspBlob(key);
                 return rsaProvider.Encrypt(data, false);
             }
         }
 
-        public byte[] AsymmetricDecryptData(byte[] data, byte[] key)
+        public byte[] AsymmetricDecryptData(byte[] data, Key key)
         {
-            using (RSACryptoServiceProvider rsaProvider = new RSACryptoServiceProvider(2048))
+            using (RSACryptoServiceProvider rsaProvider = new RSACryptoServiceProvider())
             {
                 rsaProvider.ImportCspBlob(key);
                 try

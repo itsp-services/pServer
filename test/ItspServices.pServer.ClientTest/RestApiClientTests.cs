@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Text;
+using System.Text.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Text.Json;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ItspServices.pServer.Client.RestApi;
 using ItspServices.pServer.Client.Models;
+using ItspServices.pServer.Client.Datatypes;
 
 namespace ItspServices.pServer.ClientTest
 {
@@ -30,7 +32,7 @@ namespace ItspServices.pServer.ClientTest
                 => Task.FromResult(Callback(request));
         }
         #endregion
-        
+
         [TestMethod]
         public async Task RequestRootFolder_ShouldReturnRootFolder()
         {
@@ -42,7 +44,7 @@ namespace ItspServices.pServer.ClientTest
                 SubfolderIds = new List<int>()
             };
             Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
-            HttpResponseMessage Callback (HttpRequestMessage request)
+            HttpResponseMessage Callback(HttpRequestMessage request)
             {
                 Assert.AreEqual("/api/protecteddata/folder/", request.RequestUri.LocalPath);
                 string json = JsonSerializer.Serialize(rootFolder);
@@ -53,8 +55,8 @@ namespace ItspServices.pServer.ClientTest
                 .Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(
                     new HttpClient(new MockHttpMessageHandler(Callback))
-                    { 
-                        BaseAddress = new Uri("http://test.com") 
+                    {
+                        BaseAddress = new Uri("http://test.com")
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
@@ -87,9 +89,9 @@ namespace ItspServices.pServer.ClientTest
             clientFactory
                 .Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(
-                    new HttpClient(new MockHttpMessageHandler(Callback)) 
-                    { 
-                        BaseAddress = new Uri("http://test.com") 
+                    new HttpClient(new MockHttpMessageHandler(Callback))
+                    {
+                        BaseAddress = new Uri("http://test.com")
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
@@ -114,7 +116,7 @@ namespace ItspServices.pServer.ClientTest
                     Content = new StringContent(JsonSerializer.Serialize(new DataModel
                     {
                         Name = "MailAccount.data",
-                        Data = "SecretPassword"
+                        Data = Convert.ToBase64String(Encoding.Default.GetBytes("SecretPassword"))
                     }))
                 };
             }
@@ -128,10 +130,10 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
-            DataModel dataModel = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
+            ProtectedData protectedData = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
 
-            Assert.AreEqual("MailAccount.data", dataModel.Name);
-            Assert.AreEqual("SecretPassword", dataModel.Data);
+            Assert.AreEqual("MailAccount.data", protectedData.Name);
+            Assert.IsTrue(Encoding.Default.GetBytes("SecretPassword").SequenceEqual(protectedData.Data));
         }
 
 
@@ -155,9 +157,9 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
-            DataModel dataModel = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
+            ProtectedData protectedData = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
 
-            Assert.IsNull(dataModel);
+            Assert.IsNull(protectedData);
         }
 
         [TestMethod]
@@ -185,15 +187,15 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
-            int id = await restClient.SendCreateData("AndysPasswords/MailAccount.data", new DataModel
+            int id = await restClient.SendCreateData("AndysPasswords/MailAccount.data", new ProtectedData
             {
                 Name = "MailAccount.data",
-                Data = "SecretPassword"
+                Data = Encoding.Default.GetBytes("SecretPassword")
             });
             DataModelWithPath dataModel = await JsonSerializer.DeserializeAsync<DataModelWithPath>(await requestMessage.Content.ReadAsStreamAsync());
 
             Assert.AreEqual("MailAccount.data", dataModel.DataModel.Name);
-            Assert.AreEqual("SecretPassword", dataModel.DataModel.Data);
+            Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("SecretPassword")), dataModel.DataModel.Data);
             Assert.AreEqual("AndysPasswords/MailAccount.data", dataModel.Path);
             Assert.AreEqual(1, id);
         }
@@ -220,15 +222,15 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
-            await restClient.SendUpdateData("AndysPasswords/MailAccount.data", new DataModel
+            await restClient.SendUpdateData("AndysPasswords/MailAccount.data", new ProtectedData
             {
                 Name = "MailAccount.data",
-                Data = "SecretPassword"
+                Data = Encoding.Default.GetBytes("SecretPassword")
             });
             DataModel dataModel = await JsonSerializer.DeserializeAsync<DataModel>(await requestMessage.Content.ReadAsStreamAsync());
 
             Assert.AreEqual("MailAccount.data", dataModel.Name);
-            Assert.AreEqual("SecretPassword", dataModel.Data);
+            Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("SecretPassword")), dataModel.Data);
         }
 
         [TestMethod]
@@ -238,13 +240,13 @@ namespace ItspServices.pServer.ClientTest
             {
                 new KeyPairModel()
                 {
-                    PublicKey = "publicKey1",
-                    SymmetricKey = "symmetricKey1"
+                    PublicKey = Convert.ToBase64String(Encoding.Default.GetBytes("publicKey1")),
+                    SymmetricKey = Convert.ToBase64String(Encoding.Default.GetBytes("symmetricKey1"))
                 },
                 new KeyPairModel()
                 {
-                    PublicKey = "publicKey2",
-                    SymmetricKey = "symmetricKey2"
+                    PublicKey = Convert.ToBase64String(Encoding.Default.GetBytes("publicKey2")),
+                    SymmetricKey = Convert.ToBase64String(Encoding.Default.GetBytes("symmetricKey2"))
                 }
             };
             Mock<IHttpClientFactory> clientFactory = new Mock<IHttpClientFactory>();
@@ -267,13 +269,13 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
-            KeyPairModel[] keyPairModels = await restClient.RequestKeyPairsByFilePath("AndysPasswords/MailAccount.data");
+            KeyPair[] keyPairs = await restClient.RequestKeyPairsByFilePath("AndysPasswords/MailAccount.data");
 
-            Assert.AreEqual(expectedKeyPairModels.Length, keyPairModels.Length);
-            for (int i = 0; i < keyPairModels.Length; i++)
+            Assert.AreEqual(expectedKeyPairModels.Length, keyPairs.Length);
+            for (int i = 0; i < keyPairs.Length; i++)
             {
-                Assert.AreEqual(expectedKeyPairModels[i].PublicKey, keyPairModels[i].PublicKey);
-                Assert.AreEqual(expectedKeyPairModels[i].SymmetricKey, keyPairModels[i].SymmetricKey);
+                Assert.AreEqual(expectedKeyPairModels[i].PublicKey, keyPairs[i].PublicKey.GetBase64());
+                Assert.AreEqual(expectedKeyPairModels[i].SymmetricKey, keyPairs[i].SymmetricKey.GetBase64());
             }
             // ?? couldnt find an array comparing function
         }
@@ -300,15 +302,15 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
-            await restClient.SendCreateKeyPairWithFileId(1, new KeyPairModel
+            await restClient.SendCreateKeyPairWithFileId(1, new KeyPair
             {
-                PublicKey = "publicKey",
-                SymmetricKey = "symmetricKey"
+                PublicKey = Encoding.Default.GetBytes("publicKey"),
+                SymmetricKey = Encoding.Default.GetBytes("symmetricKey")
             });
             KeyPairModel keyPairModel = await JsonSerializer.DeserializeAsync<KeyPairModel>(await requestMessage.Content.ReadAsStreamAsync());
 
-            Assert.AreEqual("publicKey", keyPairModel.PublicKey);
-            Assert.AreEqual("symmetricKey", keyPairModel.SymmetricKey);
+            Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("publicKey")), keyPairModel.PublicKey);
+            Assert.AreEqual(Convert.ToBase64String(Encoding.Default.GetBytes("symmetricKey")), keyPairModel.SymmetricKey);
         }
     }
 }

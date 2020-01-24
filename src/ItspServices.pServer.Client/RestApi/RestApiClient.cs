@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Net.Http;
+using ItspServices.pServer.Client.Datatypes;
 using ItspServices.pServer.Client.Models;
 
 namespace ItspServices.pServer.Client.RestApi
@@ -24,7 +25,7 @@ namespace ItspServices.pServer.Client.RestApi
             }
         }
 
-        public async Task<DataModel> RequestDataByPath(string path)
+        public async Task<ProtectedData> RequestDataByPath(string path)
         {
             using (HttpClient client = _provider.CreateClient())
             {
@@ -32,13 +33,14 @@ namespace ItspServices.pServer.Client.RestApi
                 {
                     if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                         return null;
-                    return await JsonSerializer.DeserializeAsync<DataModel>(await response.Content.ReadAsStreamAsync());
+                    return (await JsonSerializer.DeserializeAsync<DataModel>(await response.Content.ReadAsStreamAsync())).ToProtectedData();
                 }
             }
         }
 
-        public async Task<int> SendCreateData(string path, DataModel dataModel)
+        public async Task<int> SendCreateData(string path, ProtectedData protectedData)
         {
+            DataModel dataModel = protectedData.ToDataModel();
             DataModelWithPath dataModelWithPath = new DataModelWithPath
             {
                 DataModel = dataModel,
@@ -55,8 +57,9 @@ namespace ItspServices.pServer.Client.RestApi
             }
         }
 
-        public async Task SendUpdateData(string path, DataModel dataModel)
+        public async Task SendUpdateData(string path, ProtectedData protectedData)
         {
+            DataModel dataModel = protectedData.ToDataModel();
             using (HttpClient client = _provider.CreateClient())
             {
                 string serializedModel = JsonSerializer.Serialize(dataModel);
@@ -67,26 +70,31 @@ namespace ItspServices.pServer.Client.RestApi
             }
         }
 
-        public async Task<KeyPairModel[]> RequestKeyPairsByFilePath(string path)
+        public async Task<KeyPair[]> RequestKeyPairsByFilePath(string path)
         {
             using (HttpClient client = _provider.CreateClient())
             {
                 using (HttpResponseMessage response = await client.GetAsync($"/api/protecteddata/key/{path}"))
                 {
-                    return await JsonSerializer.DeserializeAsync<KeyPairModel[]>(await response.Content.ReadAsStreamAsync());
+                    KeyPairModel[] keyPairModels = await JsonSerializer.DeserializeAsync<KeyPairModel[]>(await response.Content.ReadAsStreamAsync());
+                    KeyPair[] keyPairs = new KeyPair[keyPairModels.Length];
+                    for (int i = 0; i < keyPairModels.Length; i++)
+                    {
+                        keyPairs[i] = keyPairModels[i].ToKeyPair();
+                    }
+                    return keyPairs;
                 }
             }
         }
 
-        public async Task SendCreateKeyPairWithFileId(int fileId, KeyPairModel keyPairModel)
+        public async Task SendCreateKeyPairWithFileId(int fileId, KeyPair keyPair)
         {
+            KeyPairModel keyPairModel = keyPair.ToKeyPairModel();
             using (HttpClient client = _provider.CreateClient())
             {
                 string serializedModel = JsonSerializer.Serialize(keyPairModel);
                 HttpContent content = new StringContent(serializedModel);
-                using (HttpResponseMessage response = await client.PostAsync($"/api/protecteddata/key/{fileId}", content))
-                {
-                }
+                using (HttpResponseMessage response = await client.PostAsync($"/api/protecteddata/key/{fileId}", content)) { }
             }
         }
     }
