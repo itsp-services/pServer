@@ -9,7 +9,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ItspServices.pServer.Client;
 using ItspServices.pServer.Client.Datatypes;
-using ItspServices.pServer.Client.Models;
 using ItspServices.pServer.Client.RestApi;
 using ItspServices.pServer.Client.Security;
 using ItspServices.pServer.Client.Security.Keys;
@@ -42,10 +41,10 @@ namespace ItspServices.pServer.ClientTest
             Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
             Mock<IKeyFactory> keyFactory = new Mock<IKeyFactory>();
             List<bool> wasCalled = new List<bool>();
-            Task<DataModel> CheckRequestDataByPath()
+            Task<ProtectedData> CheckRequestDataByPath()
             {
                 wasCalled.Add(true);
-                return Task.FromResult(default(DataModel));
+                return Task.FromResult(default(ProtectedData));
             }
             Task<int> CheckSendCreateData()
             {
@@ -61,7 +60,7 @@ namespace ItspServices.pServer.ClientTest
             restClient.Setup(x => x.RequestDataByPath(It.Is<string>(s => s == "AndysPasswords/MailAccount.data")))
                 .Returns(CheckRequestDataByPath);
 
-            restClient.Setup(x => x.SendCreateData(It.Is<string>(s => s == "AndysPasswords/MailAccount.data"), It.Is<DataModel>(s => s.Name == "MailAccount.data" && s.Data == Convert.ToBase64String(Encoding.Default.GetBytes("EncryptedSecretPassword")))))
+            restClient.Setup(x => x.SendCreateData(It.Is<string>(s => s == "AndysPasswords/MailAccount.data"), It.Is<ProtectedData>(s => s.Name == "MailAccount.data" && s.Data.SequenceEqual(Encoding.Default.GetBytes("EncryptedSecretPassword")))))
                 .Returns(CheckSendCreateData);
 
             restClient.Setup(x => x.SendCreateKeyPairWithFileId(It.Is<int>(s => s == 1), It.Is<KeyPair>(s => s.PublicKey.GetBytes().SequenceEqual(Encoding.Default.GetBytes("publicKey")) && s.SymmetricKey.GetBytes().SequenceEqual(Encoding.Default.GetBytes("publicSymmetricKey")))))
@@ -98,13 +97,13 @@ namespace ItspServices.pServer.ClientTest
             Mock<ILocalKeysController> localKeysController = new Mock<ILocalKeysController>();
             Mock<IDataEncryptor> dataEncryptor = new Mock<IDataEncryptor>();
             List<bool> wasCalled = new List<bool>();
-            Task<DataModel> CheckRequestDataByPath()
+            Task<ProtectedData> CheckRequestDataByPath()
             {
                 wasCalled.Add(true);
-                return Task.FromResult(new DataModel
+                return Task.FromResult(new ProtectedData
                 {
                     Name = "MailAccount.data",
-                    Data = "OldData"
+                    Data = Encoding.Default.GetBytes("OldData")
                 });
             }
             Task<KeyPair[]> CheckRequestKeyPairsByFilePath()
@@ -136,7 +135,7 @@ namespace ItspServices.pServer.ClientTest
             restClient.Setup(x => x.RequestKeyPairsByFilePath(It.Is<string>(s => s == "AndysPasswords/MailAccount.data")))
                 .Returns(CheckRequestKeyPairsByFilePath);
 
-            restClient.Setup(x => x.SendUpdateData(It.Is<string>(s => s == "AndysPasswords/MailAccount.data"), It.Is<DataModel>(s => s.Name == "MailAccount.data" && s.Data == Convert.ToBase64String(Encoding.Default.GetBytes("EncryptedSecretPassword")))))
+            restClient.Setup(x => x.SendUpdateData(It.Is<string>(s => s == "AndysPasswords/MailAccount.data"), It.Is<ProtectedData>(s => s.Name == "MailAccount.data" && s.Data.SequenceEqual(Encoding.Default.GetBytes("EncryptedSecretPassword")))))
                 .Returns(CheckSendUpdateData);
 
             localKeysController.Setup(x => x.GetPublicKey())

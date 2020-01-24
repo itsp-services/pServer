@@ -34,8 +34,6 @@ namespace ItspServices.pServer.ClientTest
         [TestMethod]
         public void CreateTwoSymmetricKeys_ShouldReturnDifferentKeys()
         {
-            DataEncryptor dataEncryptor = new DataEncryptor();
-
             Key symmetricKey = keyFactory.CreateSymmetricKey();
             Key differentSymmetricKey = keyFactory.CreateSymmetricKey();
 

@@ -7,9 +7,9 @@ namespace ItspServices.pServer.Client.RestApi
     interface IApiClient
     {
         Task<FolderModel> RequestFolderById(int? id);
-        Task<DataModel> RequestDataByPath(string path);
-        Task<int> SendCreateData(string path, DataModel dataModel);
-        Task SendUpdateData(string path, DataModel dataModel);
+        Task<ProtectedData> RequestDataByPath(string path);
+        Task<int> SendCreateData(string path, ProtectedData protectedData);
+        Task SendUpdateData(string path, ProtectedData protectedData);
         Task<KeyPair[]> RequestKeyPairsByFilePath(string path);
         Task SendCreateKeyPairWithFileId(int fileId, KeyPair keyPair);
     }

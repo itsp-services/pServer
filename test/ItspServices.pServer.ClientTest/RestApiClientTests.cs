@@ -130,10 +130,10 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
-            DataModel dataModel = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
+            ProtectedData protectedData = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
 
-            Assert.AreEqual("MailAccount.data", dataModel.Name);
-            Assert.AreEqual("SecretPassword", dataModel.Data);
+            Assert.AreEqual("MailAccount.data", protectedData.Name);
+            Assert.AreEqual(Encoding.Default.GetBytes("SecretPassword"), protectedData.Data);
         }
 
 
@@ -157,9 +157,9 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
-            DataModel dataModel = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
+            ProtectedData protectedData = await restClient.RequestDataByPath("AndysPasswords/MailAccount.data");
 
-            Assert.IsNull(dataModel);
+            Assert.IsNull(protectedData);
         }
 
         [TestMethod]
@@ -187,10 +187,10 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
-            int id = await restClient.SendCreateData("AndysPasswords/MailAccount.data", new DataModel
+            int id = await restClient.SendCreateData("AndysPasswords/MailAccount.data", new ProtectedData
             {
                 Name = "MailAccount.data",
-                Data = "SecretPassword"
+                Data = Encoding.Default.GetBytes("SecretPassword")
             });
             DataModelWithPath dataModel = await JsonSerializer.DeserializeAsync<DataModelWithPath>(await requestMessage.Content.ReadAsStreamAsync());
 
@@ -222,10 +222,10 @@ namespace ItspServices.pServer.ClientTest
                     });
 
             IApiClient restClient = new RestApiClient(clientFactory.Object);
-            await restClient.SendUpdateData("AndysPasswords/MailAccount.data", new DataModel
+            await restClient.SendUpdateData("AndysPasswords/MailAccount.data", new ProtectedData
             {
                 Name = "MailAccount.data",
-                Data = "SecretPassword"
+                Data = Encoding.Default.GetBytes("SecretPassword")
             });
             DataModel dataModel = await JsonSerializer.DeserializeAsync<DataModel>(await requestMessage.Content.ReadAsStreamAsync());
 

@@ -25,7 +25,7 @@ namespace ItspServices.pServer.Client.RestApi
             }
         }
 
-        public async Task<DataModel> RequestDataByPath(string path)
+        public async Task<ProtectedData> RequestDataByPath(string path)
         {
             using (HttpClient client = _provider.CreateClient())
             {
@@ -33,13 +33,14 @@ namespace ItspServices.pServer.Client.RestApi
                 {
                     if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                         return null;
-                    return await JsonSerializer.DeserializeAsync<DataModel>(await response.Content.ReadAsStreamAsync());
+                    return (await JsonSerializer.DeserializeAsync<DataModel>(await response.Content.ReadAsStreamAsync())).ToProtectedData();
                 }
             }
         }
 
-        public async Task<int> SendCreateData(string path, DataModel dataModel)
+        public async Task<int> SendCreateData(string path, ProtectedData protectedData)
         {
+            DataModel dataModel = protectedData.ToDataModel();
             DataModelWithPath dataModelWithPath = new DataModelWithPath
             {
                 DataModel = dataModel,
@@ -56,8 +57,9 @@ namespace ItspServices.pServer.Client.RestApi
             }
         }
 
-        public async Task SendUpdateData(string path, DataModel dataModel)
+        public async Task SendUpdateData(string path, ProtectedData protectedData)
         {
+            DataModel dataModel = protectedData.ToDataModel();
             using (HttpClient client = _provider.CreateClient())
             {
                 string serializedModel = JsonSerializer.Serialize(dataModel);
